@@ -141,7 +141,7 @@ RUN set -eux && \
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_server/zabbix_server", "/usr/sbin/zabbix_server"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_get/zabbix_get", "/usr/bin/zabbix_get"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_sender/zabbix_sender", "/usr/bin/zabbix_sender"]
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/conf/zabbix_server.conf", "/usr/zabbix/etc/zabbix_server.conf"]
+COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/conf/zabbix_server.conf", "/usr/local/zabbix/etc/zabbix_server.conf"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/database/mysql/create_server.sql.gz", "/usr/local/zabbix/share/doc/zabbix-server-mysql/create.sql.gz"]
 COPY ["./zabbix-server/docker-entrypoint.sh", "/usr/bin/"]
 
@@ -170,4 +170,4 @@ ENTRYPOINT ["/sbin/tini", "--", "/usr/bin/docker-entrypoint.sh"]
 USER 1997
 
 # ***** 执行命令 *****
-CMD ["zabbix_server", "--foreground", "-c", "/etc/zabbix/zabbix_server.conf"]
+CMD ["zabbix_server", "--foreground", "-c", "/usr/local/zabbix/etc/zabbix_server.conf"]
