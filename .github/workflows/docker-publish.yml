@@ -81,7 +81,7 @@ jobs:
         user_name: ${{ secrets.ALIYUN_USERNAME }}
         password: ${{ secrets.ALIYUN_PASSWORD }}
         image_version: ${{ matrix.DOCKER_TAG }}
-        docker_file: './build-base/Dockerfile'
+        docker_file: 'build-base/Dockerfile'
         
       
     - name: 删除旧的GitHub-workflow
@@ -148,7 +148,7 @@ jobs:
           user_name: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
           image_version: ${{ matrix.DOCKER_TAG }}
-          docker_file: './build-mysql/Dockerfile'
+          docker_file: 'build-mysql/Dockerfile'
 
 
       - name: 删除旧的GitHub-workflow
@@ -215,7 +215,7 @@ jobs:
           user_name: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
           image_version: ${{ matrix.DOCKER_TAG }}
-          docker_file: './zabbix-server/Dockerfile'
+          docker_file: 'zabbix-server/Dockerfile'
 
 
       - name: 删除旧的GitHub-workflow
