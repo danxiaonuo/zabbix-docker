@@ -3,7 +3,7 @@
 ##########################################
 #
 # 指定创建的基础镜像
-FROM --platform=$BUILDPLATFORM alpine:latest
+FROM alpine:latest
 
 # 作者描述信息
 MAINTAINER danxiaonuo
