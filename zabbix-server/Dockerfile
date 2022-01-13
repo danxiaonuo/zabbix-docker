@@ -11,7 +11,7 @@ ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-mysql:latest
 FROM ${BUILD_BASE_IMAGE} as builder
 
 # 指定创建的基础镜像
-FROM --platform=$BUILDPLATFORM alpine:latest
+FROM alpine:latest
 
 # 作者描述信息
 MAINTAINER danxiaonuo
@@ -143,7 +143,7 @@ COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_get/zabbix_get", "/u
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_sender/zabbix_sender", "/usr/bin/zabbix_sender"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/conf/zabbix_server.conf", "/usr/zabbix/etc/zabbix_server.conf"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/database/mysql/create_server.sql.gz", "/usr/local/zabbix/share/doc/zabbix-server-mysql/create.sql.gz"]
-COPY ["docker-entrypoint.sh", "/usr/bin/"]
+COPY ["./zabbix-server/docker-entrypoint.sh", "/usr/bin/"]
 
 # ***** 创建zabbix目录授权 *****
 RUN set -eux && \

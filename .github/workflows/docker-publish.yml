@@ -67,7 +67,7 @@ jobs:
       with:
         context: .
         file: ./build-base/Dockerfile
-        platforms: linux/amd64,linux/arm/v7,linux/arm64,linux/386
+        platforms: linux/amd64
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-build-base:${{ matrix.DOCKER_TAG }}
         
@@ -81,7 +81,7 @@ jobs:
         user_name: ${{ secrets.ALIYUN_USERNAME }}
         password: ${{ secrets.ALIYUN_PASSWORD }}
         image_version: ${{ matrix.DOCKER_TAG }}
-        docker_file: 'build-base/Dockerfile'
+        docker_file: '../build-base/Dockerfile'
         
       
     - name: 删除旧的GitHub-workflow
@@ -134,7 +134,7 @@ jobs:
         with:
           context: .
           file: ./build-mysql/Dockerfile
-          platforms: linux/amd64,linux/arm/v7,linux/arm64,linux/386
+          platforms: linux/amd64
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-build-mysql:${{ matrix.DOCKER_TAG }}
 
@@ -148,7 +148,7 @@ jobs:
           user_name: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
           image_version: ${{ matrix.DOCKER_TAG }}
-          docker_file: 'build-mysql/Dockerfile'
+          docker_file: '../build-mysql/Dockerfile'
 
 
       - name: 删除旧的GitHub-workflow
@@ -201,7 +201,7 @@ jobs:
         with:
           context: .
           file: ./zabbix-server/Dockerfile
-          platforms: linux/amd64,linux/arm/v7,linux/arm64,linux/386
+          platforms: linux/amd64
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-server:${{ matrix.DOCKER_TAG }}
 
@@ -215,7 +215,7 @@ jobs:
           user_name: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
           image_version: ${{ matrix.DOCKER_TAG }}
-          docker_file: 'zabbix-server/Dockerfile'
+          docker_file: '../zabbix-server/Dockerfile'
 
 
       - name: 删除旧的GitHub-workflow
