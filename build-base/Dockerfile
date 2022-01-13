@@ -26,10 +26,11 @@ ENV TERM=xterm \
     PATH=/usr/lib/jvm/default-jvm/bin:$PATH \
     JAVA_HOME=/usr/lib/jvm/default-jvm
 
-# 安装包
 ARG PKG_DEPS="\
     zsh \
     bash \
+	bash-doc \
+    bash-completion \
     bind-tools \
     iproute2 \
     git \
@@ -38,8 +39,17 @@ ARG PKG_DEPS="\
     curl \
     wget \
     lsof \
+	tar \
     zip \
     unzip \
+	sysstat \
+    sudo \
+    python2 \
+    python2-dev \
+    python3 \
+    python3-dev \
+    go \
+    jq \
     ca-certificates"
 ENV PKG_DEPS=$PKG_DEPS
 
