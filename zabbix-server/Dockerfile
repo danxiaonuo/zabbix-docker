@@ -31,9 +31,6 @@ ENV TERM=xterm \
     ZBX_VERSION=${ZBX_VERSION} ZBX_SOURCES=${ZBX_SOURCES} \
     MIBDIRS=/usr/share/snmp/mibs:/usr/local/zabbix/mibs MIBS=+ALL
 
-# ***** 容器信号处理 *****
-STOPSIGNAL SIGTERM
-
 # 安装依赖包
 ARG PKG_DEPS="\
     zsh \
