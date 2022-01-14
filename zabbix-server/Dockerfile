@@ -160,8 +160,11 @@ EXPOSE 10051/TCP
 # ***** 工作目录 *****
 WORKDIR /usr/local/zabbix
 
+# ***** 容器信号处理 *****
+STOPSIGNAL SIGQUIT
+
 # ***** 挂载目录 *****
-VOLUME ["/usr/local/zabbix/snmptraps"]
+VOLUME ["/usr/local/zabbix/snmptraps", "/usr/local/zabbix/export"]
 
 # ***** 入口 *****
 ENTRYPOINT ["/sbin/tini", "--", "/usr/bin/docker-entrypoint.sh"]
@@ -170,4 +173,4 @@ ENTRYPOINT ["/sbin/tini", "--", "/usr/bin/docker-entrypoint.sh"]
 USER 1997
 
 # ***** 执行命令 *****
-CMD ["zabbix_server", "--foreground", "-c", "/usr/local/zabbix/etc/zabbix_server.conf"]
+CMD ["/usr/sbin/zabbix_server", "--foreground", "-c", "/usr/local/zabbix/etc/zabbix_server.conf"]
