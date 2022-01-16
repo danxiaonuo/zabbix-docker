@@ -146,7 +146,7 @@ COPY ["./zabbix-server/docker-entrypoint.sh", "/usr/bin/"]
 RUN set -eux && \
     cp -rf /root/.oh-my-zsh /usr/local/zabbix/.oh-my-zsh && \
     cp -rf /root/.zshrc /usr/local/zabbix/.zshrc && \
-    sed -i '5s#/root/.oh-my-zsh#/var/lib/zabbix/.oh-my-zsh#' /usr/local/zabbix/.zshrc && \
+    sed -i '5s#/root/.oh-my-zsh#/usr/local/zabbix/.oh-my-zsh#' /usr/local/zabbix/.zshrc && \
     chmod a+x /usr/bin/docker-entrypoint.sh /usr/sbin/zabbix_server /usr/bin/zabbix_get /usr/bin/zabbix_sender && \
     chmod -R 775 /usr/local/zabbix && chown -R zabbix:zabbix /usr/local/zabbix && \
     rm -rf /var/cache/apk/*
