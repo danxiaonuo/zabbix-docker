@@ -115,9 +115,9 @@ WORKDIR /usr/local/zabbix/snmptraps
 VOLUME ["/usr/local/zabbix/snmptraps"]
 
 # 拷贝文件
-COPY ["conf/etc/logrotate.d/zabbix_snmptraps", "/etc/logrotate.d/"]
-COPY ["conf/etc/snmp/snmptrapd.conf", "/etc/snmp/"]
-COPY ["conf/usr/sbin/zabbix_trap_handler.sh", "/usr/sbin/"]
+COPY ["../snmptraps/conf/etc/logrotate.d/zabbix_snmptraps", "/etc/logrotate.d/"]
+COPY ["../snmptrapsconf/etc/snmp/snmptrapd.conf", "/etc/snmp/"]
+COPY ["../snmptraps/conf/usr/sbin/zabbix_trap_handler.sh", "/usr/sbin/"]
 
 # ***** 创建zabbix目录授权 *****
 RUN set -eux && \
