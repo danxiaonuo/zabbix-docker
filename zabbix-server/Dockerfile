@@ -134,6 +134,18 @@ RUN set -eux && \
     mkdir -p /usr/local/zabbix/ssl/ssl_ca && \
     mkdir -p /usr/local/zabbix/share/doc/zabbix-server-mysql
 
+# ***** 容器信号处理 *****
+STOPSIGNAL SIGQUIT
+
+# ***** 监听端口 *****
+EXPOSE 10051/TCP
+
+# ***** 工作目录 *****
+WORKDIR /usr/local/zabbix
+
+# ***** 挂载目录 *****
+VOLUME ["/usr/local/zabbix/snmptraps", "/usr/local/zabbix/export"]
+
 # 拷贝文件
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_server/zabbix_server", "/usr/sbin/zabbix_server"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_get/zabbix_get", "/usr/bin/zabbix_get"]
@@ -148,20 +160,10 @@ RUN set -eux && \
     cp -rf /root/.zshrc /usr/local/zabbix/.zshrc && \
     sed -i '5s#/root/.oh-my-zsh#/usr/local/zabbix/.oh-my-zsh#' /usr/local/zabbix/.zshrc && \
     chmod a+x /usr/bin/docker-entrypoint.sh /usr/sbin/zabbix_server /usr/bin/zabbix_get /usr/bin/zabbix_sender && \
-    chmod -R 775 /usr/local/zabbix && chown -R zabbix:zabbix /usr/local/zabbix && \
+    chown --quiet -R zabbix:root /usr/local/zabbix/ && \
+    chgrp -R 0 /usr/local/zabbix/ && \
+    chmod -R g=u /usr/local/zabbix/ && \
     rm -rf /var/cache/apk/*
-
-# ***** 监听端口 *****
-EXPOSE 10051/TCP
-
-# ***** 工作目录 *****
-WORKDIR /usr/local/zabbix
-
-# ***** 容器信号处理 *****
-STOPSIGNAL SIGQUIT
-
-# ***** 挂载目录 *****
-VOLUME ["/usr/local/zabbix/snmptraps", "/usr/local/zabbix/export"]
 
 # ***** 入口 *****
 ENTRYPOINT ["/sbin/tini", "--", "/usr/bin/docker-entrypoint.sh"]
