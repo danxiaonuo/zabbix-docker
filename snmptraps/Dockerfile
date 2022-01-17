@@ -98,7 +98,7 @@ RUN set -eux && \
                             zabbix && \
     adduser zabbix root && \
     adduser zabbix dialout && \
-    mkdir -p /usr/local/zabbix && 
+    mkdir -p /usr/local/zabbix && \
     mkdir -p /usr/local/zabbix/mibs && \
     mkdir -p /usr/local/zabbix/snmptraps
  
