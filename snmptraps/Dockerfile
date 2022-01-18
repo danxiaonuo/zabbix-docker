@@ -41,14 +41,8 @@ ARG PKG_DEPS="\
     tar \
     zip \
     unzip \
-    sysstat \
-    sudo \
-    python2 \
-    python2-dev \
-    python3 \
-    python3-dev \
-    go \
     jq \
+    sudo \
     ca-certificates"
 ENV PKG_DEPS=$PKG_DEPS
 
@@ -75,15 +69,6 @@ RUN set -eux && \
     sed -i -e 's/mouse=/mouse-=/g' /usr/share/vim/vim*/defaults.vim && \
     sed -i '$a\zabbix  ALL=(ALL)  NOPASSWD:ALL' /etc/sudoers && \
     /bin/zsh
-
-# ***** 升级 setuptools 版本 *****
-RUN set -eux && \
-    python3 -m ensurepip && \
-    rm -r /usr/lib/python*/ensurepip && \
-    pip3 install --upgrade pip setuptools wheel pycryptodome lxml cython beautifulsoup4 && \
-    if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip ; fi && \
-    if [[ ! -e /usr/bin/python ]]; then ln -sf /usr/bin/python3 /usr/bin/python; fi && \
-    rm -r /root/.cache
 
 # ***** 创建zabbix用户和相关目录 *****
 RUN set -eux && \
@@ -115,9 +100,9 @@ WORKDIR /usr/local/zabbix/snmptraps
 VOLUME ["/usr/local/zabbix/snmptraps"]
 
 # 拷贝文件
-COPY ["conf/etc/logrotate.d/zabbix_snmptraps", "/etc/logrotate.d/"]
-COPY ["conf/etc/snmp/snmptrapd.conf", "/etc/snmp/"]
-COPY ["conf/usr/sbin/zabbix_trap_handler.sh", "/usr/sbin/"]
+COPY ["./snmptraps/conf/etc/logrotate.d/zabbix_snmptraps", "/etc/logrotate.d/"]
+COPY ["./snmptraps/conf/etc/snmp/snmptrapd.conf", "/etc/snmp/"]
+COPY ["./snmptraps/conf/usr/sbin/zabbix_trap_handler.sh", "/usr/sbin/"]
 
 # ***** 创建zabbix目录授权 *****
 RUN set -eux && \
