@@ -2,6 +2,15 @@
 #         构建基础镜像                    #
 ##########################################
 #
+#
+# zabbix版本号
+ARG MAJOR_VERSION=6.0
+ARG ZBX_VERSION=${MAJOR_VERSION}
+ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-mysql:latest
+
+# 指定创建的基础镜像
+FROM ${BUILD_BASE_IMAGE} as builder
+
 # 指定创建的基础镜像
 FROM danxiaonuo/nginx:latest
 
@@ -15,12 +24,9 @@ ARG LANG=C.UTF-8
 ENV LANG=$LANG
 
 # zabbix版本号
-ARG MAJOR_VERSION=6.0
-ENV MAJOR_VERSION=$MAJOR_VERSION
-ARG ZBX_VERSION=${MAJOR_VERSION}
-ENV ZBX_VERSION=$ZBX_VERSION
+ARG MAJOR_VERSION
+ARG ZBX_VERSION
 ARG ZBX_SOURCES=https://git.zabbix.com/scm/zbx/zabbix.git
-ENV ZBX_SOURCES=$ZBX_SOURCES
 
 ENV TERM=xterm \
     ZBX_VERSION=${ZBX_VERSION} ZBX_SOURCES=${ZBX_SOURCES}
