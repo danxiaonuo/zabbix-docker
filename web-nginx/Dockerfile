@@ -59,7 +59,7 @@ WORKDIR /www/zabbix
 VOLUME ["/www/zabbix"]
 
 # 拷贝文件
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/ui/*", "/www/zabbix"]
+COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/ui/", "/www/zabbix/"]
 
 # ***** 删除配置文件 *****
 RUN set -eux && \
@@ -72,11 +72,11 @@ RUN set -eux && \
 
 # 拷贝文件
 COPY ["./web-nginx/docker-entrypoint.sh", "/usr/bin/"]
-COPY ["./web-nginx/conf/etc/zabbix/web/*", "/www/zabbix/conf/"]
+COPY ["./web-nginx/conf/etc/zabbix/web/", "/www/zabbix/conf/"]
 
 # ***** 创建zabbix目录授权 *****
 RUN set -eux && \
-    chmod a+x /usr/sbin/docker-entrypoint.sh && \
+    chmod a+x /usr/bin/docker-entrypoint.sh && \
     chown --quiet -R zabbix:root /www/zabbix && \
     chgrp -R 0 /www/zabbix/ && \
     chmod -R g=u /www/zabbix/ && \
