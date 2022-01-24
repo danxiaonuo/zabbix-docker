@@ -75,7 +75,7 @@ COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/ui/", "/www/zabbix/"]
 # ***** 删除配置文件 *****
 RUN set -eux && \
     cd /www/zabbix/ && \
-    rm -f conf/zabbix.conf.php conf/maintenance.inc.php conf/zabbix.conf.php.example && \
+    rm -f conf/zabbix.conf.php conf/maintenance.inc.php conf/zabbix.conf.php.example assets/fonts/DejaVuSans.ttf && \
     rm -rf tests && \
     rm -f locale/add_new_language.sh locale/update_po.sh locale/make_mo.sh && \
     find /www/zabbix/locale -name '*.po' | xargs rm -f && \
@@ -84,6 +84,7 @@ RUN set -eux && \
 # 拷贝文件
 COPY ["./web-nginx/docker-entrypoint.sh", "/usr/bin/"]
 COPY ["./web-nginx/conf/etc/zabbix/web/", "/www/zabbix/conf/"]
+COPY ["./web-nginx/assets/fonts/DejaVuSans.ttf", "/www/zabbix/assets/fonts/DejaVuSans.ttf"]
 
 # ***** 创建zabbix目录授权 *****
 RUN set -eux && \
