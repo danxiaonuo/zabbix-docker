@@ -293,7 +293,7 @@ jobs:
 
   snmptraps:
     # 依赖环境
-    needs: [ zabbix-server ]
+    needs: [ zabbix-build-mysql ]
     # 选择虚拟环境
     runs-on: ubuntu-latest
     if: github.event.repository.owner.id == github.event.sender.id
