@@ -37,16 +37,13 @@ ARG PKG_DEPS="\
     mariadb-connector-c"
 ENV PKG_DEPS=$PKG_DEPS
 
-# ***** 安装依赖 *****
+# ***** 创建zabbix用户和相关目录 *****
 RUN set -eux && \
-    # 更新源地址并更新系统软件
+    # 更新源地址
     apk update && \
     # 安装依赖包
     apk add --no-cache --clean-protected $PKG_DEPS && \
-    rm -rf /var/cache/apk/*
-
-# ***** 创建zabbix用户和相关目录 *****
-RUN set -eux && \
+    rm -rf /var/cache/apk/* && \
     addgroup --system --gid 1995 zabbix && \
     adduser --system \
             --gecos "Zabbix monitoring system" \
