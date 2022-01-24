@@ -31,6 +31,56 @@ ARG ZBX_SOURCES=https://git.zabbix.com/scm/zbx/zabbix.git
 ENV TERM=xterm \
     ZBX_VERSION=${ZBX_VERSION} ZBX_SOURCES=${ZBX_SOURCES}
 
+# 安装依赖包
+ARG PKG_DEPS="\
+    zsh \
+    bash \
+    bash-doc \
+    bash-completion \
+    bind-tools \
+    iproute2 \
+    git \
+    vim \
+    tzdata \
+    curl \
+    wget \
+    lsof \
+    tar \
+    zip \
+    unzip \
+    sysstat \
+    sudo \
+    python2 \
+    python2-dev \
+    python3 \
+    python3-dev \
+    go \
+    jq \
+    mariadb-client \
+    mariadb-connector-c \
+    ca-certificates"
+ENV PKG_DEPS=$PKG_DEPS
+
+# ***** 安装依赖 *****
+RUN set -eux && \
+    # 修改源地址
+    sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
+    # 更新源地址并更新系统软件
+    apk update && apk upgrade && \
+    # 安装依赖包
+    apk add --no-cache --clean-protected $PKG_DEPS && \
+    rm -rf /var/cache/apk/* && \
+    # 更新时区
+    ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime && \
+    # 更新时间
+    echo ${TZ} > /etc/timezone && \
+    # 更改为zsh
+    sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" || true && \
+    sed -i -e "s/bin\/ash/bin\/zsh/" /etc/passwd && \
+    sed -i -e 's/mouse=/mouse-=/g' /usr/share/vim/vim*/defaults.vim && \
+    sed -i '$a\zabbix  ALL=(ALL)  NOPASSWD:ALL' /etc/sudoers && \
+    /bin/zsh \
+
 # ***** 创建zabbix用户和相关目录 *****
 RUN set -eux && \
     addgroup --system --gid 1995 zabbix && \
@@ -80,6 +130,9 @@ RUN set -eux && \
     chown --quiet -R zabbix:root /www/zabbix && \
     chgrp -R 0 /www/zabbix/ && \
     chmod -R g=u /www/zabbix/ && \
+    cp -rf /root/.oh-my-zsh /www/zabbix/.oh-my-zsh && \
+    cp -rf /root/.zshrc /www/zabbix/.zshrc && \
+    sed -i '5s#/root/.oh-my-zsh#/www/zabbix/.oh-my-zsh#' /www/zabbix/.zshrc && \
     rm -rf /var/cache/apk/*
 
 # ***** 入口 *****
