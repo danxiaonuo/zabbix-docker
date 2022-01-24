@@ -37,24 +37,13 @@ ARG PKG_DEPS="\
     mariadb-connector-c"
 ENV PKG_DEPS=$PKG_DEPS
 
-# ***** 创建zabbix用户和相关目录 *****
+# ***** 安装依赖软件 *****
 RUN set -eux && \
     # 更新源地址
     apk update && \
     # 安装依赖包
     apk add --no-cache --clean-protected $PKG_DEPS && \
     rm -rf /var/cache/apk/* && \
-    addgroup --system --gid 1995 zabbix && \
-    adduser --system \
-            --gecos "Zabbix monitoring system" \
-            --disabled-password \
-            --uid 1997 \
-            --ingroup zabbix \
-            --shell /sbin/nologin \
-            --home /usr/local/zabbix/ \
-                            zabbix && \
-    adduser zabbix root && \
-    adduser zabbix dialout && \
     mkdir -p /www/zabbix
 
 # ***** 容器信号处理 *****
@@ -89,9 +78,8 @@ COPY ["./web-nginx/assets/fonts/DejaVuSans.ttf", "/www/zabbix/assets/fonts/DejaV
 # ***** 创建zabbix目录授权 *****
 RUN set -eux && \
     chmod a+x /usr/bin/docker-entrypoint.sh && \
-    chown --quiet -R zabbix:root /www/zabbix && \
-    chgrp -R 0 /www/zabbix/ && \
-    chmod -R g=u /www/zabbix/ && \
+    chown --quiet -R nginx:root /www/zabbix && \
+    chmod -R 775 /www/zabbix/ && \
     cp -rf /root/.oh-my-zsh /www/zabbix/.oh-my-zsh && \
     cp -rf /root/.zshrc /www/zabbix/.zshrc && \
     sed -i '5s#/root/.oh-my-zsh#/www/zabbix/.oh-my-zsh#' /www/zabbix/.zshrc && \
@@ -99,9 +87,6 @@ RUN set -eux && \
 
 # ***** 入口 *****
 ENTRYPOINT ["docker-entrypoint.sh"]
-
-# ***** 运行用户 *****
-USER 1997
 
 # ***** 执行命令 *****
 CMD ["nginx", "-g", "daemon off;"]
