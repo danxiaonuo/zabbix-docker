@@ -211,7 +211,6 @@ RUN set -eux && \
     apk del .gettext && \
     mv /tmp/envsubst /usr/local/bin/
 
-
 # ***** 检查依赖并授权 *****
 RUN set -eux && \
     # 创建用户和用户组
