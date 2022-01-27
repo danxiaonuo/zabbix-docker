@@ -213,6 +213,7 @@ RUN set -eux && \
 COPY ["./web-nginx/docker-entrypoint.sh", "/usr/bin/"]
 COPY ["./web-nginx/conf/etc/zabbix/web/", "/www/zabbix/conf/"]
 COPY ["./web-nginx/assets/fonts/DejaVuSans.ttf", "/www/zabbix/assets/fonts/DejaVuSans.ttf"]
+COPY ["./web-nginx/conf/nginx/php.conf", "/data/nginx/conf/php.conf"]
 COPY ["./web-nginx/conf/nginx/vhost/default.conf", "/data/nginx/conf/vhost/default.conf"]
 COPY ["./web-nginx/conf/supervisor", "/etc/supervisor"]
 
@@ -251,6 +252,8 @@ RUN set -eux && \
     ln -sf ${PHP_DIR}/sbin/* /usr/sbin/ && \
     nginx -V && \
     php-fpm -v && \
+    nginx -t && \
+    php-fpm -t && \
     rm -rf /var/cache/apk/*
 
 # ***** 入口 *****
