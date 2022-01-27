@@ -250,8 +250,7 @@ RUN set -eux && \
     ln -sf ${PHP_DIR}/bin/* /usr/bin/ && \
     ln -sf ${PHP_DIR}/sbin/* /usr/sbin/ && \
     nginx -V && \
-    nginx -t && \
-    php-fpm -t && \
+    php-fpm -v && \
     rm -rf /var/cache/apk/*
 
 # ***** 入口 *****
