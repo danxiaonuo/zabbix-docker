@@ -202,6 +202,12 @@ echo "########################################################"
 if [ "$1" != "" ]; then
     echo "** Executing '$@'"
     exec "$@"
+elif [ -f "/usr/bin/supervisord" ]; then
+    echo "** Executing supervisord"
+    exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf
+else
+    echo "Unknown instructions. Exiting..."
+    exit 1
 fi
 
 #################################################
