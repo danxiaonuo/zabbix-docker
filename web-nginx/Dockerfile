@@ -196,7 +196,23 @@ COPY ["./web-nginx/assets/fonts/DejaVuSans.ttf", "/www/zabbix/assets/fonts/DejaV
 COPY ["./web-nginx/conf/nginx/vhost/default.conf", "/data/nginx/conf/vhost/default.conf"]
 COPY ["./web-nginx/conf/supervisor", "/etc/supervisor"]
 
-# ***** 创建zabbix目录授权 *****
+# 安装相关依赖
+RUN set -eux && \
+    apk add --no-cache --virtual .gettext gettext && \
+    mv /usr/bin/envsubst /tmp/ && \
+    runDeps="$( \
+        scanelf --needed --nobanner ${NGINX_DIR}/sbin/nginx ${NGINX_DIR}/modules/*.so ${LUAJIT_LIB}/*.so /tmp/envsubst \
+            | awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
+            | sort -u \
+            | xargs -r apk info --installed \
+            | sort -u \
+    )" && \
+    apk add --no-cache --virtual .$NGINX_BUILD_DEPS $runDeps && \
+    apk del .gettext && \
+    mv /tmp/envsubst /usr/local/bin/
+
+
+# ***** 检查依赖并授权 *****
 RUN set -eux && \
     # 创建用户和用户组
     addgroup -g 32548 -S nginx && \
