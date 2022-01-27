@@ -159,10 +159,10 @@ RUN set -eux && \
    sed -i -e "s/bin\/ash/bin\/zsh/" /etc/passwd && \
    sed -i -e 's/mouse=/mouse-=/g' /usr/share/vim/vim*/defaults.vim && \
    mkdir -p /www/zabbix /data && \
-   /bin/zsh \
+   /bin/zsh
 
 # ***** 容器信号处理 *****
-STOPSIGNAL SIGQUIT
+ STOPSIGNAL SIGQUIT
 
 # ***** 监听端口 *****
 EXPOSE 80/TCP 443/TCP
