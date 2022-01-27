@@ -93,6 +93,26 @@ ARG PKG_DEPS="\
     zlib-dev"
 ENV PKG_DEPS=$PKG_DEPS
 
+ARG NGINX_BUILD_DEPS="\
+    # NGINX
+    alpine-sdk \
+    bash \
+    findutils \
+    gcc \
+    gd-dev \
+    geoip-dev \
+    libc-dev \
+    libedit-dev \
+    libxslt-dev \
+    linux-headers \
+    make \
+    mercurial \
+    openssl-dev \
+    pcre-dev \
+    perl-dev \
+    zlib-dev"
+ENV NGINX_BUILD_DEPS=$NGINX_BUILD_DEPS
+
 ARG PHP_BUILD_DEPS="\
     ca-certificates \
     openssl \
