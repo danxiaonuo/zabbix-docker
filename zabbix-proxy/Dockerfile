@@ -118,7 +118,7 @@ RUN set -eux && \
                             zabbix && \
     adduser zabbix root && \
     adduser zabbix dialout && \
-    mkdir -p /usr/local/zabbix/etc/zabbix_server.conf.d && \
+    mkdir -p /usr/local/zabbix/etc/zabbix_proxy.conf.d && \
     mkdir -p /usr/local/zabbix/alertscripts && \
     mkdir -p /usr/local/zabbix/enc && \
     mkdir -p /usr/local/zabbix/export && \
@@ -132,13 +132,13 @@ RUN set -eux && \
     mkdir -p /usr/local/zabbix/ssl/certs && \
     mkdir -p /usr/local/zabbix/ssl/keys && \
     mkdir -p /usr/local/zabbix/ssl/ssl_ca && \
-    mkdir -p /usr/local/zabbix/share/doc/zabbix-server-mysql
+    mkdir -p /usr/local/zabbix/share/doc/zabbix-proxy-mysql
 
 # ***** 容器信号处理 *****
 STOPSIGNAL SIGQUIT
 
 # ***** 监听端口 *****
-EXPOSE 16168/TCP
+EXPOSE 16165/TCP
 
 # ***** 工作目录 *****
 WORKDIR /usr/local/zabbix
@@ -147,19 +147,19 @@ WORKDIR /usr/local/zabbix
 VOLUME ["/usr/local/zabbix/snmptraps", "/usr/local/zabbix/export"]
 
 # 拷贝文件
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_server/zabbix_server", "/usr/sbin/zabbix_server"]
+COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_proxy/zabbix_proxy", "/usr/sbin/zabbix_proxy"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_get/zabbix_get", "/usr/bin/zabbix_get"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_sender/zabbix_sender", "/usr/bin/zabbix_sender"]
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/conf/zabbix_server.conf", "/usr/local/zabbix/etc/zabbix_server.conf"]
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/database/mysql/create_server.sql.gz", "/usr/local/zabbix/share/doc/zabbix-server-mysql/create.sql.gz"]
-COPY ["./zabbix-server/docker-entrypoint.sh", "/usr/bin/"]
+COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/conf/zabbix_proxy.conf", "/usr/local/zabbix/etc/zabbix_proxy.conf"]
+COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/database/mysql/create_proxy.sql.gz", "/usr/local/zabbix/share/doc/zabbix-proxy-mysql/create_proxy.sql.gz"]
+COPY ["./zabbix-proxy/docker-entrypoint.sh", "/usr/bin/"]
 
 # ***** 创建zabbix目录授权 *****
 RUN set -eux && \
     cp -rf /root/.oh-my-zsh /usr/local/zabbix/.oh-my-zsh && \
     cp -rf /root/.zshrc /usr/local/zabbix/.zshrc && \
     sed -i '5s#/root/.oh-my-zsh#/usr/local/zabbix/.oh-my-zsh#' /usr/local/zabbix/.zshrc && \
-    chmod a+x /usr/bin/docker-entrypoint.sh /usr/sbin/zabbix_server /usr/bin/zabbix_get /usr/bin/zabbix_sender && \
+    chmod a+x /usr/bin/docker-entrypoint.sh /usr/sbin/zabbix_proxy /usr/bin/zabbix_get /usr/bin/zabbix_sender && \
     chown --quiet -R zabbix:root /usr/local/zabbix/ && \
     chgrp -R 0 /usr/local/zabbix/ && \
     chmod -R g=u /usr/local/zabbix/ && \
@@ -172,4 +172,4 @@ ENTRYPOINT ["/sbin/tini", "--", "/usr/bin/docker-entrypoint.sh"]
 USER 1997
 
 # ***** 执行命令 *****
-CMD ["/usr/sbin/zabbix_server", "--foreground", "-c", "/usr/local/zabbix/etc/zabbix_server.conf"]
+CMD ["/usr/sbin/zabbix_proxy", "--foreground", "-c", "/usr/local/zabbix/etc/zabbix_proxy.conf"]

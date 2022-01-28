@@ -9,6 +9,11 @@ if [ "${DEBUG_MODE,,}" == "true" ]; then
     set -o xtrace
 fi
 
+# Default Zabbix server host
+: ${ZBX_SERVER_HOST:="zabbix-server"}
+# Default Zabbix server port number
+: ${ZBX_SERVER_PORT:="16168"}
+
 # Default directories
 # User 'zabbix' home directory
 ZABBIX_USER_HOME_DIR="/usr/local/zabbix"
@@ -164,12 +169,12 @@ check_variables_mysql() {
     [ -n "${MYSQL_USER}" ] && [ "${USE_DB_ROOT_USER}" == "true" ] && CREATE_ZBX_DB_USER=true
 
     # If root password is not specified use provided credentials
-    : ${DB_SERVER_ROOT_USER:=${MYSQL_USER}}
+    DB_SERVER_ROOT_USER=${DB_SERVER_ROOT_USER:-${MYSQL_USER}}
     [ "${MYSQL_ALLOW_EMPTY_PASSWORD,,}" == "true" ] || DB_SERVER_ROOT_PASS=${DB_SERVER_ROOT_PASS:-${MYSQL_PASSWORD}}
     DB_SERVER_ZBX_USER=${MYSQL_USER:-"zabbix"}
     DB_SERVER_ZBX_PASS=${MYSQL_PASSWORD:-"zabbix"}
 
-    DB_SERVER_DBNAME=${MYSQL_DATABASE:-"zabbix"}
+    DB_SERVER_DBNAME=${MYSQL_DATABASE:-"zabbix_proxy"}
 }
 
 db_tls_params() {
@@ -288,9 +293,9 @@ create_db_schema_mysql() {
 
         export MYSQL_PWD="${DB_SERVER_ROOT_PASS}"
 
-        zcat /usr/local/zabbix/share/doc/zabbix-server-mysql/create.sql.gz | mysql --silent --skip-column-names \
+        zcat /usr/local/zabbix/share/doc/zabbix-proxy-mysql/create.sql.gz | mysql --silent --skip-column-names \
                     -h ${DB_SERVER_HOST} -P ${DB_SERVER_PORT} \
-                    -u ${DB_SERVER_ROOT_USER} $ssl_opts  \
+                    -u ${DB_SERVER_ROOT_USER} $ssl_opts \
                     ${DB_SERVER_DBNAME} 1>/dev/null
 
         unset MYSQL_PWD
@@ -298,9 +303,20 @@ create_db_schema_mysql() {
 }
 
 update_zbx_config() {
-    echo "** Preparing Zabbix server configuration file"
+    echo "** Preparing Zabbix proxy configuration file"
 
-    ZBX_CONFIG=$ZABBIX_ETC_DIR/zabbix_server.conf
+    ZBX_CONFIG=$ZABBIX_ETC_DIR/zabbix_proxy.conf
+
+    update_config_var $ZBX_CONFIG "ProxyMode" "${ZBX_PROXYMODE}"
+    update_config_var $ZBX_CONFIG "Server" "${ZBX_SERVER_HOST}"
+    update_config_var $ZBX_CONFIG "ServerPort" "${ZBX_SERVER_PORT}"
+    if [ -z "${ZBX_HOSTNAME}" ] && [ -n "${ZBX_HOSTNAMEITEM}" ]; then
+        update_config_var $ZBX_CONFIG "Hostname" ""
+        update_config_var $ZBX_CONFIG "HostnameItem" "${ZBX_HOSTNAMEITEM}"
+    else
+        update_config_var $ZBX_CONFIG "Hostname" "${ZBX_HOSTNAME:-"zabbix-proxy"}"
+        update_config_var $ZBX_CONFIG "HostnameItem" "${ZBX_HOSTNAMEITEM}"
+    fi
 
     update_config_var $ZBX_CONFIG "ListenIP" "${ZBX_LISTENIP}"
     update_config_var $ZBX_CONFIG "ListenPort" "${ZBX_LISTENPORT}"
@@ -323,6 +339,9 @@ update_zbx_config() {
         update_config_var $ZBX_CONFIG "DBTLSCipher13" "${ZBX_DBTLSCIPHER13}"
     fi
 
+    update_config_var $ZBX_CONFIG "EnableRemoteCommands" "${ZBX_ENABLEREMOTECOMMANDS}"
+    update_config_var $ZBX_CONFIG "LogRemoteCommands" "${ZBX_LOGREMOTECOMMANDS}"
+
     update_config_var $ZBX_CONFIG "DBHost" "${DB_SERVER_HOST}"
     update_config_var $ZBX_CONFIG "DBName" "${DB_SERVER_DBNAME}"
     update_config_var $ZBX_CONFIG "DBSchema" "${DB_SERVER_SCHEMA}"
@@ -342,17 +361,16 @@ update_zbx_config() {
 
     update_config_var $ZBX_CONFIG "AllowUnsupportedDBVersions" "${ZBX_ALLOWUNSUPPORTEDDBVERSIONS}"
 
-    update_config_var $ZBX_CONFIG "StartReportWriters" "${ZBX_STARTREPORTWRITERS}"
-    : ${ZBX_WEBSERVICEURL:="http://zabbix-web-service:10053/report"}
-    update_config_var $ZBX_CONFIG "WebServiceURL" "${ZBX_WEBSERVICEURL}"
-
-    update_config_var $ZBX_CONFIG "HistoryStorageURL" "${ZBX_HISTORYSTORAGEURL}"
-    update_config_var $ZBX_CONFIG "HistoryStorageTypes" "${ZBX_HISTORYSTORAGETYPES}"
-    update_config_var $ZBX_CONFIG "HistoryStorageDateIndex" "${ZBX_HISTORYSTORAGEDATEINDEX}"
-
     update_config_var $ZBX_CONFIG "DBSocket" "${DB_SERVER_SOCKET}"
 
+    update_config_var $ZBX_CONFIG "ProxyLocalBuffer" "${ZBX_PROXYLOCALBUFFER}"
+    update_config_var $ZBX_CONFIG "ProxyOfflineBuffer" "${ZBX_PROXYOFFLINEBUFFER}"
+    update_config_var $ZBX_CONFIG "HeartbeatFrequency" "${ZBX_PROXYHEARTBEATFREQUENCY}"
+    update_config_var $ZBX_CONFIG "ConfigFrequency" "${ZBX_CONFIGFREQUENCY}"
+    update_config_var $ZBX_CONFIG "DataSenderFrequency" "${ZBX_DATASENDERFREQUENCY}"
+
     update_config_var $ZBX_CONFIG "StatsAllowedIP" "${ZBX_STATSALLOWEDIP}"
+    update_config_var $ZBX_CONFIG "StartPreprocessors" "${ZBX_STARTPREPROCESSORS}"
 
     update_config_var $ZBX_CONFIG "StartPollers" "${ZBX_STARTPOLLERS}"
     update_config_var $ZBX_CONFIG "StartIPMIPollers" "${ZBX_IPMIPOLLERS}"
@@ -362,15 +380,6 @@ update_zbx_config() {
     update_config_var $ZBX_CONFIG "StartDiscoverers" "${ZBX_STARTDISCOVERERS}"
     update_config_var $ZBX_CONFIG "StartHistoryPollers" "${ZBX_STARTHISTORYPOLLERS}"
     update_config_var $ZBX_CONFIG "StartHTTPPollers" "${ZBX_STARTHTTPPOLLERS}"
-
-    update_config_var $ZBX_CONFIG "StartPreprocessors" "${ZBX_STARTPREPROCESSORS}"
-    update_config_var $ZBX_CONFIG "StartTimers" "${ZBX_STARTTIMERS}"
-    update_config_var $ZBX_CONFIG "StartEscalators" "${ZBX_STARTESCALATORS}"
-    update_config_var $ZBX_CONFIG "StartAlerters" "${ZBX_STARTALERTERS}"
-    update_config_var $ZBX_CONFIG "StartTimers" "${ZBX_STARTTIMERS}"
-    update_config_var $ZBX_CONFIG "StartEscalators" "${ZBX_STARTESCALATORS}"
-
-    update_config_var $ZBX_CONFIG "StartLLDProcessors" "${ZBX_STARTLLDPROCESSORS}"
 
     : ${ZBX_JAVAGATEWAY_ENABLE:="false"}
     if [ "${ZBX_JAVAGATEWAY_ENABLE,,}" == "true" ]; then
@@ -399,21 +408,12 @@ update_zbx_config() {
     fi
 
     update_config_var $ZBX_CONFIG "HousekeepingFrequency" "${ZBX_HOUSEKEEPINGFREQUENCY}"
-    update_config_var $ZBX_CONFIG "MaxHousekeeperDelete" "${ZBX_MAXHOUSEKEEPERDELETE}"
-    update_config_var $ZBX_CONFIG "ServiceManagerSyncFrequency" "${ZBX_PROBLEMHOUSEKEEPINGFREQUENCY}"
-    update_config_var $ZBX_CONFIG "SenderFrequency" "${ZBX_SENDERFREQUENCY}"
 
     update_config_var $ZBX_CONFIG "CacheSize" "${ZBX_CACHESIZE}"
-
-    update_config_var $ZBX_CONFIG "CacheUpdateFrequency" "${ZBX_CACHEUPDATEFREQUENCY}"
 
     update_config_var $ZBX_CONFIG "StartDBSyncers" "${ZBX_STARTDBSYNCERS}"
     update_config_var $ZBX_CONFIG "HistoryCacheSize" "${ZBX_HISTORYCACHESIZE}"
     update_config_var $ZBX_CONFIG "HistoryIndexCacheSize" "${ZBX_HISTORYINDEXCACHESIZE}"
-
-    update_config_var $ZBX_CONFIG "TrendCacheSize" "${ZBX_TRENDCACHESIZE}"
-    update_config_var $ZBX_CONFIG "TrendFunctionCacheSize" "${ZBX_TRENDFUNCTIONCACHESIZE}"
-    update_config_var $ZBX_CONFIG "ValueCacheSize" "${ZBX_VALUECACHESIZE}"
 
     update_config_var $ZBX_CONFIG "Timeout" "${ZBX_TIMEOUT}"
     update_config_var $ZBX_CONFIG "TrapperTimeout" "${ZBX_TRAPPERTIMEOUT}"
@@ -423,13 +423,7 @@ update_zbx_config() {
 
     update_config_var $ZBX_CONFIG "AlertScriptsPath" "$ZABBIX_USER_HOME_DIR/alertscripts"
     update_config_var $ZBX_CONFIG "ExternalScripts" "$ZABBIX_USER_HOME_DIR/externalscripts"
-    update_config_var $ZBX_CONFIG "Include" "$ZABBIX_ETC_DIR/zabbix_server.conf.d/*.conf"
-
-    if [ -n "${ZBX_EXPORTFILESIZE}" ]; then
-        update_config_var $ZBX_CONFIG "ExportDir" "$ZABBIX_USER_HOME_DIR/export/"
-        update_config_var $ZBX_CONFIG "ExportFileSize" "${ZBX_EXPORTFILESIZE}"
-        update_config_var $ZBX_CONFIG "ExportType" "${ZBX_EXPORTTYPE}"
-    fi
+	update_config_var $ZBX_CONFIG "Include" "$ZABBIX_ETC_DIR/zabbix_proxy.conf.d/*.conf"
 
     update_config_var $ZBX_CONFIG "FpingLocation" "/usr/sbin/fping"
     update_config_var $ZBX_CONFIG "Fping6Location"
@@ -437,18 +431,19 @@ update_zbx_config() {
     update_config_var $ZBX_CONFIG "SSHKeyLocation" "$ZABBIX_USER_HOME_DIR/ssh_keys"
     update_config_var $ZBX_CONFIG "LogSlowQueries" "${ZBX_LOGSLOWQUERIES}"
 
-    update_config_var $ZBX_CONFIG "StartProxyPollers" "${ZBX_STARTPROXYPOLLERS}"
-    update_config_var $ZBX_CONFIG "ProxyConfigFrequency" "${ZBX_PROXYCONFIGFREQUENCY}"
-    update_config_var $ZBX_CONFIG "ProxyDataFrequency" "${ZBX_PROXYDATAFREQUENCY}"
-
     update_config_var $ZBX_CONFIG "SSLCertLocation" "$ZABBIX_USER_HOME_DIR/ssl/certs/"
     update_config_var $ZBX_CONFIG "SSLKeyLocation" "$ZABBIX_USER_HOME_DIR/ssl/keys/"
     update_config_var $ZBX_CONFIG "SSLCALocation" "$ZABBIX_USER_HOME_DIR/ssl/ssl_ca/"
     update_config_var $ZBX_CONFIG "LoadModulePath" "$ZABBIX_USER_HOME_DIR/modules/"
     update_config_multiple_var $ZBX_CONFIG "LoadModule" "${ZBX_LOADMODULE}"
 
+    update_config_var $ZBX_CONFIG "TLSConnect" "${ZBX_TLSCONNECT}"
+    update_config_var $ZBX_CONFIG "TLSAccept" "${ZBX_TLSACCEPT}"
     update_config_var $ZBX_CONFIG "TLSCAFile" "${ZBX_TLSCAFILE}"
     update_config_var $ZBX_CONFIG "TLSCRLFile" "${ZBX_TLSCRLFILE}"
+
+    update_config_var $ZBX_CONFIG "TLSServerCertIssuer" "${ZBX_TLSSERVERCERTISSUER}"
+    update_config_var $ZBX_CONFIG "TLSServerCertSubject" "${ZBX_TLSSERVERCERTSUBJECT}"
 
     update_config_var $ZBX_CONFIG "TLSCertFile" "${ZBX_TLSCERTFILE}"
     update_config_var $ZBX_CONFIG "TLSCipherAll" "${ZBX_TLSCIPHERALL}"
@@ -462,25 +457,6 @@ update_zbx_config() {
     update_config_var $ZBX_CONFIG "TLSPSKIdentity" "${ZBX_TLSPSKIDENTITY}"
     update_config_var $ZBX_CONFIG "TLSPSKFile" "${ZBX_TLSPSKFILE}"
 
-    update_config_var $ZBX_CONFIG "ServiceManagerSyncFrequency" "${ZBX_SERVICEMANAGERSYNCFREQUENCY}"
-
-    if [ "${ZBX_AUTOHANODENAME}" == 'fqdn' ] && [ ! -n "${ZBX_HANODENAME}" ]; then
-        update_config_var $ZBX_CONFIG "HANodeName" "$(hostname -f)"
-    elif [ "${ZBX_AUTOHANODENAME}" == 'hostname' ] && [ ! -n "${ZBX_HANODENAME}" ]; then
-        update_config_var $ZBX_CONFIG "HANodeName" "$(hostname)"
-    else
-        update_config_var $ZBX_CONFIG "HANodeName" "${ZBX_HANODENAME}"
-    fi
-
-    : ${ZBX_NODEADDRESSPORT:="16168"}
-    if [ "${ZBX_AUTONODEADDRESS}" == 'fqdn' ] && [ ! -n "${ZBX_NODEADDRESS}" ]; then
-        update_config_var $ZBX_CONFIG "NodeAddress" "$(hostname -f):${ZBX_NODEADDRESSPORT}"
-    elif [ "${ZBX_AUTONODEADDRESS}" == 'hostname' ] && [ ! -n "${ZBX_NODEADDRESS}" ]; then
-        update_config_var $ZBX_CONFIG "NodeAddress" "$(hostname):${ZBX_NODEADDRESSPORT}"
-    else
-        update_config_var $ZBX_CONFIG "NodeAddress" "${ZBX_NODEADDRESS}"
-    fi
-
     if [ "$(id -u)" != '0' ]; then
         update_config_var $ZBX_CONFIG "User" "$(whoami)"
     else
@@ -488,25 +464,26 @@ update_zbx_config() {
     fi
 }
 
-prepare_server() {
-    echo "** Preparing Zabbix server"
+prepare_proxy() {
+    echo "Preparing Zabbix proxy"
 
     check_variables_mysql
     check_db_connect_mysql
     create_db_user_mysql
     create_db_database_mysql
     create_db_schema_mysql
+
     update_zbx_config
 }
 
 #################################################
 
 if [ "${1#-}" != "$1" ]; then
-    set -- /usr/sbin/zabbix_server "$@"
+    set -- /usr/sbin/zabbix_proxy "$@"
     fi
 
-if [ "$1" == '/usr/sbin/zabbix_server' ]; then
-    prepare_server
+if [ "$1" == '/usr/sbin/zabbix_proxy' ]; then
+    prepare_proxy
 fi
 
 exec "$@"
