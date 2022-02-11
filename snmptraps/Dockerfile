@@ -47,7 +47,8 @@ ARG PKG_DEPS="\
 ENV PKG_DEPS=$PKG_DEPS
 
 ARG INSTALL_PKGS="\
-    net-snmp"
+    net-snmp \
+    net-snmp-tools"
 ENV INSTALL_PKGS=$INSTALL_PKGS
 
 # ***** 安装依赖 *****
