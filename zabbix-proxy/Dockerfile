@@ -71,6 +71,7 @@ ARG INSTALL_PKGS="\
     mariadb-client \
     mariadb-connector-c \
     net-snmp-agent-libs \
+    net-snmp-tools \
     openipmi-libs \
     pcre2 \
     unixodbc"
