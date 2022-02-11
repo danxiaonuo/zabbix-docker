@@ -306,7 +306,6 @@ update_zbx_config() {
     echo "** Preparing Zabbix proxy configuration file"
 
     ZBX_CONFIG=$ZABBIX_ETC_DIR/zabbix_proxy.conf
-    sed -i 's/# Server=/&\n# ServerPort=/' $ZBX_CONFIG
 
     update_config_var $ZBX_CONFIG "ProxyMode" "${ZBX_PROXYMODE}"
     update_config_var $ZBX_CONFIG "Server" "${ZBX_SERVER_HOST}"
