@@ -151,7 +151,7 @@ COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_proxy/zabbix_proxy",
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_get/zabbix_get", "/usr/bin/zabbix_get"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_sender/zabbix_sender", "/usr/bin/zabbix_sender"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/conf/zabbix_proxy.conf", "/usr/local/zabbix/etc/zabbix_proxy.conf"]
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/database/mysql/create_proxy.sql.gz", "/usr/local/zabbix/share/doc/zabbix-proxy-mysql/create_proxy.sql.gz"]
+COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/database/mysql/create_proxy.sql.gz", "/usr/local/zabbix/share/doc/zabbix-proxy-mysql/create.sql.gz"]
 COPY ["./zabbix-proxy/docker-entrypoint.sh", "/usr/bin/"]
 
 # ***** 创建zabbix目录授权 *****
