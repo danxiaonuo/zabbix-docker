@@ -146,6 +146,7 @@ RUN set -eux && \
     chown --quiet -R zabbix:root /usr/local/zabbix/ && \
     chgrp -R 0 /usr/local/zabbix/ && \
     chmod -R g=u /usr/local/zabbix/ && \
+    ln -sf /usr/sbin/fping /usr/sbin/fping6 && \
     rm -rf /var/cache/apk/*
 
 # ***** 入口 *****
