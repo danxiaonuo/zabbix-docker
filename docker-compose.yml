@@ -537,7 +537,6 @@ services:
 # 存储        
 volumes:
   snmptraps:
-  web-nginx:
 
 # 密钥
 secrets:
