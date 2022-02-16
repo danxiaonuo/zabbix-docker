@@ -294,6 +294,7 @@ create_db_schema_mysql() {
         export MYSQL_PWD="${DB_SERVER_ROOT_PASS}"
 
         zcat /usr/local/zabbix/share/doc/zabbix-proxy-mysql/create.sql.gz | mysql --silent --skip-column-names \
+                    --default-character-set=utf8mb4 \
                     -h ${DB_SERVER_HOST} -P ${DB_SERVER_PORT} \
                     -u ${DB_SERVER_ROOT_USER} $ssl_opts \
                     ${DB_SERVER_DBNAME} 1>/dev/null
@@ -314,7 +315,7 @@ update_zbx_config() {
         update_config_var $ZBX_CONFIG "Hostname" ""
         update_config_var $ZBX_CONFIG "HostnameItem" "${ZBX_HOSTNAMEITEM}"
     else
-        update_config_var $ZBX_CONFIG "Hostname" "${ZBX_HOSTNAME:-"zabbix-proxy"}"
+        update_config_var $ZBX_CONFIG "Hostname" "${ZBX_HOSTNAME:-"zabbix-proxy-mysql"}"
         update_config_var $ZBX_CONFIG "HostnameItem" "${ZBX_HOSTNAMEITEM}"
     fi
 
@@ -423,10 +424,10 @@ update_zbx_config() {
 
     update_config_var $ZBX_CONFIG "AlertScriptsPath" "$ZABBIX_USER_HOME_DIR/alertscripts"
     update_config_var $ZBX_CONFIG "ExternalScripts" "$ZABBIX_USER_HOME_DIR/externalscripts"
-	update_config_var $ZBX_CONFIG "Include" "$ZABBIX_ETC_DIR/zabbix_proxy.conf.d/*.conf"
+	  update_config_var $ZBX_CONFIG "Include" "$ZABBIX_ETC_DIR/zabbix_proxy.conf.d/*.conf"
 
     update_config_var $ZBX_CONFIG "FpingLocation" "/usr/sbin/fping"
-    update_config_var $ZBX_CONFIG "Fping6Location"
+    update_config_var $ZBX_CONFIG "Fping6Location" "/usr/sbin/fping6"
 
     update_config_var $ZBX_CONFIG "SSHKeyLocation" "$ZABBIX_USER_HOME_DIR/ssh_keys"
     update_config_var $ZBX_CONFIG "LogSlowQueries" "${ZBX_LOGSLOWQUERIES}"

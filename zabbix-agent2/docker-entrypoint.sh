@@ -166,8 +166,8 @@ prepare_zbx_agent_config() {
         update_config_var $ZBX_AGENT_CONFIG "StatusPort" "31999"
     fi
 
-#    update_config_var $ZBX_AGENT_CONFIG "HostInterface" "${ZBX_HOSTINTERFACE}"
-#    update_config_var $ZBX_AGENT_CONFIG "HostInterfaceItem" "${ZBX_HOSTINTERFACEITEM}"
+    update_config_var $ZBX_AGENT_CONFIG "HostInterface" "${ZBX_HOSTINTERFACE}"
+    update_config_var $ZBX_AGENT_CONFIG "HostInterfaceItem" "${ZBX_HOSTINTERFACEITEM}"
 
     update_config_var $ZBX_AGENT_CONFIG "Hostname" "${ZBX_HOSTNAME}"
     update_config_var $ZBX_AGENT_CONFIG "HostnameItem" "${ZBX_HOSTNAMEITEM}"
@@ -178,7 +178,7 @@ prepare_zbx_agent_config() {
     update_config_var $ZBX_AGENT_CONFIG "BufferSize" "${ZBX_BUFFERSIZE}"
     update_config_var $ZBX_AGENT_CONFIG "MaxLinesPerSecond" "${ZBX_MAXLINESPERSECOND}"
     # Please use include to enable Alias feature
-#    update_config_multiple_var $ZBX_AGENT_CONFIG "Alias" ${ZBX_ALIAS}
+    # update_config_multiple_var $ZBX_AGENT_CONFIG "Alias" ${ZBX_ALIAS}
     update_config_var $ZBX_AGENT_CONFIG "Timeout" "${ZBX_TIMEOUT}"
     update_config_var $ZBX_AGENT_CONFIG "Include" "$ZABBIX_ETC_DIR/zabbix_agentd.conf.d/*.conf"
     update_config_var $ZBX_AGENT_CONFIG "UnsafeUserParameters" "${ZBX_UNSAFEUSERPARAMETERS}"
