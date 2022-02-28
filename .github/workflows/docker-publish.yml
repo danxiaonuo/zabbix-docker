@@ -22,8 +22,8 @@ on:
         required: true
         default: 'build zabbix'
   # 定时触发编译(每天早5点)
-  schedule:
-     - cron: '0 21 * * *'
+  #schedule:
+  #   - cron: '0 21 * * *'
   # 点☆Star触发开始编译
   watch:  
      types: [started]
