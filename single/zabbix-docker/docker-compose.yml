@@ -12,7 +12,7 @@ services:
     # 指定容器名称
     container_name: mysql-server
     # 指定为镜像名称或镜像ID
-    image: mysql:latest
+    image: danxiaonuo/mysql:latest
     # 覆盖容器启动后默认执行的命令
     command:
      - mysqld
@@ -36,8 +36,7 @@ services:
     # 数据卷所挂载路径设置
     volumes:
       # 数据目录
-      - ./zbx_env/data/mysql:/var/lib/mysql:rw,cached
-      - ./zbx_env/data/mysql-files:/var/lib/mysql-files:rw,cached
+      - ./zbx_env/data/mysql:/data/mysql/data:rwx,cached
       # 配置目录与文件
       - ./conf/mysql/my.cnf:/etc/mysql/my.cnf:rw,cached
       # 同步宿主机时区与时间
@@ -430,7 +429,7 @@ services:
     # 数据卷所挂载路径设置
     volumes:
       # 配置目录与文件
-      #- ./conf/nginx/ssl:/ssl:rw,cached
+      # - ./conf/nginx/ssl:/ssl:rw,cached
       # - ./conf/nginx/vhost:/data/nginx/conf/vhost:rw,cached
       # - ./conf/nginx/php.conf:/data/nginx/conf/php.conf:rw,cached
       # 日志目录

@@ -1,0 +1,729 @@
+version: '3.9'
+services:
+
+  # 服务名
+  mysql-server:
+    # 模拟一个伪终端
+    tty: true
+    # 打开标准输入,可以接受外部输入
+    stdin_open: true
+    # 主机名
+    hostname: mysql-server
+    # 指定容器名称
+    container_name: mysql-server
+    # 指定为镜像名称或镜像ID
+    image: danxiaonuo/mysql:latest
+    # 覆盖容器启动后默认执行的命令
+    command:
+     - mysqld
+     - --character-set-server=utf8mb4
+     - --collation-server=utf8mb4_bin
+     - --default-authentication-plugin=mysql_native_password  
+    # 允许容器中运行一些特权命令
+    privileged: true
+    # 跟主机系统共享进程命名空间
+    # pid: "host"
+    # 指定容器退出后的重启策略为始终重启
+    restart: always
+    # 指定容器的内核能力(capacity)分配
+    cap_add:
+     - ALL
+    # 配置容器内核参数
+    sysctls:
+      - net.ipv4.tcp_ecn=1
+      - net.ipv4.tcp_ecn_fallback=1
+      - net.ipv4.tcp_congestion_control=bbrplus
+    # 数据卷所挂载路径设置
+    volumes:
+      # 数据目录
+      - ./zbx_env/data/mysql:/data/mysql/data:rwx,cached
+      # 配置目录与文件
+      - ./conf/mysql/my.cnf:/etc/mysql/my.cnf:rw,cached
+      # 同步宿主机时区与时间
+      - /usr/share/zoneinfo:/usr/share/zoneinfo:ro,cached
+      - /etc/localtime:/etc/localtime:ro,cached
+      # 共享内核
+      #- /lib/modules:/lib/modules:ro,cached
+      #- /etc/sysctl.conf:/etc/sysctl.conf:ro,cached
+    env_file:
+     - ./.env_vars/.env_db_mysql
+    secrets:
+     - MYSQL_USER
+     - MYSQL_PASSWORD
+     - MYSQL_ROOT_PASSWORD
+    # 指定设备映射关系
+    #devices:
+    # - /dev/net/tun
+    # 解决容器的依赖
+    #depends_on:
+    #  - ""
+    # 配置容器连接的网络
+    networks:
+      zabbix_net:
+        ipv4_address: 172.186.0.2
+    # 暴露端口信息
+    ports:
+     - "3306:3306"
+    # 指定容器的 ulimits 限制值
+    ulimits:
+      nproc: 65535
+      nofile:
+          soft: 65535
+          hard: 65535
+  
+  # 服务名
+  zabbix-snmptraps:
+    # 模拟一个伪终端
+    tty: true
+    # 打开标准输入,可以接受外部输入
+    stdin_open: true
+    # 主机名
+    hostname: zabbix-snmptraps
+    # 指定容器名称
+    container_name: zabbix-snmptraps
+    # 指定为镜像名称或镜像ID
+    image: danxiaonuo/zabbix-snmptraps:latest
+    # 覆盖容器启动后默认执行的命令
+    # command: /sbin/init
+    # 允许容器中运行一些特权命令
+    privileged: true
+    # 跟主机系统共享进程命名空间
+    pid: "host"
+    # 指定容器退出后的重启策略为始终重启
+    restart: always
+    # 指定容器的内核能力(capacity)分配
+    cap_add:
+     - ALL
+    # 配置容器内核参数
+    sysctls:
+      - net.ipv4.tcp_ecn=1
+      - net.ipv4.tcp_ecn_fallback=1
+      - net.ipv4.tcp_congestion_control=bbrplus
+    # 数据卷所挂载路径设置
+    volumes:
+      # 配置目录与文件
+      - snmptraps:/usr/local/zabbix/snmptraps:rw,cached
+      # 同步宿主机时区与时间
+      - /usr/share/zoneinfo:/usr/share/zoneinfo:ro,cached
+      - /etc/localtime:/etc/localtime:ro,cached
+      # 共享内核
+      #- /lib/modules:/lib/modules:ro,cached
+      #- /etc/sysctl.conf:/etc/sysctl.conf:ro,cached
+    # 指定设备映射关系
+    #devices:
+    # - /dev/net/tun
+    # 解决容器的依赖
+    #depends_on:
+    #  - ""
+    # 配置容器连接的网络
+    networks:
+      zabbix_net:
+        ipv4_address: 172.186.0.3
+    # 暴露端口信息
+    ports:
+     - "162:1162/udp"
+    # 指定容器的 ulimits 限制值
+    ulimits:
+      nproc: 65535
+      nofile:
+          soft: 65535
+          hard: 65535
+          
+  # 服务名
+  zabbix-java-gateway:
+    # 模拟一个伪终端
+    tty: true
+    # 打开标准输入,可以接受外部输入
+    stdin_open: true
+    # 主机名
+    hostname: zabbix-java-gateway
+    # 指定容器名称
+    container_name: zabbix-java-gateway
+    # 指定为镜像名称或镜像ID
+    image: danxiaonuo/zabbix-java-gateway:latest
+    # 覆盖容器启动后默认执行的命令
+    # command: /sbin/init
+    # 允许容器中运行一些特权命令
+    privileged: true
+    # 跟主机系统共享进程命名空间
+    pid: "host"
+    # 指定容器退出后的重启策略为始终重启
+    restart: always
+    # 指定容器的内核能力(capacity)分配
+    cap_add:
+     - ALL
+    # 配置容器内核参数
+    sysctls:
+      - net.ipv4.tcp_ecn=1
+      - net.ipv4.tcp_ecn_fallback=1
+      - net.ipv4.tcp_congestion_control=bbrplus
+    # 数据卷所挂载路径设置
+    volumes:
+      # 同步宿主机时区与时间
+      - /usr/share/zoneinfo:/usr/share/zoneinfo:ro,cached
+      - /etc/localtime:/etc/localtime:ro,cached
+      # 共享内核
+      #- /lib/modules:/lib/modules:ro,cached
+      #- /etc/sysctl.conf:/etc/sysctl.conf:ro,cached
+    env_file:
+     - ./.env_vars/.env_java
+    # 指定设备映射关系
+    #devices:
+    # - /dev/net/tun
+    # 解决容器的依赖
+    #depends_on:
+    #  - ""
+    # 配置容器连接的网络
+    networks:
+      zabbix_net:
+        ipv4_address: 172.186.0.4
+    # 暴露端口信息
+    ports:
+     - "10052:10052"
+    # 指定容器的 ulimits 限制值
+    ulimits:
+      nproc: 65535
+      nofile:
+          soft: 65535
+          hard: 65535
+ 
+  # 服务名
+  zabbix-server-master01:
+    # 模拟一个伪终端
+    tty: true
+    # 打开标准输入,可以接受外部输入
+    stdin_open: true
+    # 主机名
+    hostname: zabbix-server-master01
+    # 指定容器名称
+    container_name: zabbix-server-master01
+    # 指定为镜像名称或镜像ID
+    image: danxiaonuo/zabbix-server:latest
+    # 覆盖容器启动后默认执行的命令
+    # command: /sbin/init
+    # 允许容器中运行一些特权命令
+    privileged: true
+    # 跟主机系统共享进程命名空间
+    pid: "host"
+    # 指定容器退出后的重启策略为始终重启
+    restart: always
+    # 指定容器的内核能力(capacity)分配
+    cap_add:
+     - ALL
+    # 配置容器内核参数
+    sysctls:
+      - net.ipv4.tcp_ecn=1
+      - net.ipv4.tcp_ecn_fallback=1
+      - net.ipv4.tcp_congestion_control=bbrplus
+    # 数据卷所挂载路径设置
+    volumes:
+      # 配置目录与文件
+      - ./zbx_env/usr/local/zabbix/scripts:/usr/local/zabbix/scripts:rw,cached
+      - ./zbx_env/usr/local/zabbix/alertscripts:/usr/local/zabbix/alertscripts:rw,cached
+      - ./zbx_env/usr/local/zabbix/externalscripts:/usr/local/zabbix/externalscripts:rw,cached
+      - ./zbx_env/usr/local/zabbix/zabbix_server.conf.d:/usr/local/zabbix/etc/zabbix_server.conf.d:rw,cached
+      - ./zbx_env/usr/local/zabbix/export:/usr/local/zabbix/export:rw,cached
+      - ./zbx_env/usr/local/zabbix/modules:/usr/local/zabbix/modules:rw,cached
+      - ./zbx_env/usr/local/zabbix/enc:/usr/local/zabbix/enc:rw,cached
+      - ./zbx_env/usr/local/zabbix/ssh_keys:/usr/local/zabbix/ssh_keys:rw,cached
+      - ./zbx_env/usr/local/zabbix/mibs:/usr/local/zabbix/mibs:rw,cached
+      - snmptraps:/usr/local/zabbix/snmptraps:rw,cached
+      # 同步宿主机时区与时间
+      - /usr/share/zoneinfo:/usr/share/zoneinfo:ro,cached
+      - /etc/localtime:/etc/localtime:ro,cached
+      # 共享内核
+      #- /lib/modules:/lib/modules:ro,cached
+      #- /etc/sysctl.conf:/etc/sysctl.conf:ro,cached
+    env_file:
+     - ./.env_vars/.env_db_mysql
+     - ./.env_vars/.env_srv_01
+    secrets:
+     - MYSQL_USER
+     - MYSQL_PASSWORD
+     - MYSQL_ROOT_PASSWORD
+    # 指定设备映射关系
+    #devices:
+    # - /dev/net/tun
+    # 解决容器的依赖
+    depends_on:
+      - "mysql-server"
+      - "zabbix-snmptraps"
+      - "zabbix-java-gateway"
+    # 配置容器连接的网络
+    networks:
+      zabbix_net:
+        ipv4_address: 172.186.0.5
+    # 暴露端口信息
+    ports:
+     - "16166:16166"
+    # 指定容器的 ulimits 限制值
+    ulimits:
+      nproc: 65535
+      nofile:
+          soft: 65535
+          hard: 65535
+    
+  # 服务名
+  zabbix-server-master02:
+    # 模拟一个伪终端
+    tty: true
+    # 打开标准输入,可以接受外部输入
+    stdin_open: true
+    # 主机名
+    hostname: zabbix-server-master02
+    # 指定容器名称
+    container_name: zabbix-server-master02
+    # 指定为镜像名称或镜像ID
+    image: danxiaonuo/zabbix-server:latest
+    # 覆盖容器启动后默认执行的命令
+    # command: /sbin/init
+    # 允许容器中运行一些特权命令
+    privileged: true
+    # 跟主机系统共享进程命名空间
+    pid: "host"
+    # 指定容器退出后的重启策略为始终重启
+    restart: always
+    # 指定容器的内核能力(capacity)分配
+    cap_add:
+     - ALL
+    # 配置容器内核参数
+    sysctls:
+      - net.ipv4.tcp_ecn=1
+      - net.ipv4.tcp_ecn_fallback=1
+      - net.ipv4.tcp_congestion_control=bbrplus
+    # 数据卷所挂载路径设置
+    volumes:
+      # 配置目录与文件
+      - ./zbx_env/usr/local/zabbix/scripts:/usr/local/zabbix/scripts:rw,cached
+      - ./zbx_env/usr/local/zabbix/alertscripts:/usr/local/zabbix/alertscripts:rw,cached
+      - ./zbx_env/usr/local/zabbix/externalscripts:/usr/local/zabbix/externalscripts:rw,cached
+      - ./zbx_env/usr/local/zabbix/zabbix_server.conf.d:/usr/local/zabbix/etc/zabbix_server.conf.d:rw,cached
+      - ./zbx_env/usr/local/zabbix/export:/usr/local/zabbix/export:rw,cached
+      - ./zbx_env/usr/local/zabbix/modules:/usr/local/zabbix/modules:rw,cached
+      - ./zbx_env/usr/local/zabbix/enc:/usr/local/zabbix/enc:rw,cached
+      - ./zbx_env/usr/local/zabbix/ssh_keys:/usr/local/zabbix/ssh_keys:rw,cached
+      - ./zbx_env/usr/local/zabbix/mibs:/usr/local/zabbix/mibs:rw,cached
+      - snmptraps:/usr/local/zabbix/snmptraps:rw,cached
+      # 同步宿主机时区与时间
+      - /usr/share/zoneinfo:/usr/share/zoneinfo:ro,cached
+      - /etc/localtime:/etc/localtime:ro,cached
+      # 共享内核
+      #- /lib/modules:/lib/modules:ro,cached
+      #- /etc/sysctl.conf:/etc/sysctl.conf:ro,cached
+    env_file:
+     - ./.env_vars/.env_db_mysql
+     - ./.env_vars/.env_srv_02
+    secrets:
+     - MYSQL_USER
+     - MYSQL_PASSWORD
+     - MYSQL_ROOT_PASSWORD
+    # 指定设备映射关系
+    #devices:
+    # - /dev/net/tun
+    # 解决容器的依赖
+    depends_on:
+      - "mysql-server"
+      - "zabbix-snmptraps"
+      - "zabbix-java-gateway"
+      - "zabbix-server-master01"
+    # 配置容器连接的网络
+    networks:
+      zabbix_net:
+        ipv4_address: 172.186.0.6
+    # 暴露端口信息
+    ports:
+     - "16167:16167"
+    # 指定容器的 ulimits 限制值
+    ulimits:
+      nproc: 65535
+      nofile:
+          soft: 65535
+          hard: 65535
+  
+  # 服务名
+  zabbix-server-master03:
+    # 模拟一个伪终端
+    tty: true
+    # 打开标准输入,可以接受外部输入
+    stdin_open: true
+    # 主机名
+    hostname: zabbix-server-master03
+    # 指定容器名称
+    container_name: zabbix-server-master03
+    # 指定为镜像名称或镜像ID
+    image: danxiaonuo/zabbix-server:latest
+    # 覆盖容器启动后默认执行的命令
+    # command: /sbin/init
+    # 允许容器中运行一些特权命令
+    privileged: true
+    # 跟主机系统共享进程命名空间
+    pid: "host"
+    # 指定容器退出后的重启策略为始终重启
+    restart: always
+    # 指定容器的内核能力(capacity)分配
+    cap_add:
+     - ALL
+    # 配置容器内核参数
+    sysctls:
+      - net.ipv4.tcp_ecn=1
+      - net.ipv4.tcp_ecn_fallback=1
+      - net.ipv4.tcp_congestion_control=bbrplus
+    # 数据卷所挂载路径设置
+    volumes:
+      # 配置目录与文件
+      - ./zbx_env/usr/local/zabbix/scripts:/usr/local/zabbix/scripts:rw,cached
+      - ./zbx_env/usr/local/zabbix/alertscripts:/usr/local/zabbix/alertscripts:rw,cached
+      - ./zbx_env/usr/local/zabbix/externalscripts:/usr/local/zabbix/externalscripts:rw,cached
+      - ./zbx_env/usr/local/zabbix/zabbix_server.conf.d:/usr/local/zabbix/etc/zabbix_server.conf.d:rw,cached
+      - ./zbx_env/usr/local/zabbix/export:/usr/local/zabbix/export:rw,cached
+      - ./zbx_env/usr/local/zabbix/modules:/usr/local/zabbix/modules:rw,cached
+      - ./zbx_env/usr/local/zabbix/enc:/usr/local/zabbix/enc:rw,cached
+      - ./zbx_env/usr/local/zabbix/ssh_keys:/usr/local/zabbix/ssh_keys:rw,cached
+      - ./zbx_env/usr/local/zabbix/mibs:/usr/local/zabbix/mibs:rw,cached
+      - snmptraps:/usr/local/zabbix/snmptraps:rw,cached
+      # 同步宿主机时区与时间
+      - /usr/share/zoneinfo:/usr/share/zoneinfo:ro,cached
+      - /etc/localtime:/etc/localtime:ro,cached
+      # 共享内核
+      #- /lib/modules:/lib/modules:ro,cached
+      #- /etc/sysctl.conf:/etc/sysctl.conf:ro,cached
+    env_file:
+     - ./.env_vars/.env_db_mysql
+     - ./.env_vars/.env_srv_03
+    secrets:
+     - MYSQL_USER
+     - MYSQL_PASSWORD
+     - MYSQL_ROOT_PASSWORD
+    # 指定设备映射关系
+    #devices:
+    # - /dev/net/tun
+    # 解决容器的依赖
+    depends_on:
+      - "mysql-server"
+      - "zabbix-snmptraps"
+      - "zabbix-java-gateway"
+      - "zabbix-server-master02"
+    # 配置容器连接的网络
+    networks:
+      zabbix_net:
+        ipv4_address: 172.186.0.7
+    # 暴露端口信息
+    ports:
+     - "16168:16168"
+    # 指定容器的 ulimits 限制值
+    ulimits:
+      nproc: 65535
+      nofile:
+          soft: 65535
+          hard: 65535
+  
+  # 服务名
+  zabbix-proxy:
+    # 模拟一个伪终端
+    tty: true
+    # 打开标准输入,可以接受外部输入
+    stdin_open: true
+    # 主机名
+    hostname: zabbix-proxy
+    # 指定容器名称
+    container_name: zabbix-proxy
+    # 指定为镜像名称或镜像ID
+    image: danxiaonuo/zabbix-proxy:latest
+    # 覆盖容器启动后默认执行的命令
+    # command: /sbin/init
+    # 允许容器中运行一些特权命令
+    privileged: true
+    # 跟主机系统共享进程命名空间
+    pid: "host"
+    # 指定容器退出后的重启策略为始终重启
+    restart: always
+    # 指定容器的内核能力(capacity)分配
+    cap_add:
+     - ALL
+    # 配置容器内核参数
+    sysctls:
+      - net.ipv4.tcp_ecn=1
+      - net.ipv4.tcp_ecn_fallback=1
+      - net.ipv4.tcp_congestion_control=bbrplus
+    # 数据卷所挂载路径设置
+    volumes:
+      # 配置目录与文件
+      - ./zbx_env/usr/local/zabbix/scripts:/usr/local/zabbix/scripts:rw,cached
+      - ./zbx_env/usr/local/zabbix/alertscripts:/usr/local/zabbix/alertscripts:rw,cached
+      - ./zbx_env/usr/local/zabbix/externalscripts:/usr/local/zabbix/externalscripts:rw,cached
+      - ./zbx_env/usr/local/zabbix/zabbix_proxy.conf.d:/usr/local/zabbix/etc/zabbix_proxy.conf.d:rw,cached
+      - ./zbx_env/usr/local/zabbix/export:/usr/local/zabbix/export:rw,cached
+      - ./zbx_env/usr/local/zabbix/modules:/usr/local/zabbix/modules:rw,cached
+      - ./zbx_env/usr/local/zabbix/enc:/usr/local/zabbix/enc:rw,cached
+      - ./zbx_env/usr/local/zabbix/ssh_keys:/usr/local/zabbix/ssh_keys:rw,cached
+      - ./zbx_env/usr/local/zabbix/mibs:/usr/local/zabbix/mibs:rw,cached
+      - snmptraps:/usr/local/zabbix/snmptraps:rw,cached
+      # 同步宿主机时区与时间
+      - /usr/share/zoneinfo:/usr/share/zoneinfo:ro,cached
+      - /etc/localtime:/etc/localtime:ro,cached
+      # 共享内核
+      #- /lib/modules:/lib/modules:ro,cached
+      #- /etc/sysctl.conf:/etc/sysctl.conf:ro,cached
+    env_file:
+     - ./.env_vars/.env_db_mysql_proxy
+     - ./.env_vars/.env_prx
+     - ./.env_vars/.env_prx_mysql
+    secrets:
+     - MYSQL_USER
+     - MYSQL_PASSWORD
+     - MYSQL_ROOT_PASSWORD
+    # 指定设备映射关系
+    #devices:
+    # - /dev/net/tun
+    # 解决容器的依赖
+    depends_on:
+      - "mysql-server"
+      - "zabbix-snmptraps"
+      - "zabbix-java-gateway"
+      - "zabbix-server-master01"
+      - "zabbix-server-master02"
+      - "zabbix-server-master03"
+    # 配置容器连接的网络
+    networks:
+      zabbix_net:
+        ipv4_address: 172.186.0.8
+    # 暴露端口信息
+    ports:
+     - "16165:16165"
+    # 指定容器的 ulimits 限制值
+    ulimits:
+      nproc: 65535
+      nofile:
+          soft: 65535
+          hard: 65535
+ 
+  # 服务名
+  zabbix-web-service:
+    # 模拟一个伪终端
+    tty: true
+    # 打开标准输入,可以接受外部输入
+    stdin_open: true
+    # 主机名
+    hostname: zabbix-web-service
+    # 指定容器名称
+    container_name: zabbix-web-service
+    # 指定为镜像名称或镜像ID
+    image: danxiaonuo/zabbix-web-service:latest
+    # 覆盖容器启动后默认执行的命令
+    # command: /sbin/init
+    # 允许容器中运行一些特权命令
+    privileged: true
+    # 跟主机系统共享进程命名空间
+    pid: "host"
+    # 指定容器退出后的重启策略为始终重启
+    restart: always
+    # 指定容器的内核能力(capacity)分配
+    cap_add:
+     - ALL
+    # 配置容器内核参数
+    sysctls:
+      - net.ipv4.tcp_ecn=1
+      - net.ipv4.tcp_ecn_fallback=1
+      - net.ipv4.tcp_congestion_control=bbrplus
+    # 数据卷所挂载路径设置
+    volumes:
+      # 配置目录与文件
+      - ./zbx_env/usr/local/zabbix/enc:/usr/local/zabbix/enc:rw,cached
+      # 同步宿主机时区与时间
+      - /usr/share/zoneinfo:/usr/share/zoneinfo:ro,cached
+      - /etc/localtime:/etc/localtime:ro,cached
+      # 共享内核
+      #- /lib/modules:/lib/modules:ro,cached
+      #- /etc/sysctl.conf:/etc/sysctl.conf:ro,cached
+    env_file:
+     - ./.env_vars/.env_web_service
+    # 指定设备映射关系
+    #devices:
+    # - /dev/net/tun
+    # 解决容器的依赖
+    depends_on:
+      - "zabbix-server-master01"
+      - "zabbix-server-master02"
+      - "zabbix-server-master03"
+    # 配置容器连接的网络
+    networks:
+      zabbix_net:
+        ipv4_address: 172.186.0.9
+    # 暴露端口信息
+    ports:
+     - "10053:10053"
+    # 指定容器的 ulimits 限制值
+    ulimits:
+      nproc: 65535
+      nofile:
+          soft: 65535
+          hard: 65535
+ 
+  # 服务名
+  zabbix-web-nginx:
+    # 模拟一个伪终端
+    tty: true
+    # 打开标准输入,可以接受外部输入
+    stdin_open: true
+    # 主机名
+    hostname: zabbix-web-nginx
+    # 指定容器名称
+    container_name: zabbix-web-nginx
+    # 指定为镜像名称或镜像ID
+    image: danxiaonuo/zabbix-web-nginx:latest
+    # 覆盖容器启动后默认执行的命令
+    # command: /sbin/init
+    # 允许容器中运行一些特权命令
+    privileged: true
+    # 跟主机系统共享进程命名空间
+    pid: "host"
+    # 指定容器退出后的重启策略为始终重启
+    restart: always
+    # 指定容器的内核能力(capacity)分配
+    cap_add:
+     - ALL
+    # 配置容器内核参数
+    sysctls:
+      - net.ipv4.tcp_ecn=1
+      - net.ipv4.tcp_ecn_fallback=1
+      - net.ipv4.tcp_congestion_control=bbrplus
+    # 数据卷所挂载路径设置
+    volumes:
+      # 配置目录与文件
+      # - ./conf/nginx/ssl:/ssl:rw,cached
+      # - ./conf/nginx/vhost:/data/nginx/conf/vhost:rw,cached
+      # - ./conf/nginx/php.conf:/data/nginx/conf/php.conf:rw,cached
+      # 日志目录
+      - ./logs/nginx:/data/nginx/logs:delegated
+      # 同步宿主机时区与时间
+      - /usr/share/zoneinfo:/usr/share/zoneinfo:ro,cached
+      - /etc/localtime:/etc/localtime:ro,cached
+      # 共享内核
+      #- /lib/modules:/lib/modules:ro,cached
+      #- /etc/sysctl.conf:/etc/sysctl.conf:ro,cached
+    env_file:
+     - ./.env_vars/.env_db_mysql
+     - ./.env_vars/.env_web
+    secrets:
+     - MYSQL_USER
+     - MYSQL_PASSWORD
+     - MYSQL_ROOT_PASSWORD
+    # 指定设备映射关系
+    #devices:
+    # - /dev/net/tun
+    # 解决容器的依赖
+    depends_on:
+      - "mysql-server"
+      - "zabbix-server-master01"
+      - "zabbix-server-master02"
+      - "zabbix-server-master03"
+    # 配置容器连接的网络
+    networks:
+      zabbix_net:
+        ipv4_address: 172.186.0.10
+    # 暴露端口信息
+    ports:
+    - "80:80"
+    - "443:443"
+    # 指定容器的 ulimits 限制值
+    ulimits:
+      nproc: 65535
+      nofile:
+          soft: 65535
+          hard: 65535
+  
+  # 服务名
+  zabbix-agent:
+    # 模拟一个伪终端
+    tty: true
+    # 打开标准输入,可以接受外部输入
+    stdin_open: true
+    # 主机名
+    hostname: zabbix-agent
+    # 指定容器名称
+    container_name: zabbix-agent
+    # 指定为镜像名称或镜像ID
+    image: danxiaonuo/zabbix-agent2:latest
+    # 覆盖容器启动后默认执行的命令
+    # command: /sbin/init
+    # 允许容器中运行一些特权命令
+    privileged: true
+    # 跟主机系统共享进程命名空间
+    pid: "host"
+    # 指定容器退出后的重启策略为始终重启
+    restart: always
+    # 指定容器的内核能力(capacity)分配
+    cap_add:
+     - ALL
+    # 配置容器内核参数
+    sysctls:
+      - net.ipv4.tcp_ecn=1
+      - net.ipv4.tcp_ecn_fallback=1
+      - net.ipv4.tcp_congestion_control=bbrplus
+    # 数据卷所挂载路径设置
+    volumes:
+      # 配置目录与文件
+      - ./zbx_env/usr/local/zabbix/scripts:/usr/local/zabbix/scripts:rw,cached
+      - ./zbx_env/usr/local/zabbix/zabbix_agentd.conf.d:/usr/local/zabbix/etc/zabbix_agentd.conf.d:rw,cached
+      - ./zbx_env/usr/local/zabbix/export:/usr/local/zabbix/export:rw,cached
+      - ./zbx_env/usr/local/zabbix/modules:/usr/local/zabbix/modules:rw,cached
+      - ./zbx_env/usr/local/zabbix/enc:/usr/local/zabbix/enc:rw,cached
+      # 同步宿主机时区与时间
+      - /usr/share/zoneinfo:/usr/share/zoneinfo:ro,cached
+      - /etc/localtime:/etc/localtime:ro,cached
+      # 共享内核
+      #- /lib/modules:/lib/modules:ro,cached
+      #- /etc/sysctl.conf:/etc/sysctl.conf:ro,cached
+    env_file:
+     - ./.env_vars/.env_agent
+    # 指定设备映射关系
+    #devices:
+    # - /dev/net/tun
+    # 解决容器的依赖
+    #depends_on:
+    #  - ""
+    # 配置容器连接的网络
+    networks:
+      zabbix_net:
+        ipv4_address: 172.186.0.11
+    # 暴露端口信息
+    ports:
+     - "10050:10050"
+    # 指定容器的 ulimits 限制值
+    ulimits:
+      nproc: 65535
+      nofile:
+          soft: 65535
+          hard: 65535   
+
+# 存储        
+volumes:
+  snmptraps:
+
+# 密钥
+secrets:
+  MYSQL_USER:
+    file: ./.env_vars/.MYSQL_USER
+  MYSQL_PASSWORD:
+    file: ./.env_vars/.MYSQL_PASSWORD
+  MYSQL_ROOT_PASSWORD:
+    file: ./.env_vars/.MYSQL_ROOT_PASSWORD
+
+# 网络   
+networks:
+  zabbix_net:
+    driver: bridge
+    enable_ipv6: false
+    driver_opts:
+      com.docker.network.bridge.name: zabbix_net
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.bridge.enable_ip_forwarding: "true"
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+      com.docker.network.bridge.host_binding_ipv4: "0.0.0.0"
+      com.docker.network.bridge.host_binding_ipv6: "::/0"
+      com.docker.network.driver.mtu: 1500
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.186.0.0/24
+        gateway: 172.186.0.1
