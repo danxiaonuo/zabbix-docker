@@ -4,7 +4,7 @@
 #
 # zabbix版本号
 ARG MAJOR_VERSION=6.0
-ARG ZBX_VERSION=${MAJOR_VERSION}.3
+ARG ZBX_VERSION=${MAJOR_VERSION}.4
 ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-mysql:latest
 
 # 指定创建的基础镜像
