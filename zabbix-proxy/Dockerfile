@@ -50,8 +50,6 @@ ARG PKG_DEPS="\
     unzip \
     sysstat \
     sudo \
-    python2 \
-    python2-dev \
     python3 \
     python3-dev \
     go \
