@@ -61,35 +61,23 @@ RUN set -eux && \
             --enable-agent2 \
             --enable-ipv6 \
             --enable-proxy \
-            --enable-server \
-            --enable-webservice \
             --with-ldap \
             --with-libcurl \
             --with-libmodbus \
+            --with-libpcre2 \
             --with-libxml2 \
-            --with-mysql \
             --with-net-snmp \
             --with-openipmi \
             --with-openssl \
+            --with-sqlite3 \
             --with-ssh \
             --with-unixodbc \
             $additional_components \
             --silent && \
     make -j"$(nproc)" -s dbschema && \
     make -j"$(nproc)" -s && \
-    make -j"$(nproc)" -s gettext && \
-    cat database/mysql/schema.sql > database/mysql/create.sql && \
-    cat database/mysql/images.sql >> database/mysql/create.sql && \
-    cat database/mysql/data.sql >> database/mysql/create.sql && \
-    gzip -c database/mysql/create.sql > database/mysql/create_server.sql.gz && \
-    rm -rf database/mysql/create.sql && \
-    cat database/mysql/schema.sql > database/mysql/create.sql && \
-    gzip -c database/mysql/create.sql > database/mysql/create_proxy.sql.gz && \
-    rm -rf database/mysql/create.sql && \
     strip /tmp/zabbix-${ZBX_VERSION}/src/zabbix_agent/zabbix_agentd && \
-    strip /tmp/zabbix-${ZBX_VERSION}/src/zabbix_server/zabbix_server && \
     strip /tmp/zabbix-${ZBX_VERSION}/src/zabbix_proxy/zabbix_proxy && \
     strip /tmp/zabbix-${ZBX_VERSION}/src/go/bin/zabbix_agent2 && \
     strip /tmp/zabbix-${ZBX_VERSION}/src/zabbix_get/zabbix_get && \
-    strip /tmp/zabbix-${ZBX_VERSION}/src/zabbix_sender/zabbix_sender && \
-    strip /tmp/zabbix-${ZBX_VERSION}/src/go/bin/zabbix_web_service
+    strip /tmp/zabbix-${ZBX_VERSION}/src/zabbix_sender/zabbix_sender

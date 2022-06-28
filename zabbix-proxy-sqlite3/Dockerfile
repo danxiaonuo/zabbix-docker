@@ -5,7 +5,7 @@
 # zabbix版本号
 ARG MAJOR_VERSION=6.0
 ARG ZBX_VERSION=${MAJOR_VERSION}.6
-ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-mysql:latest
+ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-sqlite3:latest
 
 # 指定创建的基础镜像
 FROM ${BUILD_BASE_IMAGE} as builder
@@ -63,12 +63,18 @@ ARG INSTALL_PKGS="\
     tini \
     fping \
     iputils \
+    libcurl \
+    libevent \
+    libldap \
+    libssh \
+    libxml2 \
     mariadb-client \
     mariadb-connector-c \
     net-snmp-agent-libs \
     net-snmp-tools \
     openipmi-libs \
     pcre2 \
+    sqlite-libs \
     unixodbc"
 ENV INSTALL_PKGS=$INSTALL_PKGS
 
@@ -114,35 +120,47 @@ RUN set -eux && \
                             zabbix && \
     adduser zabbix root && \
     adduser zabbix dialout && \
-    mkdir -p /usr/local/zabbix/etc/zabbix_agentd.conf.d && \
+    mkdir -p /usr/local/zabbix/etc/zabbix_proxy.conf.d && \
+    mkdir -p /usr/local/zabbix/alertscripts && \
     mkdir -p /usr/local/zabbix/enc && \
     mkdir -p /usr/local/zabbix/export && \
     mkdir -p /usr/local/zabbix/scripts && \
+    mkdir -p /usr/local/zabbix/externalscripts && \
+    mkdir -p /usr/local/zabbix/mibs && \
     mkdir -p /usr/local/zabbix/modules && \
-    mkdir -p /usr/local/zabbix/buffer
+    mkdir -p /usr/local/zabbix/snmptraps && \
+    mkdir -p /usr/local/zabbix/ssh_keys && \
+    mkdir -p /usr/local/zabbix/ssl && \
+    mkdir -p /usr/local/zabbix/ssl/certs && \
+    mkdir -p /usr/local/zabbix/ssl/keys && \
+    mkdir -p /usr/local/zabbix/ssl/ssl_ca && \
+    mkdir -p /usr/local/zabbix/share/doc/zabbix-proxy-mysql
 
 # ***** 容器信号处理 *****
 STOPSIGNAL SIGQUIT
 
 # ***** 监听端口 *****
-EXPOSE 10050/TCP 31999/TCP
+EXPOSE 16165/TCP
 
 # ***** 工作目录 *****
 WORKDIR /usr/local/zabbix
 
+# ***** 挂载目录 *****
+VOLUME ["/usr/local/zabbix/snmptraps", "/usr/local/zabbix/export"]
+
 # 拷贝文件
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/go/bin/zabbix_agent2", "/usr/sbin/zabbix_agent2"]
+COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_proxy/zabbix_proxy", "/usr/sbin/zabbix_proxy"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_get/zabbix_get", "/usr/bin/zabbix_get"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_sender/zabbix_sender", "/usr/bin/zabbix_sender"]
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/go/conf/zabbix_agent2.conf", "/usr/local/zabbix/etc/zabbix_agent2.conf"]
-COPY ["./zabbix-agent2/docker-entrypoint.sh", "/usr/bin/"]
+COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/conf/zabbix_proxy.conf", "/usr/local/zabbix/etc/zabbix_proxy.conf"]
+COPY ["./zabbix-proxy/docker-entrypoint.sh", "/usr/bin/"]
 
 # ***** 创建zabbix目录授权 *****
 RUN set -eux && \
     cp -rf /root/.oh-my-zsh /usr/local/zabbix/.oh-my-zsh && \
     cp -rf /root/.zshrc /usr/local/zabbix/.zshrc && \
     sed -i '5s#/root/.oh-my-zsh#/usr/local/zabbix/.oh-my-zsh#' /usr/local/zabbix/.zshrc && \
-    chmod a+x /usr/bin/docker-entrypoint.sh /usr/sbin/zabbix_agent2 /usr/bin/zabbix_get /usr/bin/zabbix_sender && \
+    chmod a+x /usr/bin/docker-entrypoint.sh /usr/sbin/zabbix_proxy /usr/bin/zabbix_get /usr/bin/zabbix_sender && \
     chown --quiet -R zabbix:root /usr/local/zabbix/ && \
     chgrp -R 0 /usr/local/zabbix/ && \
     chmod -R g=u /usr/local/zabbix/ && \
@@ -156,4 +174,4 @@ ENTRYPOINT ["/sbin/tini", "--", "/usr/bin/docker-entrypoint.sh"]
 USER 1997
 
 # ***** 执行命令 *****
-CMD ["/usr/sbin/zabbix_agent2", "--foreground", "-c", "/usr/local/zabbix/etc/zabbix_agent2.conf"]
+CMD ["/usr/sbin/zabbix_proxy", "--foreground", "-c", "/usr/local/zabbix/etc/zabbix_proxy.conf"]
