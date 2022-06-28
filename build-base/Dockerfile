@@ -29,7 +29,7 @@ ENV TERM=xterm \
 ARG PKG_DEPS="\
     zsh \
     bash \
-	bash-doc \
+    bash-doc \
     bash-completion \
     bind-tools \
     iproute2 \
@@ -39,13 +39,11 @@ ARG PKG_DEPS="\
     curl \
     wget \
     lsof \
-	tar \
+    tar \
     zip \
     unzip \
-	sysstat \
+    sysstat \
     sudo \
-    python2 \
-    python2-dev \
     python3 \
     python3-dev \
     go \
