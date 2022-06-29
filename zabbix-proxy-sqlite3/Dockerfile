@@ -118,6 +118,7 @@ RUN set -eux && \
                             zabbix && \
     adduser zabbix root && \
     adduser zabbix dialout && \
+    mkdir -p /usr/local/zabbix/db_data && \
     mkdir -p /usr/local/zabbix/etc/zabbix_proxy.conf.d && \
     mkdir -p /usr/local/zabbix/alertscripts && \
     mkdir -p /usr/local/zabbix/enc && \
@@ -151,7 +152,7 @@ COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_proxy/zabbix_proxy",
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_get/zabbix_get", "/usr/bin/zabbix_get"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_sender/zabbix_sender", "/usr/bin/zabbix_sender"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/conf/zabbix_proxy.conf", "/usr/local/zabbix/etc/zabbix_proxy.conf"]
-COPY ["./zabbix-proxy/docker-entrypoint.sh", "/usr/bin/"]
+COPY ["./zabbix-proxy-sqlite3/docker-entrypoint.sh", "/usr/bin/"]
 
 # ***** 创建zabbix目录授权 *****
 RUN set -eux && \
