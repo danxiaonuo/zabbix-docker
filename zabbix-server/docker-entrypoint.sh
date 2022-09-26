@@ -15,6 +15,9 @@ ZABBIX_USER_HOME_DIR="/usr/local/zabbix"
 # Configuration files directory
 ZABBIX_ETC_DIR="/usr/local/zabbix/etc"
 
+: ${DB_CHARACTER_SET:="utf8mb4"}
+: ${DB_CHARACTER_COLLATE:="utf8mb4_bin"}
+
 # usage: file_env VAR [DEFAULT]
 # as example: file_env 'MYSQL_PASSWORD' 'zabbix'
 #    (will allow for "$MYSQL_PASSWORD_FILE" to fill in the value of "$MYSQL_PASSWORD" from a file)
@@ -143,6 +146,7 @@ check_variables_mysql() {
     file_env MYSQL_USER
     file_env MYSQL_PASSWORD
 
+    file_env MYSQL_ROOT_USER
     file_env MYSQL_ROOT_PASSWORD
 
     if [ ! -n "${MYSQL_USER}" ] && [ "${MYSQL_RANDOM_ROOT_PASSWORD,,}" == "true" ]; then
@@ -157,7 +161,7 @@ check_variables_mysql() {
 
     if [ "${MYSQL_ALLOW_EMPTY_PASSWORD,,}" == "true" ] || [ -n "${MYSQL_ROOT_PASSWORD}" ]; then
         USE_DB_ROOT_USER=true
-        DB_SERVER_ROOT_USER="root"
+        DB_SERVER_ROOT_USER=${MYSQL_ROOT_USER:-"root"}
         DB_SERVER_ROOT_PASS=${MYSQL_ROOT_PASSWORD:-""}
     fi
 
@@ -244,6 +248,28 @@ mysql_query() {
     echo $result
 }
 
+exec_sql_file() {
+    sql_script=$1
+
+    local command="cat"
+
+    ssl_opts="$(db_tls_params)"
+
+    export MYSQL_PWD="${DB_SERVER_ROOT_PASS}"
+
+    if [ "${sql_script: -3}" == ".gz" ]; then
+        command="zcat"
+    fi
+
+    $command "$sql_script" | mysql --silent --skip-column-names \
+            --default-character-set=${DB_CHARACTER_SET} \
+            -h ${DB_SERVER_HOST} -P ${DB_SERVER_PORT} \
+            -u ${DB_SERVER_ROOT_USER} $ssl_opts  \
+            ${DB_SERVER_DBNAME} 1>/dev/null
+
+    unset MYSQL_PWD
+}
+
 create_db_user_mysql() {
     [ "${CREATE_ZBX_DB_USER}" == "true" ] || return
 
@@ -265,12 +291,23 @@ create_db_database_mysql() {
 
     if [ -z ${DB_EXISTS} ]; then
         echo "** Database '${DB_SERVER_DBNAME}' does not exist. Creating..."
-        mysql_query "CREATE DATABASE ${DB_SERVER_DBNAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_bin" 1>/dev/null
+        mysql_query "CREATE DATABASE ${DB_SERVER_DBNAME} CHARACTER SET ${DB_CHARACTER_SET} COLLATE ${DB_CHARACTER_COLLATE}" 1>/dev/null
         # better solution?
         mysql_query "GRANT ALL PRIVILEGES ON $DB_SERVER_DBNAME. * TO '${DB_SERVER_ZBX_USER}'@'%'" 1>/dev/null
     else
         echo "** Database '${DB_SERVER_DBNAME}' already exists. Please be careful with database COLLATE!"
     fi
+}
+
+apply_db_scripts() {
+    db_scripts=$1
+
+    for sql_script in $db_scripts; do
+        [ -e "$sql_script" ] || continue
+        echo "** Processing additional '$sql_script' SQL script"
+
+        exec_sql_file "$sql_script"
+    done
 }
 
 create_db_schema_mysql() {
@@ -284,17 +321,9 @@ create_db_schema_mysql() {
     if [ -z "${ZBX_DB_VERSION}" ]; then
         echo "** Creating '${DB_SERVER_DBNAME}' schema in MySQL"
 
-        ssl_opts="$(db_tls_params)"
+        exec_sql_file "/usr/local/zabbix/share/doc/zabbix-server-mysql/create.sql.gz"
 
-        export MYSQL_PWD="${DB_SERVER_ROOT_PASS}"
-
-        zcat /usr/local/zabbix/share/doc/zabbix-server-mysql/create.sql.gz | mysql --silent --skip-column-names \
-                    --default-character-set=utf8mb4 \
-                    -h ${DB_SERVER_HOST} -P ${DB_SERVER_PORT} \
-                    -u ${DB_SERVER_ROOT_USER} $ssl_opts  \
-                    ${DB_SERVER_DBNAME} 1>/dev/null
-
-        unset MYSQL_PWD
+        apply_db_scripts "/usr/local/zabbix/dbscripts/*.sql"
     fi
 }
 
@@ -363,6 +392,7 @@ update_zbx_config() {
     update_config_var $ZBX_CONFIG "StartDiscoverers" "${ZBX_STARTDISCOVERERS}"
     update_config_var $ZBX_CONFIG "StartHistoryPollers" "${ZBX_STARTHISTORYPOLLERS}"
     update_config_var $ZBX_CONFIG "StartHTTPPollers" "${ZBX_STARTHTTPPOLLERS}"
+    update_config_var $ZBX_CONFIG "StartODBCPollers" "${ZBX_STARTODBCPOLLERS}"
 
     update_config_var $ZBX_CONFIG "StartPreprocessors" "${ZBX_STARTPREPROCESSORS}"
     update_config_var $ZBX_CONFIG "StartTimers" "${ZBX_STARTTIMERS}"

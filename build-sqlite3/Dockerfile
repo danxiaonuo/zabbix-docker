@@ -4,7 +4,7 @@
 #
 # zabbix版本号
 ARG MAJOR_VERSION=6.0
-ARG ZBX_VERSION=${MAJOR_VERSION}.6
+ARG ZBX_VERSION=${MAJOR_VERSION}.9
 ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-base:latest
 
 # 指定创建的基础镜像
@@ -54,7 +54,8 @@ RUN set -eux && \
     sed -i "s/{ZABBIX_REVISION}/$zabbix_revision/g" src/zabbix_java/src/com/zabbix/gateway/GeneralInformation.java && \
     sed -i s#1000#100000#g include/proxy.h && \
     ./bootstrap.sh && \
-    export CFLAGS="-fPIC -pie -Wl,-z,relro -Wl,-z,now" && \
+    export CFLAGS="-fPIC -pie -Wl,-z,relro,-z,now,-z,defs" && \
+    export CFLAGS="$CFLAGS -D_FORTIFY_SOURCE=2 -fexceptions -O2 -pipe" && \
     ./configure \
             --prefix=/usr/local/zabbix \
             --enable-agent \

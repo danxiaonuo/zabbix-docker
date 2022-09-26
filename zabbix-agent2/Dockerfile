@@ -4,7 +4,7 @@
 #
 # zabbix版本号
 ARG MAJOR_VERSION=6.0
-ARG ZBX_VERSION=${MAJOR_VERSION}.6
+ARG ZBX_VERSION=${MAJOR_VERSION}.9
 ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-mysql:latest
 
 # 指定创建的基础镜像
@@ -67,6 +67,8 @@ ARG INSTALL_PKGS="\
     net-snmp-tools \
     openipmi-libs \
     pcre2 \
+    coreutils \
+    smartmontools \
     unixodbc"
 ENV INSTALL_PKGS=$INSTALL_PKGS
 
@@ -133,6 +135,7 @@ COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/go/bin/zabbix_agent2", "/us
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_get/zabbix_get", "/usr/bin/zabbix_get"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_sender/zabbix_sender", "/usr/bin/zabbix_sender"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/go/conf/zabbix_agent2.conf", "/usr/local/zabbix/etc/zabbix_agent2.conf"]
+COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/go/conf/zabbix_agent2.d/plugins.d", "/usr/local/zabbix/etc/zabbix_agent2.d/plugins.d"]
 COPY ["./zabbix-agent2/docker-entrypoint.sh", "/usr/bin/"]
 
 # ***** 创建zabbix目录授权 *****

@@ -213,9 +213,10 @@ update_zbx_config() {
 
     update_config_var $ZBX_CONFIG "AlertScriptsPath" "${ZABBIX_USER_HOME_DIR}/alertscripts"
     update_config_var $ZBX_CONFIG "ExternalScripts" "${ZABBIX_USER_HOME_DIR}/externalscripts"
+	  update_config_var $ZBX_CONFIG "Include" "$ZABBIX_ETC_DIR/zabbix_proxy.conf.d/*.conf"
 
     update_config_var $ZBX_CONFIG "FpingLocation" "/usr/sbin/fping"
-    update_config_var $ZBX_CONFIG "Fping6Location"
+    update_config_var $ZBX_CONFIG "Fping6Location" "/usr/sbin/fping6"
 
     update_config_var $ZBX_CONFIG "SSHKeyLocation" "$ZABBIX_USER_HOME_DIR/ssh_keys"
     update_config_var $ZBX_CONFIG "LogSlowQueries" "${ZBX_LOGSLOWQUERIES}"
