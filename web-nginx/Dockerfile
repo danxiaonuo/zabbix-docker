@@ -182,7 +182,7 @@ RUN set -eux && \
    /bin/zsh
 
 # ***** 容器信号处理 *****
- STOPSIGNAL SIGQUIT
+STOPSIGNAL SIGQUIT
 
 # ***** 监听端口 *****
 EXPOSE 80/TCP 443/TCP
