@@ -160,9 +160,9 @@ RUN set -eux && \
     cp -rf /root/.zshrc /usr/local/zabbix/.zshrc && \
     sed -i '5s#/root/.oh-my-zsh#/usr/local/zabbix/.oh-my-zsh#' /usr/local/zabbix/.zshrc && \
     chmod a+x /usr/bin/docker-entrypoint.sh /usr/sbin/zabbix_server /usr/bin/zabbix_get /usr/bin/zabbix_sender && \
-    chown --quiet -R zabbix:root /usr/local/zabbix/ && \
-    chgrp -R 0 /usr/local/zabbix/ && \
-    chmod -R g=u /usr/local/zabbix/ && \
+    sudo chown --quiet -R zabbix:root /usr/local/zabbix/ && \
+    sudo chgrp -R 0 /usr/local/zabbix/ && \
+    sudo chmod -R g=u /usr/local/zabbix/ && \
     ln -sf /usr/sbin/fping /usr/sbin/fping6 && \
     rm -rf /var/cache/apk/*
 
