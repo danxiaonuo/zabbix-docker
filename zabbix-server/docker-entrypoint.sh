@@ -527,8 +527,8 @@ prepare_server() {
     create_db_user_mysql
     create_db_database_mysql
     create_db_schema_mysql
-
     update_zbx_config
+    sudo chown --quiet -R zabbix:root $ZABBIX_USER_HOME_DIR
 }
 
 #################################################
