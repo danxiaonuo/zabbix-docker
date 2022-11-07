@@ -133,7 +133,7 @@ prepare_zbx_agent_config() {
     update_config_var $ZBX_AGENT_CONFIG "LogFileSize"
     update_config_var $ZBX_AGENT_CONFIG "DebugLevel" "${ZBX_DEBUGLEVEL}"
     update_config_var $ZBX_AGENT_CONFIG "SourceIP"
-    update_config_var $ZBX_AGENT_CONFIG "LogRemoteCommands" "${ZBX_LOGREMOTECOMMANDS}"
+    update_config_var $ZBX_AGENT_CONFIG "Plugins.SystemRun.LogRemoteCommands" "${ZBX_LOGREMOTECOMMANDS}"
 
     : ${ZBX_PASSIVE_ALLOW:="true"}
     if [ "${ZBX_PASSIVE_ALLOW,,}" == "true" ]; then
@@ -176,7 +176,7 @@ prepare_zbx_agent_config() {
     update_config_var $ZBX_AGENT_CONFIG "RefreshActiveChecks" "${ZBX_REFRESHACTIVECHECKS}"
     update_config_var $ZBX_AGENT_CONFIG "BufferSend" "${ZBX_BUFFERSEND}"
     update_config_var $ZBX_AGENT_CONFIG "BufferSize" "${ZBX_BUFFERSIZE}"
-    update_config_var $ZBX_AGENT_CONFIG "MaxLinesPerSecond" "${ZBX_MAXLINESPERSECOND}"
+    update_config_var $ZBX_AGENT_CONFIG "Plugins.Log.MaxLinesPerSecond" "${ZBX_MAXLINESPERSECOND}"
     # Please use include to enable Alias feature
     # update_config_multiple_var $ZBX_AGENT_CONFIG "Alias" ${ZBX_ALIAS}
     update_config_var $ZBX_AGENT_CONFIG "Timeout" "${ZBX_TIMEOUT}"
