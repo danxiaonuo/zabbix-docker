@@ -11,7 +11,7 @@ fi
 
 # Default Zabbix installation name
 # Default Zabbix server host
-: ${ZBX_SERVER_HOST:="zabbix-server"}
+: ${ZBX_SERVER_HOST:="0.0.0.0/0"}
 # Default Zabbix server port number
 : ${ZBX_SERVER_PORT:="16168"}
 
@@ -117,15 +117,10 @@ prepare_zbx_agent_config() {
     ZBX_AGENT_CONFIG=$ZABBIX_ETC_DIR/zabbix_agent2.conf
 
     : ${ZBX_PASSIVESERVERS:=""}
-    : ${ZBX_ACTIVESERVERS:=""}
 
     [ -n "$ZBX_PASSIVESERVERS" ] && ZBX_PASSIVESERVERS=","$ZBX_PASSIVESERVERS
 
     ZBX_PASSIVESERVERS=$ZBX_SERVER_HOST$ZBX_PASSIVESERVERS
-
-    [ -n "$ZBX_ACTIVESERVERS" ] && ZBX_ACTIVESERVERS=","$ZBX_ACTIVESERVERS
-
-    ZBX_ACTIVESERVERS=$ZBX_SERVER_HOST":"$ZBX_SERVER_PORT$ZBX_ACTIVESERVERS
 
     update_config_var $ZBX_AGENT_CONFIG "PidFile"
     update_config_var $ZBX_AGENT_CONFIG "LogType" "console"
