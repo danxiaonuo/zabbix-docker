@@ -99,7 +99,7 @@ RUN set -eux && \
 RUN set -eux && \
     python3 -m ensurepip && \
     rm -r /usr/lib/python*/ensurepip && \
-    pip3 install --upgrade pip setuptools wheel pycryptodome lxml cython beautifulsoup4 && \
+    pip3 install --upgrade pip setuptools wheel pycryptodome lxml cython beautifulsoup4 redis pymysql && \
     if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip ; fi && \
     if [[ ! -e /usr/bin/python ]]; then ln -sf /usr/bin/python3 /usr/bin/python; fi && \
     rm -r /root/.cache
