@@ -54,6 +54,7 @@ ARG PKG_DEPS="\
     python3-dev \
     go \
     jq \
+    dmidecode \
     ca-certificates"
 ENV PKG_DEPS=$PKG_DEPS
 
@@ -96,7 +97,7 @@ RUN set -eux && \
 RUN set -eux && \
     python3 -m ensurepip && \
     rm -r /usr/lib/python*/ensurepip && \
-    pip3 install --upgrade pip setuptools wheel pycryptodome lxml cython beautifulsoup4 && \
+    pip3 install --upgrade pip setuptools wheel pycryptodome lxml cython beautifulsoup4 requests && \
     if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip ; fi && \
     if [[ ! -e /usr/bin/python ]]; then ln -sf /usr/bin/python3 /usr/bin/python; fi && \
     rm -r /root/.cache
@@ -137,6 +138,8 @@ COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_sender/zabbix_sender
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/go/conf/zabbix_agent2.conf", "/usr/local/zabbix/etc/zabbix_agent2.conf"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/go/conf/zabbix_agent2.d/plugins.d", "/usr/local/zabbix/etc/zabbix_agent2.d/plugins.d"]
 COPY ["./zabbix-agent2/docker-entrypoint.sh", "/usr/bin/"]
+COPY ["./zabbix-agent2/scripts/", "/usr/local/zabbix/scripts/"]
+COPY ["./zabbix-agent2/zabbix_agentd.conf.d/", "/usr/local/zabbix/etc/zabbix_agentd.conf.d/"]
 
 # ***** 创建zabbix目录授权 *****
 RUN set -eux && \
