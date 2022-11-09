@@ -9,7 +9,7 @@ fi
 
 ProgramPath="/usr/local/zabbix"
 CONFIGFILE=${ProgramPath}/etc/zabbix_agent2.conf
-zbx_sender='/usr/local/zabbix/bin/zabbix_sender'
+zbx_sender='zabbix_sender'
 x=0.7
 nf_conntrack_max=$(cat /proc/sys/net/nf_conntrack_max)
 nf_conntrack_number=$(cat /proc/sys/net/netfilter/nf_conntrack_count)
