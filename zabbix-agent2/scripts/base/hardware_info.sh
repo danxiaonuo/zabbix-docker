@@ -2,7 +2,7 @@
 
 ProgramPath="/usr/local/zabbix"
 CONFIGFILE=${ProgramPath}/etc/zabbix_agent2.conf
-zbx_sender='/usr/local/zabbix/bin/zabbix_sender'
+zbx_sender='zabbix_sender'
 
 processName="hardware_info.sh"
 processNum=$(ps -aef | grep -v sudo | grep "${processName}" | grep -v grep | wc -l)
