@@ -51,7 +51,7 @@ senderhostname = execute_cmd(zbx_ip)['stdout'].strip()
 drop_list = ['systemd','dnsmasq','cupsd','smtpd','master','^.*:95','ssh.*']
 drop_str = "|".join(drop_list)
 # 获取端口列表
-port_cmd = (""" for port in $(ss -atunlp | grep -v grep | grep LISTEN | egrep -vw '%s' | sed "s#::#FF#g" | egrep -v '(ffff)' | grep users | sort -u | uniq | awk '{print $5,$NF}' | awk -F "[ :]+" '{print $2,$NF}' | awk '{if(length($2)>1) print $0}' | awk -F '[=,()" ]+' '{print $1}' | sort -u | uniq);do curl -s --max-time 1 --insecure http://127.0.0.1:$port -o /dev/null && echo $port;done """ % (drop_str))
+port_cmd = (""" for port in $(ps -aux | grep -i 'ss -atunlp' | grep -v grep >/dev/null 2>&1 || ss -atunlp | grep -v grep | grep LISTEN | egrep -vw '%s' | sed "s#::#FF#g" | egrep -v '(ffff)' | grep users | sort -u | uniq | awk '{print $5,$NF}' | awk -F "[ :]+" '{print $2,$NF}' | awk '{if(length($2)>1) print $0}' | awk -F '[=,()" ]+' '{print $1}' | sort -u | uniq);do curl -s --max-time 1 --insecure http://127.0.0.1:$port -o /dev/null && echo $port;done """ % (drop_str))
 port_lists = execute_cmd(port_cmd)['stdout'].strip().split("\n")
 # 获取pid信息
 pidstat_cmd = execute_cmd("which pidstat")['stdout'].strip()
