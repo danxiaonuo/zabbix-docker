@@ -38,7 +38,7 @@ services:
       # 数据目录
       - ./zbx_env/data/mysql:/var/lib/mysql:rwx,cached
       # 配置目录与文件
-      - ./conf/mysql/my.cnf:/etc/mysql/conf.d/my.cnf:rw,cached
+      - ./conf/mysql/my.cnf:/etc/mysql/my.cnf:rw,cached
       # 同步宿主机时区与时间
       - /usr/share/zoneinfo:/usr/share/zoneinfo:ro,cached
       - /etc/localtime:/etc/localtime:ro,cached
