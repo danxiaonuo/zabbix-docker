@@ -17,7 +17,7 @@ ENV LANG=$LANG
 # zabbix版本号
 ARG MAJOR_VERSION=6.0
 ENV MAJOR_VERSION=$MAJOR_VERSION
-ARG ZBX_VERSION=${MAJOR_VERSION}.6
+ARG ZBX_VERSION=${MAJOR_VERSION}.14
 ENV ZBX_VERSION=$ZBX_VERSION
 
 # 环境
@@ -66,6 +66,7 @@ ARG INSTALL_PKGS="\
     openipmi-dev \
     openldap-dev \
     openssl-dev \
+    patch \
     pcre2-dev \
     postgresql-dev \
     openjdk8 \

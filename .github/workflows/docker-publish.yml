@@ -162,6 +162,73 @@ jobs:
           retain_days: 1
           keep_minimum_runs: 1    #保留多少个workflow不删除
           
+  zabbix-build-pgsql:
+    # 依赖环境
+    needs: [ zabbix-build-base ]
+    # 选择虚拟环境
+    runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - DOCKER_TAG: latest
+
+    # 运行步骤
+    steps:
+
+      # 检出master分支
+      - name: 检出各个模块代码
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 安装 QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: all
+
+      - name: 安装 docker buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          version: latest
+
+      - name: 登录 DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: 构建镜像并发布
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./build-pgsql/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-build-pgsql:${{ matrix.DOCKER_TAG }}
+
+      - name: 上传至阿里云
+        id: buildAndPushImage
+        uses: risfeng/docker-image-build-push-action@v1.0
+        with:
+          registry_url: 'registry.cn-hongkong.aliyuncs.com'
+          namespaces: 'danxiaonuo'
+          repository_name: 'zabbix-build-pgsql'
+          user_name: ${{ secrets.ALIYUN_USERNAME }}
+          password: ${{ secrets.ALIYUN_PASSWORD }}
+          image_version: ${{ matrix.DOCKER_TAG }}
+          docker_file: 'build-pgsql/.'
+
+
+      - name: 删除旧的GitHub-workflow
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          repository: ${{ github.repository }}
+          retain_days: 1
+          keep_minimum_runs: 1    #保留多少个workflow不删除
+          
   zabbix-build-sqlite3:
     # 依赖环境
     needs: [ zabbix-build-base ]
@@ -229,7 +296,7 @@ jobs:
           retain_days: 1
           keep_minimum_runs: 1    #保留多少个workflow不删除
 
-  zabbix-server:
+  zabbix-server-mysql:
     # 依赖环境
     needs: [ zabbix-build-mysql ]
     # 选择虚拟环境
@@ -271,10 +338,10 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: ./zabbix-server/Dockerfile
+          file: ./zabbix-server-mysql/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-server:${{ matrix.DOCKER_TAG }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-server-mysql:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -282,11 +349,78 @@ jobs:
         with:
           registry_url: 'registry.cn-hongkong.aliyuncs.com'
           namespaces: 'danxiaonuo'
-          repository_name: 'zabbix-server'
+          repository_name: 'zabbix-server-mysql'
           user_name: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
           image_version: ${{ matrix.DOCKER_TAG }}
-          docker_file: 'zabbix-server/.'
+          docker_file: 'zabbix-server-mysql/.'
+
+
+      - name: 删除旧的GitHub-workflow
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          repository: ${{ github.repository }}
+          retain_days: 1
+          keep_minimum_runs: 1    #保留多少个workflow不删除
+          
+  zabbix-server-pgsql:
+    # 依赖环境
+    needs: [ zabbix-build-pgsql ]
+    # 选择虚拟环境
+    runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - DOCKER_TAG: latest
+
+    # 运行步骤
+    steps:
+
+      # 检出master分支
+      - name: 检出各个模块代码
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 安装 QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: all
+
+      - name: 安装 docker buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          version: latest
+
+      - name: 登录 DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: 构建镜像并发布
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./zabbix-server-pgsql/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-server-pgsql:${{ matrix.DOCKER_TAG }}
+
+      - name: 上传至阿里云
+        id: buildAndPushImage
+        uses: risfeng/docker-image-build-push-action@v1.0
+        with:
+          registry_url: 'registry.cn-hongkong.aliyuncs.com'
+          namespaces: 'danxiaonuo'
+          repository_name: 'zabbix-server-pgsql'
+          user_name: ${{ secrets.ALIYUN_USERNAME }}
+          password: ${{ secrets.ALIYUN_PASSWORD }}
+          image_version: ${{ matrix.DOCKER_TAG }}
+          docker_file: 'zabbix-server-pgsql/.'
 
 
       - name: 删除旧的GitHub-workflow
@@ -562,7 +696,7 @@ jobs:
           retain_days: 1
           keep_minimum_runs: 1    #保留多少个workflow不删除
 
-  zabbix-web-nginx:
+  zabbix-web-nginx-mysql:
     # 依赖环境
     needs: [ zabbix-build-mysql ]
     # 选择虚拟环境
@@ -604,10 +738,10 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: ./web-nginx/Dockerfile
+          file: ./web-nginx-mysql/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-web-nginx:${{ matrix.DOCKER_TAG }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-web-nginx-mysql:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -615,11 +749,77 @@ jobs:
         with:
           registry_url: 'registry.cn-hongkong.aliyuncs.com'
           namespaces: 'danxiaonuo'
-          repository_name: 'zabbix-web-nginx'
+          repository_name: 'zabbix-web-nginx-mysql'
           user_name: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
           image_version: ${{ matrix.DOCKER_TAG }}
-          docker_file: 'web-nginx/.'
+          docker_file: 'web-nginx-mysql/.'
+
+      - name: 删除旧的GitHub-workflow
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          repository: ${{ github.repository }}
+          retain_days: 1
+          keep_minimum_runs: 1    #保留多少个workflow不删除
+          
+  zabbix-web-nginx-pgsql:
+    # 依赖环境
+    needs: [ zabbix-build-pgsql ]
+    # 选择虚拟环境
+    runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - DOCKER_TAG: latest
+
+    # 运行步骤
+    steps:
+
+      # 检出master分支
+      - name: 检出各个模块代码
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 安装 QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: all
+
+      - name: 安装 docker buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          version: latest
+
+      - name: 登录 DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: 构建镜像并发布
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./web-nginx-pgsql/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-web-nginx-pgsql:${{ matrix.DOCKER_TAG }}
+
+      - name: 上传至阿里云
+        id: buildAndPushImage
+        uses: risfeng/docker-image-build-push-action@v1.0
+        with:
+          registry_url: 'registry.cn-hongkong.aliyuncs.com'
+          namespaces: 'danxiaonuo'
+          repository_name: 'zabbix-web-nginx-pgsql'
+          user_name: ${{ secrets.ALIYUN_USERNAME }}
+          password: ${{ secrets.ALIYUN_PASSWORD }}
+          image_version: ${{ matrix.DOCKER_TAG }}
+          docker_file: 'web-nginx-pgsql/.'
 
       - name: 删除旧的GitHub-workflow
         uses: Mattraks/delete-workflow-runs@v2

@@ -11,8 +11,6 @@ fi
 
 # Default Zabbix server host
 : ${ZBX_SERVER_HOST:="zabbix-server"}
-# Default Zabbix server port number
-: ${ZBX_SERVER_PORT:="16168"}
 
 # Default directories
 # User 'zabbix' home directory
@@ -139,7 +137,13 @@ update_zbx_config() {
     update_config_var $ZBX_CONFIG "LogRemoteCommands" "${ZBX_LOGREMOTECOMMANDS}"
 
     update_config_var $ZBX_CONFIG "DBHost"
-    update_config_var $ZBX_CONFIG "DBName" "${ZABBIX_USER_HOME_DIR}/db_data/${ZBX_HOSTNAME:-"zabbix-proxy-sqlite3"}.sqlite"
+	: ${ZBX_USE_NODE_NAME_AS_DB_NAME:="false"}
+    if [ "${ZBX_USE_NODE_NAME_AS_DB_NAME,,}" == "false" ]; then
+        update_config_var $ZBX_CONFIG "DBName" "${ZABBIX_USER_HOME_DIR}/db_data/${ZBX_HOSTNAME:-"zabbix-proxy-sqlite3"}.sqlite"
+    else
+        node_name=$(uname -n)
+        update_config_var $ZBX_CONFIG "DBName" "${ZABBIX_USER_HOME_DIR}/db_data/${ZBX_HOSTNAME:-"zabbix-proxy-sqlite3"}.sqlite"
+    fi
     update_config_var $ZBX_CONFIG "DBUser"
     update_config_var $ZBX_CONFIG "DBPort"
     update_config_var $ZBX_CONFIG "DBPassword"

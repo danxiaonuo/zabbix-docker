@@ -4,7 +4,7 @@
 #
 # zabbix版本号
 ARG MAJOR_VERSION=6.0
-ARG ZBX_VERSION=${MAJOR_VERSION}.6
+ARG ZBX_VERSION=${MAJOR_VERSION}.14
 ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-mysql:latest
 
 # 指定创建的基础镜像
@@ -29,7 +29,7 @@ ARG ZBX_SOURCES=https://git.zabbix.com/scm/zbx/zabbix.git
 
 ENV TERM=xterm \
     ZBX_VERSION=${ZBX_VERSION} ZBX_SOURCES=${ZBX_SOURCES} \
-    MIBDIRS=/usr/share/snmp/mibs:/usr/local/zabbix/mibs MIBS=+ALL
+    PATH=${PATH}:/usr/lib/jvm/default-jvm/bin/ JAVA_HOME=/usr/lib/jvm/default-jvm
 
 # 安装依赖包
 ARG PKG_DEPS="\
