@@ -36,13 +36,13 @@ ${zbx_sender} -c ${CONFIGFILE} -k "baseboard.version" -o $(sudo dmidecode -s bas
 ${zbx_sender} -c ${CONFIGFILE} -k "baseboard.serial.number" -o $(sudo dmidecode -s baseboard-serial-number | sed "/^#/d") >/dev/null 2>&1
 
 # 获取操作系统名称
-${zbx_sender} -c ${CONFIGFILE} -k "os.name" -o $(uname -s | sed "/^#/d") >/dev/null 2>&1
+${zbx_sender} -c ${CONFIGFILE} -k "os.name" -o $(python2 -c "import platform;print(platform.linux_distribution()[0])" | sed "/^#/d") >/dev/null 2>&1
 
 # 获取操作系统类型
 ${zbx_sender} -c ${CONFIGFILE} -k "os.type" -o $(uname -o | sed "/^#/d") >/dev/null 2>&1
 
 # 获取操作系统版本
-${zbx_sender} -c ${CONFIGFILE} -k "os.version" -o $(find /etc -iname "redhat-release" -or -iname "os-release" | xargs cat | awk -F'"'+ '/VERSION_ID=/{print $2}' | sed "/^#/d") >/dev/null 2>&1
+${zbx_sender} -c ${CONFIGFILE} -k "os.version" -o $(python2 -c "import platform;print(platform.linux_distribution()[1])" | sed "/^#/d") >/dev/null 2>&1
 
 # 获取CPU型号
 ${zbx_sender} -c ${CONFIGFILE} -k "cpu.module" -o "$(cat /proc/cpuinfo | awk -F': '+ '/model name/{print $2}' | uniq | sed "/^#/d")" >/dev/null 2>&1
