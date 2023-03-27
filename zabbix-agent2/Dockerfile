@@ -137,6 +137,10 @@ COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_get/zabbix_get", "/u
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_sender/zabbix_sender", "/usr/bin/zabbix_sender"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/go/conf/zabbix_agent2.conf", "/usr/local/zabbix/etc/zabbix_agent2.conf"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/go/conf/zabbix_agent2.d/plugins.d", "/usr/local/zabbix/etc/zabbix_agent2.d/plugins.d"]
+COPY --from=builder ["/tmp/mongodb_plugin/mongodb.conf", "/usr/local/zabbix/etc/zabbix_agent2.d/plugins.d/mongodb.conf"]
+COPY --from=builder ["/tmp/postgresql_plugin/postgresql.conf", "/usr/local/zabbix/etc/zabbix_agent2.d/plugins.d/postgresql.conf"]
+COPY --from=builder ["/tmp/mongodb_plugin/zabbix-agent2-plugin-mongodb", "/usr/sbin/zabbix-agent2-plugin/zabbix-agent2-plugin-mongodb"]
+COPY --from=builder ["/tmp/postgresql_plugin/zabbix-agent2-plugin-postgresql", "/usr/sbin/zabbix-agent2-plugin/zabbix-agent2-plugin-postgresql"]
 COPY ["./zabbix-agent2/docker-entrypoint.sh", "/usr/bin/"]
 COPY ["./zabbix-agent2/scripts/", "/usr/local/zabbix/scripts/"]
 COPY ["./zabbix-agent2/zabbix_agentd.conf.d/", "/usr/local/zabbix/etc/zabbix_agentd.conf.d/"]
@@ -147,9 +151,9 @@ RUN set -eux && \
     cp -rf /root/.zshrc /usr/local/zabbix/.zshrc && \
     sed -i '5s#/root/.oh-my-zsh#/usr/local/zabbix/.oh-my-zsh#' /usr/local/zabbix/.zshrc && \
     chmod a+x /usr/bin/docker-entrypoint.sh /usr/sbin/zabbix_agent2 /usr/bin/zabbix_get /usr/bin/zabbix_sender && \
-    chown --quiet -R zabbix:root /usr/local/zabbix/ && \
-    chgrp -R 0 /usr/local/zabbix/ && \
-    chmod -R g=u /usr/local/zabbix/ && \
+    chown --quiet -R zabbix:root /usr/local/zabbix/ /usr/sbin/zabbix-agent2-plugin/ && \
+    chgrp -R 0 /usr/local/zabbix/ /usr/sbin/zabbix-agent2-plugin/ && \
+    chmod -R g=u /usr/local/zabbix/ /usr/sbin/zabbix-agent2-plugin/ && \
     ln -sf /usr/sbin/fping /usr/sbin/fping6 && \
     rm -rf /var/cache/apk/*
 
