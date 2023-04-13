@@ -46,3 +46,6 @@ ${zbx_sender} -c ${CONFIGFILE} -k "os.version" -o "$(python2 -c "import platform
 
 # 获取CPU型号
 ${zbx_sender} -c ${CONFIGFILE} -k "cpu.module" -o "$(cat /proc/cpuinfo | awk -F': '+ '/model name/{print $2}' | uniq | sed "/^#/d")" >/dev/null 2>&1
+
+# 获取硬盘容量
+${zbx_sender} -c ${CONFIGFILE} -k "disk.capacity" -o "$(df -h --total | awk '/total/{print $2}' | sed "/^#/d")" >/dev/null 2>&1
