@@ -529,11 +529,16 @@ prepare_db() {
     create_db_schema_mysql
 }
 
+prepare_permissions() {
+   sudo chown -R zabbix:zabbix /usr/local/zabbix && sudo chmod -R 775 /usr/local/zabbix
+}
+
 prepare_server() {
     echo "** Preparing Zabbix server"
 
     prepare_db
     update_zbx_config
+    prepare_permissions
 }
 
 #################################################

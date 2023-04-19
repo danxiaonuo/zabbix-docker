@@ -200,10 +200,15 @@ prepare_zbx_agent_plugin_config() {
     update_config_var "$ZABBIX_ETC_DIR/zabbix_agent2.d/plugins.d/postgresql.conf" "Plugins.PostgreSQL.System.Path" "/usr/sbin/zabbix-agent2-plugin/zabbix-agent2-plugin-postgresql"
 }
 
+prepare_permissions() {
+   sudo chown -R zabbix:zabbix /usr/local/zabbix && sudo chmod -R 775 /usr/local/zabbix
+}
+
 prepare_agent() {
     echo "** Preparing Zabbix agent"
     prepare_zbx_agent_config
     prepare_zbx_agent_plugin_config
+    prepare_permissions
 }
 
 #################################################
