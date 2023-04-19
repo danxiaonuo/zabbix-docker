@@ -1,10 +1,10 @@
 #!/bin/bash
 # description:判断跟踪表值是否超过70%
 processName="check_nf_conntrack.sh"
-processNum=$(ps -aef | grep -v sudo | grep "${processName}" | grep -v grep | wc -l)
- 
-if [ "${processNum}" -gt "2" ]; then
-  exit 1
+processNum=$(ps -aef | grep -i "${processName}" | grep -v grep | wc -l)
+
+if [ "${processNum}" -gt "5" ]; then
+    exit 1
 fi
 
 ProgramPath="/usr/local/zabbix"
