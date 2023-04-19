@@ -2,10 +2,10 @@
 # description:监控用户登录失败多次告警
 
 processName="check_failed.sh"
-processNum=$(ps -aef | grep -v sudo | grep "${processName}" | grep -v grep | wc -l)
+processNum=$(ps -aef | grep -i "${processName}" | grep -v grep | wc -l)
 
-if [ "${processNum}" -gt "2" ]; then
-  exit 1
+if [ "${processNum}" -gt "5" ]; then
+    exit 1
 fi
 
 
