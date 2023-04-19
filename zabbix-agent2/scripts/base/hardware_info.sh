@@ -5,10 +5,10 @@ CONFIGFILE=${ProgramPath}/etc/zabbix_agent2.conf
 zbx_sender='zabbix_sender'
 
 processName="hardware_info.sh"
-processNum=$(ps -aef | grep -v sudo | grep "${processName}" | grep -v grep | wc -l)
- 
-if [ "${processNum}" -gt "2" ]; then
-  exit 1
+processNum=$(ps -aef | grep -i "${processName}" | grep -v grep | wc -l)
+
+if [ "${processNum}" -gt "5" ]; then
+    exit 1
 fi
 
 # 获取服务器厂家
