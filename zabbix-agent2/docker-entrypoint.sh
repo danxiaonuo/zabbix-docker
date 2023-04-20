@@ -207,7 +207,7 @@ prepare_permissions() {
 prepare_agent() {
     echo "** Preparing Zabbix agent"
     prepare_zbx_agent_config
-    prepare_zbx_agent_plugin_config
+    # prepare_zbx_agent_plugin_config
     prepare_permissions
 }
 
