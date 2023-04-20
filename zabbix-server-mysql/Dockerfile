@@ -54,6 +54,7 @@ ARG PKG_DEPS="\
     python3-dev \
     go \
     jq \
+    util-linux \
     ca-certificates"
 ENV PKG_DEPS=$PKG_DEPS
 
@@ -104,6 +105,8 @@ RUN set -eux && \
     pip3 install --upgrade pip setuptools wheel pycryptodome lxml cython beautifulsoup4 redis pymysql && \
     if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip ; fi && \
     if [[ ! -e /usr/bin/python ]]; then ln -sf /usr/bin/python3 /usr/bin/python; fi && \
+    pip3 config set global.index-url http://mirrors.aliyun.com/pypi/simple/ && \
+    pip3 config set install.trusted-host mirrors.aliyun.com && \
     rm -r /root/.cache
 
 # ***** 创建zabbix用户和相关目录 *****
