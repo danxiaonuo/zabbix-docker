@@ -175,7 +175,7 @@ prepare_zbx_agent_config() {
     # Please use include to enable Alias feature
     # update_config_multiple_var $ZBX_AGENT_CONFIG "Alias" ${ZBX_ALIAS}
     update_config_var $ZBX_AGENT_CONFIG "Timeout" "${ZBX_TIMEOUT}"
-    update_config_var $ZBX_AGENT_CONFIG "Include" "$ZABBIX_ETC_DIR/zabbix_agentd.conf.d/*.conf" "true"
+    update_config_var $ZBX_AGENT_CONFIG "Include" "$ZABBIX_ETC_DIR/zabbix_agentd.conf.d/*.conf"
     update_config_var $ZBX_AGENT_CONFIG "Include" "$ZABBIX_ETC_DIR/zabbix_agent2.d/plugins.d/*.conf"
     update_config_var $ZBX_AGENT_CONFIG "UnsafeUserParameters" "${ZBX_UNSAFEUSERPARAMETERS}"
     update_config_var $ZBX_AGENT_CONFIG "TLSConnect" "${ZBX_TLSCONNECT}"
