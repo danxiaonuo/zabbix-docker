@@ -118,13 +118,6 @@ check_db_connect() {
 prepare_zbx_web_config() {
     echo "** Preparing Zabbix frontend configuration file"
 
-    if [ "$(id -u)" == '0' ]; then
-        echo "user = zabbix" >> "$PHP_CONFIG_FILE"
-        echo "group = zabbix" >> "$PHP_CONFIG_FILE"
-        echo "listen.owner = nginx" >> "$PHP_CONFIG_FILE"
-        echo "listen.group = nginx" >> "$PHP_CONFIG_FILE"
-    fi
-
     : ${ZBX_DENY_GUI_ACCESS:="false"}
     export ZBX_DENY_GUI_ACCESS=${ZBX_DENY_GUI_ACCESS,,}
     export ZBX_GUI_ACCESS_IP_RANGE=${ZBX_GUI_ACCESS_IP_RANGE:-"['127.0.0.1']"}
