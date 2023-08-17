@@ -68,8 +68,8 @@ ARG PATH=/data/php/bin:$PATH
 ENV PATH=$PATH
 
 ARG PKG_DEPS="\
-    mariadb-client \
-    mariadb-connector-c \
+    postgresql-client \
+    postgresql-libs \
     supervisor \
     zsh \
     bash \
