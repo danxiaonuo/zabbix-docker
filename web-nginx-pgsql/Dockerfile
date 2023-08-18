@@ -158,6 +158,9 @@ ARG PHP_BUILD_DEPS="\
     openldap-dev \
     oniguruma-dev \
     tidyhtml-dev \
+    postgresql-client \
+    postgresql-libs \
+    libpq-dev \
     libzip-dev"
 ENV PHP_BUILD_DEPS=$PHP_BUILD_DEPS
 
