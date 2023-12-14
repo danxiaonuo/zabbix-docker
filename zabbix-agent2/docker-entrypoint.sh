@@ -149,6 +149,8 @@ prepare_zbx_agent_config() {
         update_config_var $ZBX_AGENT_CONFIG "ServerActive"
     fi
 
+    update_config_var $ZBX_AGENT_CONFIG "ForceActiveChecksOnStart" "${ZBX_FORCEACTIVECHECKSONSTART}"
+
     if [ "${ZBX_ENABLEPERSISTENTBUFFER,,}" == "true" ]; then
         update_config_var $ZBX_AGENT_CONFIG "EnablePersistentBuffer" "1"
         update_config_var $ZBX_AGENT_CONFIG "PersistentBufferFile" "$ZABBIX_USER_HOME_DIR/buffer/agent2.db"

@@ -55,38 +55,26 @@ file_env() {
 
 # Check prerequisites for MySQL database
 check_variables() {
-    : ${DB_SERVER_HOST:="mysql-server"}
+    if [ ! -n "${DB_SERVER_SOCKET}" ]; then
+        : ${DB_SERVER_HOST:="mysql-server"}
+    else
+        DB_SERVER_HOST="localhost"
+    fi
     : ${DB_SERVER_PORT:="3306"}
-    USE_DB_ROOT_USER=false
-    CREATE_ZBX_DB_USER=false
+
     file_env MYSQL_USER
     file_env MYSQL_PASSWORD
 
-    if [ ! -n "${MYSQL_USER}" ] && [ "${MYSQL_RANDOM_ROOT_PASSWORD,,}" == "true" ]; then
-        echo "**** Impossible to use MySQL server because of unknown Zabbix user and random 'root' password"
-        exit 1
-    fi
-
-    if [ ! -n "${MYSQL_USER}" ] && [ ! -n "${MYSQL_ROOT_PASSWORD}" ] && [ "${MYSQL_ALLOW_EMPTY_PASSWORD,,}" != "true" ]; then
-        echo "*** Impossible to use MySQL server because 'root' password is not defined and it is not empty"
-        exit 1
-    fi
-
-    if [ "${MYSQL_ALLOW_EMPTY_PASSWORD,,}" == "true" ] || [ -n "${MYSQL_ROOT_PASSWORD}" ]; then
-        USE_DB_ROOT_USER=true
-        DB_SERVER_ROOT_USER="root"
-        DB_SERVER_ROOT_PASS=${MYSQL_ROOT_PASSWORD:-""}
-    fi
-
-    [ -n "${MYSQL_USER}" ] && CREATE_ZBX_DB_USER=true
-
-    # If root password is not specified use provided credentials
-    : ${DB_SERVER_ROOT_USER:=${MYSQL_USER}}
-    [ "${MYSQL_ALLOW_EMPTY_PASSWORD,,}" == "true" ] || DB_SERVER_ROOT_PASS=${DB_SERVER_ROOT_PASS:-${MYSQL_PASSWORD}}
     DB_SERVER_ZBX_USER=${MYSQL_USER:-"zabbix"}
     DB_SERVER_ZBX_PASS=${MYSQL_PASSWORD:-"zabbix"}
 
     DB_SERVER_DBNAME=${MYSQL_DATABASE:-"zabbix"}
+
+    if [ ! -n "${DB_SERVER_SOCKET}" ]; then
+        mysql_connect_args="-h ${DB_SERVER_HOST} -P ${DB_SERVER_PORT}"
+    else
+        mysql_connect_args="-S ${DB_SERVER_SOCKET}"
+    fi
 }
 
 db_tls_params() {

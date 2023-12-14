@@ -304,7 +304,7 @@ create_db_database_postgresql() {
         fi
 
         createdb --host "${DB_SERVER_HOST}" --port "${DB_SERVER_PORT}" --username "${DB_SERVER_ROOT_USER}" \
-                 --owner "${DB_SERVER_ZBX_USER}" --lc-ctype "zh_CN.utf8" --lc-collate "zh_CN.utf8" "${DB_SERVER_DBNAME}"
+                 --owner "${DB_SERVER_ZBX_USER}" --lc-ctype "en_US.utf8" --lc-collate "en_US.utf8" "${DB_SERVER_DBNAME}"
 
         unset PGPASSWORD
         unset PGOPTIONS
@@ -466,8 +466,7 @@ update_zbx_config() {
     update_config_var $ZBX_CONFIG "HousekeepingFrequency" "${ZBX_HOUSEKEEPINGFREQUENCY}"
 
     update_config_var $ZBX_CONFIG "MaxHousekeeperDelete" "${ZBX_MAXHOUSEKEEPERDELETE}"
-    update_config_var $ZBX_CONFIG "ServiceManagerSyncFrequency" "${ZBX_PROBLEMHOUSEKEEPINGFREQUENCY}"
-    update_config_var $ZBX_CONFIG "SenderFrequency" "${ZBX_SENDERFREQUENCY}"
+    update_config_var $ZBX_CONFIG "ProblemHousekeepingFrequency" "${ZBX_PROBLEMHOUSEKEEPINGFREQUENCY}"
 
     update_config_var $ZBX_CONFIG "CacheSize" "${ZBX_CACHESIZE}"
 
@@ -487,9 +486,9 @@ update_zbx_config() {
     update_config_var $ZBX_CONFIG "UnavailableDelay" "${ZBX_UNAVAILABLEDELAY}"
     update_config_var $ZBX_CONFIG "UnreachableDelay" "${ZBX_UNREACHABLEDELAY}"
 
-	  update_config_var $ZBX_CONFIG "AlertScriptsPath" "$ZABBIX_USER_HOME_DIR/alertscripts"
+    update_config_var $ZBX_CONFIG "AlertScriptsPath" "$ZABBIX_USER_HOME_DIR/alertscripts"
     update_config_var $ZBX_CONFIG "ExternalScripts" "$ZABBIX_USER_HOME_DIR/externalscripts"
-    update_config_var $ZBX_CONFIG "Include" "$ZABBIX_ETC_DIR/zabbix_server.conf.d/*.conf"
+	  update_config_var $ZBX_CONFIG "Include" "$ZABBIX_ETC_DIR/zabbix_server.conf.d/*.conf"
 
     if [ -n "${ZBX_EXPORTFILESIZE}" ]; then
         update_config_var $ZBX_CONFIG "ExportDir" "$ZABBIX_USER_HOME_DIR/export/"
@@ -572,7 +571,7 @@ prepare_server() {
 
     prepare_db
     update_zbx_config
-    prepare_permissions
+	  prepare_permissions
 }
 
 #################################################
