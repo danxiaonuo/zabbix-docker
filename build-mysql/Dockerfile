@@ -53,7 +53,7 @@ RUN set -eux && \
     cd /tmp/ && \
     git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION} --depth 1 --single-branch /tmp/zabbix-${ZBX_VERSION} && \
     cd /tmp/zabbix-${ZBX_VERSION} && \
-	sed -i s#1000#100000#g include/proxy.h && \
+    sed -i s#1000#100000#g include/proxy.h && \
     sed -i 's#UINT64_C(2)#UINT64_C(64)#g' src/zabbix_server/server.c && \
     sed -i 's#100}#1000}#g' src/zabbix_server/server.c && \
     sed -i 's#UINT64_C(2)#UINT64_C(64)#g' src/zabbix_proxy/proxy.c && \
