@@ -3,7 +3,7 @@
 ##########################################
 #
 # 指定创建的基础镜像
-FROM alpine:latest
+FROM alpine:3.16
 
 # 作者描述信息
 MAINTAINER danxiaonuo
