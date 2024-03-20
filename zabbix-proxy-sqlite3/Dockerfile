@@ -11,9 +11,7 @@ ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-sqlite3:${ZBX_VERSION}
 FROM ${BUILD_BASE_IMAGE} as builder
 
 # 指定创建的基础镜像
-ARG BASE_IMAGE_TAG=jammy
-ARG BUILD_IMAGE=ubuntu:${BASE_IMAGE_TAG}
-FROM ${BUILD_IMAGE}
+FROM ubuntu:jammy
 
 # 作者描述信息
 MAINTAINER danxiaonuo

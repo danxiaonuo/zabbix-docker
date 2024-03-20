@@ -16,9 +16,7 @@ FROM ${BUILD_NGINX_IMAGE} as nginx
 FROM ${BUILD_PHP_IMAGE} as php
 
 # 指定创建的基础镜像
-ARG BASE_IMAGE_TAG=jammy
-ARG BUILD_IMAGE=ubuntu:${BASE_IMAGE_TAG}
-FROM ${BUILD_IMAGE}
+FROM ubuntu:jammy
 
 # 作者描述信息
 MAINTAINER danxiaonuo
