@@ -3,9 +3,9 @@
 ##########################################
 #
 # zabbix版本号
-ARG MAJOR_VERSION=6.0
-ARG ZBX_VERSION=${MAJOR_VERSION}.25
-ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-base:latest
+ARG MAJOR_VERSION=7.0
+ARG ZBX_VERSION=${MAJOR_VERSION}
+ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-base:ubuntu-${ZBX_VERSION}
 
 # 指定创建的基础镜像
 FROM ${BUILD_BASE_IMAGE} as builder
@@ -16,42 +16,24 @@ MAINTAINER danxiaonuo
 ARG TZ=Asia/Shanghai
 ENV TZ=$TZ
 # 语言设置
-ARG LANG=C.UTF-8
+ARG LANG=zh_CN.UTF-8
 ENV LANG=$LANG
 
 # zabbix版本号
 ARG MAJOR_VERSION
 ARG ZBX_VERSION
 ARG ZBX_SOURCES=https://git.zabbix.com/scm/zbx/zabbix.git
-ENV MONGODB_PLUGIN_SOURCES=https://git.zabbix.com/scm/ap/mongodb.git MONGODB_PLUGIN_VERSION=${ZBX_VERSION} \
-    POSTGRESQL_PLUGIN_SOURCES=https://git.zabbix.com/scm/ap/postgresql.git POSTGRESQL_PLUGIN_VERSION=${ZBX_VERSION}
-
-# 拷贝文件
-COPY ["./build-mysql/conf/chromedp_no_sandbox.patch", "/tmp/chromedp_no_sandbox.patch"]
+ARG GIT_BRANCH=master
+ENV MONGODB_PLUGIN_SOURCES=https://git.zabbix.com/scm/ap/mongodb.git MONGODB_PLUGIN_VERSION=master \
+    POSTGRESQL_PLUGIN_SOURCES=https://git.zabbix.com/scm/ap/postgresql.git POSTGRESQL_PLUGIN_VERSION=master
 
 # 安装编译
-RUN set -eux && \
-    ARCH_SUFFIX="$(arch)"; \
-    case "$ARCH_SUFFIX" in \
-        x86_64) \
-            additional_components='--enable-java'; \
-            ;; \
-        aarch64) \
-            additional_components='--enable-java'; \
-            ;; \
-        armv7l) \
-            additional_components='--enable-java'; \
-            ;; \
-        s390x) \
-            additional_components='--enable-java'; \
-            ;; \
-        ppc64le) \
-            additional_components=''; \
-            ;; \
-        *) echo "Unknown ARCH_SUFFIX=${ARCH_SUFFIX-}"; exit 1 ;; \
-    esac; \
+RUN --mount=type=cache,target=/root/.cache/go-build/ \
+    --mount=type=cache,target=/opt/golang/ \
+    --mount=type=bind,source=./build-mysql/conf/chromedp_no_sandbox.patch,target=/tmp/chromedp_no_sandbox.patch \
+    set -eux && \
     cd /tmp/ && \
-    git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION} --depth 1 --single-branch /tmp/zabbix-${ZBX_VERSION} && \
+    git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${GIT_BRANCH} --depth 1 --single-branch /tmp/zabbix-${ZBX_VERSION} && \
     cd /tmp/zabbix-${ZBX_VERSION} && \
     sed -i s#1000#100000#g include/proxy.h && \
     sed -i 's#UINT64_C(2)#UINT64_C(64)#g' src/zabbix_server/server.c && \
@@ -68,9 +50,9 @@ RUN set -eux && \
     export CFLAGS="$CFLAGS -D_FORTIFY_SOURCE=2 -fexceptions -O2 -pipe" && \
     ./configure \
             --prefix=/usr/local/zabbix \
+            --enable-ipv6 \
             --enable-agent \
             --enable-agent2 \
-            --enable-ipv6 \
             --enable-proxy \
             --enable-server \
             --enable-webservice \
@@ -85,7 +67,7 @@ RUN set -eux && \
             --with-openssl \
             --with-ssh \
             --with-unixodbc \
-            $additional_components \
+            --enable-java \
             --silent && \
     make -j"$(nproc)" -s dbschema && \
     make -j"$(nproc)" -s && \
@@ -99,13 +81,14 @@ RUN set -eux && \
     gzip -c database/mysql/create.sql > database/mysql/create_proxy.sql.gz && \
     rm -rf database/mysql/create.sql && \
     mkdir /tmp/fonts/ && \
-    curl --silent -L "https://noto-website.storage.googleapis.com/pkgs/NotoSansCJKjp-hinted.zip" -o /tmp/fonts/NotoSansCJKjp-hinted.zip && \
+    curl --tlsv1.2 -sSf -L "https://noto-website.storage.googleapis.com/pkgs/NotoSansCJKjp-hinted.zip" -o /tmp/fonts/NotoSansCJKjp-hinted.zip && \
     unzip /tmp/fonts/NotoSansCJKjp-hinted.zip -d /tmp/fonts/ && \
     cp /tmp/fonts/NotoSansCJKjp-Regular.otf /tmp/zabbix-${ZBX_VERSION}/ui/assets/fonts/NotoSansCJKjp-Regular.ttf && \
     cp /tmp/fonts/LICENSE_OFL.txt /tmp/zabbix-${ZBX_VERSION}/ui/assets/fonts/ && \
     rm -f /tmp/zabbix-${ZBX_VERSION}/ui/assets/fonts/DejaVuSans.ttf && \
     sed -i -r "s/(define\(.*_FONT_NAME.*)DejaVuSans/\1NotoSansCJKjp-Regular/" /tmp/zabbix-${ZBX_VERSION}/ui/include/defines.inc.php && \
     rm -rf /tmp/fonts/ && \
+    chmod o+r /tmp/zabbix-${ZBX_VERSION}/ui/assets/fonts/* && \
     strip /tmp/zabbix-${ZBX_VERSION}/src/zabbix_agent/zabbix_agentd && \
     strip /tmp/zabbix-${ZBX_VERSION}/src/zabbix_server/zabbix_server && \
     strip /tmp/zabbix-${ZBX_VERSION}/src/zabbix_proxy/zabbix_proxy && \
@@ -122,5 +105,4 @@ RUN set -eux && \
     git -c advice.detachedHead=false clone ${POSTGRESQL_PLUGIN_SOURCES} --branch ${POSTGRESQL_PLUGIN_VERSION} --depth 1 --single-branch /tmp/postgresql_plugin && \
     cd /tmp/postgresql_plugin && \
     make && \
-    strip /tmp/postgresql_plugin/zabbix-agent2-plugin-postgresql && \
-    rm -rf $(go env GOCACHE)
+    strip /tmp/postgresql_plugin/zabbix-agent2-plugin-postgresql

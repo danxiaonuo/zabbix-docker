@@ -2,13 +2,13 @@
 
 ProgramPath="/usr/local/zabbix"
 CONFIGFILE=${ProgramPath}/etc/zabbix_agent2.conf
-zbx_sender='zabbix_sender'
+zbx_sender='/usr/local/zabbix/bin/zabbix_sender'
 
 processName="hardware_info.sh"
-processNum=$(ps -aef | grep -i "${processName}" | grep -v grep | wc -l)
-
-if [ "${processNum}" -gt "5" ]; then
-    exit 1
+processNum=$(ps -aux | grep -i "${processName}" | grep -v grep | wc -l)
+ 
+if [ ${processNum} >= 5 ]; then
+   exit 1
 fi
 
 # 获取服务器厂家
@@ -35,8 +35,14 @@ ${zbx_sender} -c ${CONFIGFILE} -k "baseboard.version" -o "$(sudo dmidecode -s ba
 # 获取主板序列号
 ${zbx_sender} -c ${CONFIGFILE} -k "baseboard.serial.number" -o "$(sudo dmidecode -s baseboard-serial-number | sed "/^#/d")" >/dev/null 2>&1
 
+# 获取操作系统名称
+${zbx_sender} -c ${CONFIGFILE} -k "os.name" -o "$(python2 -c "import platform;print(platform.linux_distribution()[0])" | sed "/^#/d")" >/dev/null 2>&1
+
 # 获取操作系统类型
 ${zbx_sender} -c ${CONFIGFILE} -k "os.type" -o "$(uname -o | sed "/^#/d")" >/dev/null 2>&1
+
+# 获取操作系统版本
+${zbx_sender} -c ${CONFIGFILE} -k "os.version" -o "$(python2 -c "import platform;print(platform.linux_distribution()[1])" | sed "/^#/d")" >/dev/null 2>&1
 
 # 获取CPU型号
 ${zbx_sender} -c ${CONFIGFILE} -k "cpu.module" -o "$(cat /proc/cpuinfo | awk -F': '+ '/model name/{print $2}' | uniq | sed "/^#/d")" >/dev/null 2>&1

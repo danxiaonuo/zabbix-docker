@@ -117,10 +117,15 @@ prepare_zbx_agent_config() {
     ZBX_AGENT_CONFIG=$ZABBIX_ETC_DIR/zabbix_agent2.conf
 
     : ${ZBX_PASSIVESERVERS:=""}
+    : ${ZBX_ACTIVESERVERS:=""}
 
     [ -n "$ZBX_PASSIVESERVERS" ] && ZBX_PASSIVESERVERS=","$ZBX_PASSIVESERVERS
 
     ZBX_PASSIVESERVERS=$ZBX_SERVER_HOST$ZBX_PASSIVESERVERS
+
+    [ -n "$ZBX_ACTIVESERVERS" ] && ZBX_ACTIVESERVERS=","$ZBX_ACTIVESERVERS
+
+    ZBX_ACTIVESERVERS=$ZBX_SERVER_HOST":"$ZBX_SERVER_PORT$ZBX_ACTIVESERVERS
 
     update_config_var $ZBX_AGENT_CONFIG "PidFile"
     update_config_var $ZBX_AGENT_CONFIG "LogType" "console"
@@ -128,7 +133,7 @@ prepare_zbx_agent_config() {
     update_config_var $ZBX_AGENT_CONFIG "LogFileSize"
     update_config_var $ZBX_AGENT_CONFIG "DebugLevel" "${ZBX_DEBUGLEVEL}"
     update_config_var $ZBX_AGENT_CONFIG "SourceIP"
-    update_config_var $ZBX_AGENT_CONFIG "Plugins.SystemRun.LogRemoteCommands" "${ZBX_LOGREMOTECOMMANDS}"
+	update_config_var $ZBX_AGENT_CONFIG "Plugins.SystemRun.LogRemoteCommands" "${ZBX_LOGREMOTECOMMANDS}"
 
     : ${ZBX_PASSIVE_ALLOW:="true"}
     if [ "${ZBX_PASSIVE_ALLOW,,}" == "true" ]; then
@@ -148,7 +153,7 @@ prepare_zbx_agent_config() {
     else
         update_config_var $ZBX_AGENT_CONFIG "ServerActive"
     fi
-
+    update_config_var $ZBX_AGENT_CONFIG "HeartbeatFrequency" "${ZBX_HEARTBEAT_FREQUENCY}"
     update_config_var $ZBX_AGENT_CONFIG "ForceActiveChecksOnStart" "${ZBX_FORCEACTIVECHECKSONSTART}"
 
     if [ "${ZBX_ENABLEPERSISTENTBUFFER,,}" == "true" ]; then
@@ -173,12 +178,12 @@ prepare_zbx_agent_config() {
     update_config_var $ZBX_AGENT_CONFIG "RefreshActiveChecks" "${ZBX_REFRESHACTIVECHECKS}"
     update_config_var $ZBX_AGENT_CONFIG "BufferSend" "${ZBX_BUFFERSEND}"
     update_config_var $ZBX_AGENT_CONFIG "BufferSize" "${ZBX_BUFFERSIZE}"
-    update_config_var $ZBX_AGENT_CONFIG "Plugins.Log.MaxLinesPerSecond" "${ZBX_MAXLINESPERSECOND}"
+	  update_config_var $ZBX_AGENT_CONFIG "Plugins.Log.MaxLinesPerSecond" "${ZBX_MAXLINESPERSECOND}"
     # Please use include to enable Alias feature
     # update_config_multiple_var $ZBX_AGENT_CONFIG "Alias" ${ZBX_ALIAS}
     update_config_var $ZBX_AGENT_CONFIG "Timeout" "${ZBX_TIMEOUT}"
-    # update_config_var $ZBX_AGENT_CONFIG "Include" "$ZABBIX_ETC_DIR/zabbix_agent2.d/plugins.d/*.conf"
-    update_config_var $ZBX_AGENT_CONFIG "Include" "$ZABBIX_ETC_DIR/zabbix_agentd.conf.d/*.conf"
+    # update_config_var $ZBX_AGENT_CONFIG "Include" "${ZABBIX_ETC_DIR}/zabbix_agent2.d/plugins.d/*.conf"
+    update_config_var $ZBX_AGENT_CONFIG "Include" "${ZABBIX_ETC_DIR}/zabbix_agentd.conf.d/*.conf"
     update_config_var $ZBX_AGENT_CONFIG "UnsafeUserParameters" "${ZBX_UNSAFEUSERPARAMETERS}"
     update_config_var $ZBX_AGENT_CONFIG "TLSConnect" "${ZBX_TLSCONNECT}"
     update_config_var $ZBX_AGENT_CONFIG "TLSAccept" "${ZBX_TLSACCEPT}"
@@ -197,10 +202,10 @@ prepare_zbx_agent_config() {
 
 prepare_zbx_agent_plugin_config() {
     echo "** Preparing Zabbix agent plugin configuration files"
-    sed -i "/AllowKey=system.run/i\Include=$ZABBIX_ETC_DIR/zabbix_agent2.d/plugins.d/*.conf" $ZBX_AGENT_CONFIG
-    
-    # update_config_var "$ZABBIX_ETC_DIR/zabbix_agent2.d/plugins.d/mongodb.conf" "Plugins.MongoDB.System.Path" "/usr/sbin/zabbix-agent2-plugin/zabbix-agent2-plugin-mongodb"
-    # update_config_var "$ZABBIX_ETC_DIR/zabbix_agent2.d/plugins.d/postgresql.conf" "Plugins.PostgreSQL.System.Path" "/usr/sbin/zabbix-agent2-plugin/zabbix-agent2-plugin-postgresql"
+	  sed -i "/Include=.*/i\Include=${ZABBIX_ETC_DIR}/zabbix_agent2.d/plugins.d/*.conf" $ZBX_AGENT_CONFIG
+
+    # update_config_var "${ZABBIX_ETC_DIR}/zabbix_agent2.d/plugins.d/mongodb.conf" "Plugins.MongoDB.System.Path" "/usr/sbin/zabbix-agent2-plugin/zabbix-agent2-plugin-mongodb"
+    # update_config_var "${ZABBIX_ETC_DIR}/zabbix_agent2.d/plugins.d/postgresql.conf" "Plugins.PostgreSQL.System.Path" "/usr/sbin/zabbix-agent2-plugin/zabbix-agent2-plugin-postgresql"
 }
 
 prepare_permissions() {

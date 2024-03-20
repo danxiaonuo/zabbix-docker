@@ -1,8 +1,9 @@
 # https://support.zabbix.com/browse/ZBX-9858
 /usr/local/zabbix/snmptraps/snmptraps.log {
-    missingok
-    daily
-    rotate 0
-    minsize 50M notifempty
-    su zabbix zabbix
+     missingok
+     daily
+     rotate 0
+     minsize 50M
+     notifempty
+     su zabbix zabbix
 }

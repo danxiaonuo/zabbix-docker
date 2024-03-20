@@ -15,7 +15,6 @@ fi
 # Default Zabbix server port number
 : ${ZBX_SERVER_PORT:="16168"}
 
-
 # Default directories
 # Configuration files directory
 ZABBIX_ETC_DIR="/usr/local/zabbix/etc"
@@ -81,7 +80,7 @@ db_tls_params() {
     local result=""
 
     if [ "${ZBX_DB_ENCRYPTION,,}" == "true" ]; then
-        result="--ssl"
+        result="--ssl-mode=required"
 
         if [ -n "${ZBX_DB_CA_FILE}" ]; then
             result="${result} --ssl-ca=${ZBX_DB_CA_FILE}"
@@ -103,12 +102,11 @@ check_db_connect() {
     echo "********************"
     echo "* DB_SERVER_HOST: ${DB_SERVER_HOST}"
     echo "* DB_SERVER_PORT: ${DB_SERVER_PORT}"
+    if [ -n "${DB_SERVER_SOCKET}" ]; then
+        echo "* DB_SERVER_SOCKET: ${DB_SERVER_SOCKET}"
+    fi
     echo "* DB_SERVER_DBNAME: ${DB_SERVER_DBNAME}"
     if [ "${DEBUG_MODE,,}" == "true" ]; then
-        if [ "${USE_DB_ROOT_USER}" == "true" ]; then
-            echo "* DB_SERVER_ROOT_USER: ${DB_SERVER_ROOT_USER}"
-            echo "* DB_SERVER_ROOT_PASS: ${DB_SERVER_ROOT_PASS}"
-        fi
         echo "* DB_SERVER_ZBX_USER: ${DB_SERVER_ZBX_USER}"
         echo "* DB_SERVER_ZBX_PASS: ${DB_SERVER_ZBX_PASS}"
     fi
@@ -118,9 +116,9 @@ check_db_connect() {
 
     ssl_opts="$(db_tls_params)"
 
-    export MYSQL_PWD="${DB_SERVER_ROOT_PASS}"
+    export MYSQL_PWD="${DB_SERVER_ZBX_PASS}"
 
-    while [ ! "$(mysqladmin ping -h ${DB_SERVER_HOST} -P ${DB_SERVER_PORT} -u ${DB_SERVER_ROOT_USER} \
+    while [ ! "$(mysqladmin ping $mysql_connect_args -u ${DB_SERVER_ZBX_USER} \
                 --silent --connect_timeout=10 $ssl_opts)" ]; do
         echo "**** MySQL server is not available. Waiting $WAIT_TIMEOUT seconds..."
         sleep $WAIT_TIMEOUT
@@ -137,6 +135,12 @@ prepare_zbx_web_config() {
     export ZBX_DENY_GUI_ACCESS=${ZBX_DENY_GUI_ACCESS,,}
     export ZBX_GUI_ACCESS_IP_RANGE=${ZBX_GUI_ACCESS_IP_RANGE:-"['127.0.0.1']"}
     export ZBX_GUI_WARNING_MSG=${ZBX_GUI_WARNING_MSG:-"Zabbix is under maintenance."}
+
+    export ZBX_MAXEXECUTIONTIME=${ZBX_MAXEXECUTIONTIME:-"600"}
+    export ZBX_MEMORYLIMIT=${ZBX_MEMORYLIMIT:-"128M"}
+    export ZBX_POSTMAXSIZE=${ZBX_POSTMAXSIZE:-"16M"}
+    export ZBX_UPLOADMAXFILESIZE=${ZBX_UPLOADMAXFILESIZE:-"2M"}
+    export ZBX_MAXINPUTTIME=${ZBX_MAXINPUTTIME:-"300"}
 
     export DB_SERVER_TYPE="MYSQL"
     export DB_SERVER_HOST=${DB_SERVER_HOST}
@@ -157,9 +161,12 @@ prepare_zbx_web_config() {
     : ${ZBX_DB_VERIFY_HOST:="false"}
     export ZBX_DB_VERIFY_HOST=${ZBX_DB_VERIFY_HOST,,}
 
+    export ZBX_VAULT=${ZBX_VAULT}
     export ZBX_VAULTURL=${ZBX_VAULTURL}
     export ZBX_VAULTDBPATH=${ZBX_VAULTDBPATH}
     export VAULT_TOKEN=${VAULT_TOKEN}
+    export ZBX_VAULTCERTFILE=${ZBX_VAULTCERTFILE}
+    export ZBX_VAULTKEYFILE=${ZBX_VAULTKEYFILE}
 
     : ${DB_DOUBLE_IEEE754:="true"}
     export DB_DOUBLE_IEEE754=${DB_DOUBLE_IEEE754,,}

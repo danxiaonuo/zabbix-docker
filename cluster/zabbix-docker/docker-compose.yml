@@ -424,9 +424,9 @@ services:
     # 打开标准输入,可以接受外部输入
     stdin_open: true
     # 主机名
-    hostname: zabbix-proxy
+    hostname: zabbix-proxy-mysql
     # 指定容器名称
-    container_name: zabbix-proxy
+    container_name: zabbix-proxy-mysql
     # 指定为镜像名称或镜像ID
     image: danxiaonuo/zabbix-proxy:latest
     # 覆盖容器启动后默认执行的命令

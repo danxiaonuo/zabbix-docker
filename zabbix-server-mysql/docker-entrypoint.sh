@@ -189,11 +189,8 @@ db_tls_params() {
     local result=""
 
     if [ -n "${ZBX_DBTLSCONNECT}" ]; then
-        result="--ssl"
-
-        if [ "${ZBX_DBTLSCONNECT}" != "required" ]; then
-            result="${result} --ssl-verify-server-cert"
-        fi
+        ssl_mode=${ZBX_DBTLSCONNECT//verify_full/verify_identity}
+        result="--ssl-mode=$ssl_mode"
 
         if [ -n "${ZBX_DBTLSCAFILE}" ]; then
             result="${result} --ssl-ca=${ZBX_DBTLSCAFILE}"
@@ -337,6 +334,7 @@ create_db_schema_mysql() {
         exec_sql_file "/usr/local/zabbix/share/doc/zabbix-server-mysql/create.sql.gz"
 
         apply_db_scripts "/usr/local/zabbix/dbscripts/*.sql"
+        apply_db_scripts "/usr/local/zabbix/dbscripts/*.sql"
     fi
 }
 
@@ -377,19 +375,26 @@ update_zbx_config() {
     update_config_var $ZBX_CONFIG "DBName" "${DB_SERVER_DBNAME}"
     update_config_var $ZBX_CONFIG "DBSchema" "${DB_SERVER_SCHEMA}"
 
-    if [ -n "${VAULT_TOKEN}" ] && [ -n "${ZBX_VAULTURL}" ]; then
+    if [ -n "${ZBX_VAULTDBPATH}" ] && [ -n "${ZBX_VAULTURL}" ]; then
+        update_config_var $ZBX_CONFIG "Vault" "${ZBX_VAULT}"
         update_config_var $ZBX_CONFIG "VaultDBPath" "${ZBX_VAULTDBPATH}"
+        update_config_var $ZBX_CONFIG "VaultTLSCertFile" "${ZBX_VAULTTLSCERTFILE}"
+        update_config_var $ZBX_CONFIG "VaultTLSKeyFile" "${ZBX_VAULTTLSKEYFILE}"
         update_config_var $ZBX_CONFIG "VaultURL" "${ZBX_VAULTURL}"
         update_config_var $ZBX_CONFIG "DBUser"
         update_config_var $ZBX_CONFIG "DBPassword"
     else
+        update_config_var $ZBX_CONFIG "Vault"
         update_config_var $ZBX_CONFIG "VaultDBPath"
+        update_config_var $ZBX_CONFIG "VaultTLSCertFile"
+        update_config_var $ZBX_CONFIG "VaultTLSKeyFile"
         update_config_var $ZBX_CONFIG "VaultURL"
         update_config_var $ZBX_CONFIG "DBUser" "${DB_SERVER_ZBX_USER}"
         update_config_var $ZBX_CONFIG "DBPassword" "${DB_SERVER_ZBX_PASS}"
     fi
 
     update_config_var $ZBX_CONFIG "AllowUnsupportedDBVersions" "${ZBX_ALLOWUNSUPPORTEDDBVERSIONS}"
+    update_config_var $ZBX_CONFIG "MaxConcurrentChecksPerPoller" "${ZBX_MAXCONCURRENTCHECKSPERPOLLER}"
 
     update_config_var $ZBX_CONFIG "StartReportWriters" "${ZBX_STARTREPORTWRITERS}"
     : ${ZBX_WEBSERVICEURL:="http://zabbix-web-service:10053/report"}
@@ -408,12 +413,16 @@ update_zbx_config() {
     update_config_var $ZBX_CONFIG "StartPingers" "${ZBX_STARTPINGERS}"
     update_config_var $ZBX_CONFIG "StartDiscoverers" "${ZBX_STARTDISCOVERERS}"
     update_config_var $ZBX_CONFIG "StartHistoryPollers" "${ZBX_STARTHISTORYPOLLERS}"
+    update_config_var $ZBX_CONFIG "StartHTTPAgentPollers" "${ZBX_STARTHTTPAGENTPOLLERS}"
     update_config_var $ZBX_CONFIG "StartHTTPPollers" "${ZBX_STARTHTTPPOLLERS}"
     update_config_var $ZBX_CONFIG "StartODBCPollers" "${ZBX_STARTODBCPOLLERS}"
+    update_config_var $ZBX_CONFIG "StartSNMPPollers" "${ZBX_STARTSNMPPOLLERS}"
 
+    update_config_var $ZBX_CONFIG "StartConnectors" "${ZBX_STARTCONNECTORS}"
     update_config_var $ZBX_CONFIG "StartPreprocessors" "${ZBX_STARTPREPROCESSORS}"
     update_config_var $ZBX_CONFIG "StartTimers" "${ZBX_STARTTIMERS}"
     update_config_var $ZBX_CONFIG "StartEscalators" "${ZBX_STARTESCALATORS}"
+    update_config_var $ZBX_CONFIG "StartAgentPollers" "${ZBX_STARTAGENTPOLLERS}"
     update_config_var $ZBX_CONFIG "StartAlerters" "${ZBX_STARTALERTERS}"
     update_config_var $ZBX_CONFIG "StartTimers" "${ZBX_STARTTIMERS}"
     update_config_var $ZBX_CONFIG "StartEscalators" "${ZBX_STARTESCALATORS}"
@@ -445,6 +454,8 @@ update_zbx_config() {
         update_config_var $ZBX_CONFIG "SNMPTrapperFile"
         update_config_var $ZBX_CONFIG "StartSNMPTrapper"
     fi
+
+    update_config_var $ZBX_CONFIG "SocketDir" "/tmp/"
 
     update_config_var $ZBX_CONFIG "HousekeepingFrequency" "${ZBX_HOUSEKEEPINGFREQUENCY}"
     update_config_var $ZBX_CONFIG "MaxHousekeeperDelete" "${ZBX_MAXHOUSEKEEPERDELETE}"
@@ -478,8 +489,8 @@ update_zbx_config() {
         update_config_var $ZBX_CONFIG "ExportType" "${ZBX_EXPORTTYPE}"
     fi
 
-    update_config_var $ZBX_CONFIG "FpingLocation" "/usr/sbin/fping"
-    update_config_var $ZBX_CONFIG "Fping6Location" "/usr/sbin/fping6"
+    update_config_var $ZBX_CONFIG "FpingLocation" "/usr/bin/fping"
+    update_config_var $ZBX_CONFIG "Fping6Location" "/usr/bin/fping6"
 
     update_config_var $ZBX_CONFIG "SSHKeyLocation" "$ZABBIX_USER_HOME_DIR/ssh_keys"
     update_config_var $ZBX_CONFIG "LogSlowQueries" "${ZBX_LOGSLOWQUERIES}"
@@ -554,7 +565,7 @@ prepare_server() {
 
     prepare_db
     update_zbx_config
-    prepare_permissions
+	prepare_permissions
 }
 
 #################################################

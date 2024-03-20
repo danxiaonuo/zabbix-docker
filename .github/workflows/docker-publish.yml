@@ -38,7 +38,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: latest
+          - DOCKER_TAG: 7.0
     
     # 运行步骤
     steps:
@@ -105,7 +105,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: latest
+          - DOCKER_TAG: 7.0
 
     # 运行步骤
     steps:
@@ -172,7 +172,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: latest
+          - DOCKER_TAG: 7.0
 
     # 运行步骤
     steps:
@@ -239,7 +239,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: latest
+          - DOCKER_TAG: 7.0
 
     # 运行步骤
     steps:
@@ -306,7 +306,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: latest
+          - DOCKER_TAG: 7.0
 
     # 运行步骤
     steps:
@@ -373,7 +373,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: latest
+          - DOCKER_TAG: 7.0
 
     # 运行步骤
     steps:
@@ -430,7 +430,7 @@ jobs:
           retain_days: 1
           keep_minimum_runs: 1    #保留多少个workflow不删除
 
-  zabbix-proxy:
+  zabbix-proxy-mysql:
     # 依赖环境
     needs: [ zabbix-build-mysql ]
     # 选择虚拟环境
@@ -440,7 +440,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: latest
+          - DOCKER_TAG: 7.0
 
     # 运行步骤
     steps:
@@ -472,10 +472,10 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: ./zabbix-proxy/Dockerfile
+          file: ./zabbix-proxy-mysql/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-proxy:${{ matrix.DOCKER_TAG }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-proxy-mysql:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -483,11 +483,11 @@ jobs:
         with:
           registry_url: 'registry.cn-hongkong.aliyuncs.com'
           namespaces: 'danxiaonuo'
-          repository_name: 'zabbix-proxy'
+          repository_name: 'zabbix-proxy-mysql'
           user_name: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
           image_version: ${{ matrix.DOCKER_TAG }}
-          docker_file: 'zabbix-proxy/.'
+          docker_file: 'zabbix-proxy-mysql/.'
 
 
       - name: 删除旧的GitHub-workflow
@@ -507,7 +507,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: latest
+          - DOCKER_TAG: 7.0
 
     # 运行步骤
     steps:
@@ -566,7 +566,7 @@ jobs:
 
   zabbix-agent2:
     # 依赖环境
-    needs: [ zabbix-build-mysql ]
+    needs: [ zabbix-build-pgsql ]
     # 选择虚拟环境
     runs-on: ubuntu-latest
     if: github.event.repository.owner.id == github.event.sender.id
@@ -574,7 +574,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: latest
+          - DOCKER_TAG: 7.0
 
     # 运行步骤
     steps:
@@ -632,7 +632,7 @@ jobs:
 
   zabbix-web-service:
     # 依赖环境
-    needs: [ zabbix-build-mysql ]
+    needs: [ zabbix-build-pgsql ]
     # 选择虚拟环境
     runs-on: ubuntu-latest
     if: github.event.repository.owner.id == github.event.sender.id
@@ -640,7 +640,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: latest
+          - DOCKER_TAG: 7.0
 
     # 运行步骤
     steps:
@@ -706,7 +706,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: latest
+          - DOCKER_TAG: 7.0
 
     # 运行步骤
     steps:
@@ -772,7 +772,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: latest
+          - DOCKER_TAG: 7.0
 
     # 运行步骤
     steps:
@@ -830,7 +830,7 @@ jobs:
 
   zabbix-snmptraps:
     # 依赖环境
-    needs: [ zabbix-build-mysql ]
+    needs: [ zabbix-build-pgsql ]
     # 选择虚拟环境
     runs-on: ubuntu-latest
     if: github.event.repository.owner.id == github.event.sender.id
@@ -838,7 +838,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: latest
+          - DOCKER_TAG: 7.0
 
     # 运行步骤
     steps:
@@ -897,7 +897,7 @@ jobs:
 
   zabbix-java-gateway:
     # 依赖环境
-    needs: [ zabbix-build-mysql ]
+    needs: [ zabbix-build-pgsql ]
     # 选择虚拟环境
     runs-on: ubuntu-latest
     if: github.event.repository.owner.id == github.event.sender.id
@@ -905,7 +905,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: latest
+          - DOCKER_TAG: 7.0
 
     # 运行步骤
     steps:

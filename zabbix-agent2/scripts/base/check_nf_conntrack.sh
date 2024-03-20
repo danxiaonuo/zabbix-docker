@@ -1,15 +1,15 @@
 #!/bin/bash
 # description:判断跟踪表值是否超过70%
 processName="check_nf_conntrack.sh"
-processNum=$(ps -aef | grep -i "${processName}" | grep -v grep | wc -l)
+processNum=$(ps -aux | grep -i "${processName}" | grep -v grep | wc -l)
 
-if [ "${processNum}" -gt "5" ]; then
-    exit 1
+if [ ${processNum} >= 5 ]; then
+   exit 1
 fi
 
 ProgramPath="/usr/local/zabbix"
 CONFIGFILE=${ProgramPath}/etc/zabbix_agent2.conf
-zbx_sender='zabbix_sender'
+zbx_sender='/usr/local/zabbix/bin/zabbix_sender'
 x=0.7
 nf_conntrack_max=$(cat /proc/sys/net/nf_conntrack_max)
 nf_conntrack_number=$(cat /proc/sys/net/netfilter/nf_conntrack_count)

@@ -3,15 +3,16 @@
 ##########################################
 #
 # zabbix版本号
-ARG MAJOR_VERSION=6.0
-ARG ZBX_VERSION=${MAJOR_VERSION}.25
-ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-mysql:latest
+ARG MAJOR_VERSION=7.0
+ARG ZBX_VERSION=${MAJOR_VERSION}
+ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-pgsql:ubuntu-${ZBX_VERSION}
 
 # 指定创建的基础镜像
 FROM ${BUILD_BASE_IMAGE} as builder
 
 # 指定创建的基础镜像
-FROM alpine:latest
+ARG BASE_IMAGE_TAG=jammy
+FROM ubuntu:${BASE_IMAGE_TAG}
 
 # 作者描述信息
 MAINTAINER danxiaonuo
@@ -19,17 +20,21 @@ MAINTAINER danxiaonuo
 ARG TZ=Asia/Shanghai
 ENV TZ=$TZ
 # 语言设置
-ARG LANG=C.UTF-8
+ARG LANG=zh_CN.UTF-8
 ENV LANG=$LANG
+
+# 环境设置
+ARG DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=$DEBIAN_FRONTEND
 
 # zabbix版本号
 ARG MAJOR_VERSION
 ARG ZBX_VERSION
 ARG ZBX_SOURCES=https://git.zabbix.com/scm/zbx/zabbix.git
 
+# 环境
 ENV TERM=xterm \
-    ZBX_VERSION=${ZBX_VERSION} ZBX_SOURCES=${ZBX_SOURCES} \
-    PATH=${PATH}:/usr/lib/jvm/default-jvm/bin/ JAVA_HOME=/usr/lib/jvm/default-jvm
+    ZBX_VERSION=${ZBX_VERSION} ZBX_SOURCES=${ZBX_SOURCES}
 
 # 安装依赖包
 ARG PKG_DEPS="\
@@ -37,46 +42,76 @@ ARG PKG_DEPS="\
     bash \
     bash-doc \
     bash-completion \
-    bind-tools \
+    dnsutils \
     iproute2 \
+    net-tools \
+    sysstat \
+    ncat \
     git \
     vim \
+    jq \
+    lrzsz \
     tzdata \
     curl \
     wget \
+    axel \
     lsof \
-    tar \
     zip \
     unzip \
-    sysstat \
-    sudo \
-    go \
-    jq \
+    tar \
+    rsync \
+    iputils-ping \
+    telnet \
+    procps \
+    libaio1 \
+    numactl \
+    xz-utils \
+    gnupg2 \
+    psmisc \
+    libmecab2 \
+    debsums \
+    locales \
+    iptables \
+    python3 \
+    python3-dev \
+    python3-pip \
+    language-pack-zh-hans \
+    fonts-droid-fallback \
+    fonts-wqy-zenhei \
+    fonts-wqy-microhei \
+    fonts-arphic-ukai \
+    fonts-arphic-uming \
     ca-certificates"
 ENV PKG_DEPS=$PKG_DEPS
 
-ARG INSTALL_PKGS="openjdk8-jre-base"
+ARG INSTALL_PKGS="openjdk-19-jdk-headless"
 ENV INSTALL_PKGS=$INSTALL_PKGS
 
 # ***** 安装依赖 *****
-RUN set -eux && \
-    # 修改源地址
-    sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
-    # 更新源地址并更新系统软件
-    apk update && apk upgrade && \
-    # 安装依赖包
-    apk add --no-cache --clean-protected $PKG_DEPS $INSTALL_PKGS && \
-    rm -rf /var/cache/apk/* && \
-    # 更新时区
-    ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime && \
-    # 更新时间
-    echo ${TZ} > /etc/timezone && \
-    # 更改为zsh
-    sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" || true && \
-    sed -i -e "s/bin\/ash/bin\/zsh/" /etc/passwd && \
-    sed -i -e 's/mouse=/mouse-=/g' /usr/share/vim/vim*/defaults.vim && \
-    sed -i '$a\zabbix  ALL=(ALL)  NOPASSWD:ALL' /etc/sudoers && \
-    /bin/zsh
+RUN --mount=type=cache,target=/var/lib/apt/,sharing=locked \
+   set -eux && \
+   # 更新源地址
+   sed -i s@http://*.*ubuntu.com@https://mirrors.aliyun.com@g /etc/apt/sources.list && \
+   sed -i 's?# deb-src?deb-src?g' /etc/apt/sources.list && \
+   # 解决证书认证失败问题
+   touch /etc/apt/apt.conf.d/99verify-peer.conf && echo >>/etc/apt/apt.conf.d/99verify-peer.conf "Acquire { https::Verify-Peer false }" && \
+   # 更新系统软件
+   DEBIAN_FRONTEND=noninteractive apt-get update -qqy && apt-get upgrade -qqy && \
+   # 安装依赖包
+   DEBIAN_FRONTEND=noninteractive apt-get install -qqy --no-install-recommends $PKG_DEPS $INSTALL_PKGS && \
+   DEBIAN_FRONTEND=noninteractive apt-get -qqy --no-install-recommends autoremove --purge && \
+   DEBIAN_FRONTEND=noninteractive apt-get -qqy --no-install-recommends autoclean && \
+   rm -rf /var/lib/apt/lists/* && \
+   # 更新时区
+   ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime && \
+   # 更新时间
+   echo ${TZ} > /etc/timezone && \
+   # 更改为zsh
+   sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" || true && \
+   sed -i -e "s/bin\/ash/bin\/zsh/" /etc/passwd && \
+   sed -i -e 's/mouse=/mouse-=/g' /usr/share/vim/vim*/defaults.vim && \
+   locale-gen zh_CN.UTF-8 && localedef -f UTF-8 -i zh_CN zh_CN.UTF-8 && locale-gen && \
+   /bin/zsh
 
 # ***** 创建zabbix用户和相关目录 *****
 RUN set -eux && \
@@ -121,7 +156,7 @@ RUN set -eux && \
     chown --quiet -R zabbix:root /usr/local/zabbix/ /usr/sbin/zabbix_java/ && \
     chgrp -R 0 /usr/local/zabbix/ /usr/sbin/zabbix_java/ && \
     chmod -R g=u /usr/local/zabbix/ /usr/sbin/zabbix_java/ && \
-    rm -rf /var/cache/apk/*
+    rm -rf /var/lib/apt/lists/*
 
 # ***** 入口 *****
 ENTRYPOINT ["docker-entrypoint.sh"]

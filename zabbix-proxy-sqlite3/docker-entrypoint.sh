@@ -137,35 +137,42 @@ update_zbx_config() {
     update_config_var $ZBX_CONFIG "LogRemoteCommands" "${ZBX_LOGREMOTECOMMANDS}"
 
     update_config_var $ZBX_CONFIG "DBHost"
-	: ${ZBX_USE_NODE_NAME_AS_DB_NAME:="false"}
+    : ${ZBX_USE_NODE_NAME_AS_DB_NAME:="false"}
     if [ "${ZBX_USE_NODE_NAME_AS_DB_NAME,,}" == "false" ]; then
         update_config_var $ZBX_CONFIG "DBName" "${ZABBIX_USER_HOME_DIR}/db_data/${ZBX_HOSTNAME:-"zabbix-proxy-sqlite3"}.sqlite"
     else
         node_name=$(uname -n)
-        update_config_var $ZBX_CONFIG "DBName" "${ZABBIX_USER_HOME_DIR}/db_data/${ZBX_HOSTNAME:-"zabbix-proxy-sqlite3"}.sqlite"
+        update_config_var $ZBX_CONFIG "DBName" "${ZABBIX_USER_HOME_DIR}/db_data/${node_name}.sqlite"
     fi
     update_config_var $ZBX_CONFIG "DBUser"
     update_config_var $ZBX_CONFIG "DBPort"
     update_config_var $ZBX_CONFIG "DBPassword"
 
+    update_config_var $ZBX_CONFIG "MaxConcurrentChecksPerPoller" "${ZBX_MAXCONCURRENTCHECKSPERPOLLER}"
+
+    update_config_var $ZBX_CONFIG "ProxyBufferMode" "${ZBX_PROXYBUFFERMODE}"
+    update_config_var $ZBX_CONFIG "ProxyMemoryBufferAge" "${ZBX_PROXYMEMORYBUFFERAGE}"
+    update_config_var $ZBX_CONFIG "ProxyMemoryBufferSize" "${ZBX_PROXYMEMORYBUFFERSIZE}"
+
     update_config_var $ZBX_CONFIG "ProxyLocalBuffer" "${ZBX_PROXYLOCALBUFFER}"
     update_config_var $ZBX_CONFIG "ProxyOfflineBuffer" "${ZBX_PROXYOFFLINEBUFFER}"
-    update_config_var $ZBX_CONFIG "HeartbeatFrequency" "${ZBX_PROXYHEARTBEATFREQUENCY}"
-    update_config_var $ZBX_CONFIG "ConfigFrequency" "${ZBX_CONFIGFREQUENCY}"
+    update_config_var $ZBX_CONFIG "ProxyConfigFrequency" "${ZBX_PROXYCONFIGFREQUENCY}"
     update_config_var $ZBX_CONFIG "DataSenderFrequency" "${ZBX_DATASENDERFREQUENCY}"
 
     update_config_var $ZBX_CONFIG "StatsAllowedIP" "${ZBX_STATSALLOWEDIP}"
     update_config_var $ZBX_CONFIG "StartPreprocessors" "${ZBX_STARTPREPROCESSORS}"
 
+    update_config_var $ZBX_CONFIG "StartAgentPollers" "${ZBX_STARTAGENTPOLLERS}"
     update_config_var $ZBX_CONFIG "StartPollers" "${ZBX_STARTPOLLERS}"
     update_config_var $ZBX_CONFIG "StartIPMIPollers" "${ZBX_IPMIPOLLERS}"
     update_config_var $ZBX_CONFIG "StartPollersUnreachable" "${ZBX_STARTPOLLERSUNREACHABLE}"
     update_config_var $ZBX_CONFIG "StartTrappers" "${ZBX_STARTTRAPPERS}"
     update_config_var $ZBX_CONFIG "StartPingers" "${ZBX_STARTPINGERS}"
     update_config_var $ZBX_CONFIG "StartDiscoverers" "${ZBX_STARTDISCOVERERS}"
-    update_config_var $ZBX_CONFIG "StartHistoryPollers" "${ZBX_STARTHISTORYPOLLERS}"
+    update_config_var $ZBX_CONFIG "StartHTTPAgentPollers" "${ZBX_STARTHTTPAGENTPOLLERS}"
     update_config_var $ZBX_CONFIG "StartHTTPPollers" "${ZBX_STARTHTTPPOLLERS}"
     update_config_var $ZBX_CONFIG "StartODBCPollers" "${ZBX_STARTODBCPOLLERS}"
+    update_config_var $ZBX_CONFIG "StartSNMPPollers" "${ZBX_STARTSNMPPOLLERS}"
 
     : ${ZBX_JAVAGATEWAY_ENABLE:="false"}
     if [ "${ZBX_JAVAGATEWAY_ENABLE,,}" == "true" ]; then
@@ -193,6 +200,7 @@ update_zbx_config() {
         update_config_var $ZBX_CONFIG "StartSNMPTrapper"
     fi
 
+    update_config_var $ZBX_CONFIG "SocketDir" "/tmp/"
     update_config_var $ZBX_CONFIG "HousekeepingFrequency" "${ZBX_HOUSEKEEPINGFREQUENCY}"
 
     update_config_var $ZBX_CONFIG "CacheSize" "${ZBX_CACHESIZE}"
@@ -211,8 +219,8 @@ update_zbx_config() {
     update_config_var $ZBX_CONFIG "ExternalScripts" "${ZABBIX_USER_HOME_DIR}/externalscripts"
 	  update_config_var $ZBX_CONFIG "Include" "$ZABBIX_ETC_DIR/zabbix_proxy.conf.d/*.conf"
 
-    update_config_var $ZBX_CONFIG "FpingLocation" "/usr/sbin/fping"
-    update_config_var $ZBX_CONFIG "Fping6Location" "/usr/sbin/fping6"
+    update_config_var $ZBX_CONFIG "FpingLocation" "/usr/bin/fping"
+    update_config_var $ZBX_CONFIG "Fping6Location" "/usr/bin/fping6"
 
     update_config_var $ZBX_CONFIG "SSHKeyLocation" "$ZABBIX_USER_HOME_DIR/ssh_keys"
     update_config_var $ZBX_CONFIG "LogSlowQueries" "${ZBX_LOGSLOWQUERIES}"

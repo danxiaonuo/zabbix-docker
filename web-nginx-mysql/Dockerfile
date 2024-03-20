@@ -4,9 +4,9 @@
 #
 #
 # zabbix版本号
-ARG MAJOR_VERSION=6.0
-ARG ZBX_VERSION=${MAJOR_VERSION}.25
-ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-mysql:latest
+ARG MAJOR_VERSION=7.0
+ARG ZBX_VERSION=${MAJOR_VERSION}
+ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-mysql:ubuntu-${ZBX_VERSION}
 ARG BUILD_NGINX_IMAGE=danxiaonuo/nginx:latest
 ARG BUILD_PHP_IMAGE=danxiaonuo/php:latest
 
@@ -16,7 +16,8 @@ FROM ${BUILD_NGINX_IMAGE} as nginx
 FROM ${BUILD_PHP_IMAGE} as php
 
 # 指定创建的基础镜像
-FROM alpine:latest
+ARG BASE_IMAGE_TAG=jammy
+FROM ubuntu:${BASE_IMAGE_TAG}
 
 # 作者描述信息
 MAINTAINER danxiaonuo
@@ -24,8 +25,12 @@ MAINTAINER danxiaonuo
 ARG TZ=Asia/Shanghai
 ENV TZ=$TZ
 # 语言设置
-ARG LANG=C.UTF-8
+ARG LANG=zh_CN.UTF-8
 ENV LANG=$LANG
+
+# 环境设置
+ARG DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=$DEBIAN_FRONTEND
 
 # zabbix版本号
 ARG MAJOR_VERSION
@@ -44,7 +49,7 @@ ENV PATH=$PATH
 
 # luajit2
 # https://github.com/openresty/luajit2
-ARG LUAJIT_VERSION=2.1-20231006
+ARG LUAJIT_VERSION=2.1-20231117
 ENV LUAJIT_VERSION=$LUAJIT_VERSION
 ARG LUAJIT_LIB=/usr/local/lib
 ENV LUAJIT_LIB=$LUAJIT_LIB
@@ -55,7 +60,7 @@ ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 
 # lua-resty-core
 # https://github.com/openresty/lua-resty-core
-ARG LUA_RESTY_CORE_VERSION=0.1.27
+ARG LUA_RESTY_CORE_VERSION=0.1.28
 ENV LUA_RESTY_CORE_VERSION=$LUA_RESTY_CORE_VERSION
 ARG LUA_LIB_DIR=/usr/local/share/lua/5.1
 ENV LUA_LIB_DIR=$LUA_LIB_DIR
@@ -68,111 +73,113 @@ ARG PATH=/data/php/bin:$PATH
 ENV PATH=$PATH
 
 ARG PKG_DEPS="\
-    mariadb-client \
-    mariadb-connector-c \
-    supervisor \
     zsh \
     bash \
     bash-doc \
     bash-completion \
-    bind-tools \
+    dnsutils \
     iproute2 \
+    net-tools \
+    sysstat \
+    ncat \
     git \
     vim \
+    jq \
+    lrzsz \
     tzdata \
     curl \
     wget \
+    axel \
     lsof \
-    tar \
     zip \
     unzip \
+    tar \
+    rsync \
+    iputils-ping \
+    telnet \
+    procps \
+    libaio1 \
+    numactl \
+    xz-utils \
+    gnupg2 \
+    psmisc \
+    libmecab2 \
+    debsums \
+    locales \
+    iptables \
+    python3 \
+    python3-dev \
+    python3-pip \
+    language-pack-zh-hans \
+    fonts-droid-fallback \
+    fonts-wqy-zenhei \
+    fonts-wqy-microhei \
+    fonts-arphic-ukai \
+    fonts-arphic-uming \
     ca-certificates \
-    geoip-dev \
-    openssl-dev \
-    pcre-dev \
-    zlib-dev"
+	libldap-common \
+	mysql-client \
+	supervisor"
 ENV PKG_DEPS=$PKG_DEPS
 
 ARG NGINX_BUILD_DEPS="\
-    # NGINX
-    alpine-sdk \
-    bash \
-    findutils \
-    gcc \
-    gd-dev \
-    geoip-dev \
-    libc-dev \
-    libedit-dev \
-    libxslt-dev \
-    linux-headers \
-    make \
-    mercurial \
-    openssl-dev \
-    pcre-dev \
-    perl-dev \
-    zlib-dev"
+    libssl-dev \
+    zlib1g-dev \
+    libpcre3-dev \
+    libxml2-dev \
+    libxslt1-dev \
+    libgd-dev \
+    libgeoip-dev"
 ENV NGINX_BUILD_DEPS=$NGINX_BUILD_DEPS
 
 ARG PHP_BUILD_DEPS="\
-    ca-certificates \
-    openssl \
-    tar \
-    xz \
-    bison \
-    readline \
-    readline-dev \
-    libxslt \
-    libxslt-dev \
     libxml2 \
-    libxml2-dev \
-    openssl \
-    openssl-dev \
-    bzip2 \
-    bzip2-dev \
-    curl \
-    curl-dev \
-    freetype \
-    freetype-dev \
-    libpng \
-    libpng-dev \
-    libwebp \
-    libwebp-dev \
-    libjpeg-turbo \
-    libjpeg-turbo-dev \
-    libsodium \
-    libsodium-dev \
-    argon2-dev \
-    coreutils \
-    linux-headers \
-    krb5-dev \
-    pcre2-dev \
-    sqlite-dev \
-    gettext-dev \
-    gmp-dev \
-    openssl-dev \
-    c-client \
-    imap-dev \
-    icu-dev \
-    ldb-dev \
-    libldap \
-    openldap-dev \
-    oniguruma-dev \
-    tidyhtml-dev \
-    postgresql-client \
-    postgresql-libs \
-    libpq-dev \
-    libzip-dev"
+    libcurl4 \
+    libfreetype6 \
+    libjpeg-dev \
+    libpng16-16 \
+    libgettextpo0 \
+    libiconv-hook1 \
+    libkrb5-3 \
+    libpq5 \
+    libmysqlclient21 \
+    libssl-dev \
+    libpcre3 \
+    libpcre2-8-0 \
+    libsqlite3-0 \
+    libbz2-1.0 \
+    libcdb1 \
+    libgmp10 \
+    libreadline8 \
+    libldap2-dev \
+    libtidy-dev \
+    libzip4 \
+    libonig5 \
+    libxslt1-dev \
+    libc-client-dev \
+    libgpgme11 \
+    libmecab2 \
+    libc-client2007e \
+    libmcrypt4 \
+    libltdl7 \
+    libwebp-dev"
 ENV PHP_BUILD_DEPS=$PHP_BUILD_DEPS
 
 # ***** 安装依赖 *****
-RUN set -eux && \
-   # 修改源地址
-   sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
-   # 更新源地址并更新系统软件
-   apk update && apk upgrade && \
+RUN --mount=type=cache,target=/var/lib/apt/,sharing=locked \
+   set -eux && \
+   # 更新源地址
+   sed -i s@http://*.*ubuntu.com@https://mirrors.aliyun.com@g /etc/apt/sources.list && \
+   sed -i 's?# deb-src?deb-src?g' /etc/apt/sources.list && \
+   # 解决证书认证失败问题
+   touch /etc/apt/apt.conf.d/99verify-peer.conf && echo >>/etc/apt/apt.conf.d/99verify-peer.conf "Acquire { https::Verify-Peer false }" && \
+   # 更新系统软件
+   DEBIAN_FRONTEND=noninteractive apt-get update -qqy && apt-get upgrade -qqy && \
    # 安装依赖包
-   apk add --no-cache --clean-protected $PKG_DEPS $PHP_BUILD_DEPS && \
-   rm -rf /var/cache/apk/* && \
+   DEBIAN_FRONTEND=noninteractive apt-get install -qqy --no-install-recommends $PKG_DEPS $NGINX_BUILD_DEPS $PHP_BUILD_DEPS && \
+   DEBIAN_FRONTEND=noninteractive apt-get -qqy --no-install-recommends autoremove --purge && \
+   DEBIAN_FRONTEND=noninteractive apt-get -qqy --no-install-recommends autoclean && \
+   rm -rf /var/lib/apt/lists/* && \
    # 更新时区
    ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime && \
    # 更新时间
@@ -181,7 +188,7 @@ RUN set -eux && \
    sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" || true && \
    sed -i -e "s/bin\/ash/bin\/zsh/" /etc/passwd && \
    sed -i -e 's/mouse=/mouse-=/g' /usr/share/vim/vim*/defaults.vim && \
-   mkdir -p /www/zabbix /data && \
+   locale-gen zh_CN.UTF-8 && localedef -f UTF-8 -i zh_CN zh_CN.UTF-8 && locale-gen && \
    /bin/zsh
 
 # ***** 容器信号处理 *****
@@ -210,36 +217,27 @@ RUN set -eux && \
     rm -rf tests && \
     rm -f locale/add_new_language.sh locale/update_po.sh locale/make_mo.sh && \
     find /www/zabbix/locale -name '*.po' | xargs rm -f && \
-    find /www/zabbix/locale -name '*.sh' | xargs rm -f
+    find /www/zabbix/locale -name '*.sh' | xargs rm -f && \
+    mkdir -p /www/certs && chmod -R 775 /www/certs && \
+    mkdir -p /var/lib/locales/supported.d/ && rm -f /var/lib/locales/supported.d/local && \
+    cat /www/zabbix/include/locales.inc.php | grep display | grep true | awk '{$1=$1};1' | \
+        cut -d"'" -f 2 | sort | \
+        xargs -I '{}' bash -c 'echo "{}.UTF-8 UTF-8" >> /var/lib/locales/supported.d/local' && \
+    dpkg-reconfigure locales
 
 # 拷贝文件
-COPY ["./web-nginx-mysql/docker-entrypoint.sh", "/usr/bin/"]
-COPY ["./web-nginx-mysql/conf/etc/zabbix/web/", "/www/zabbix/conf/"]
-COPY ["./web-nginx-mysql/assets/fonts/DejaVuSans.ttf", "/www/zabbix/assets/fonts/DejaVuSans.ttf"]
-COPY ["./web-nginx-mysql/conf/nginx/php.conf", "/data/nginx/conf/php.conf"]
-COPY ["./web-nginx-mysql/conf/nginx/vhost/default.conf", "/data/nginx/conf/vhost/default.conf"]
-COPY ["./web-nginx-mysql/conf/supervisor", "/etc/supervisor"]
-
-# 安装相关依赖
-RUN set -eux && \
-    apk add --no-cache --virtual .gettext gettext && \
-    mv /usr/bin/envsubst /tmp/ && \
-    runDeps="$( \
-        scanelf --needed --nobanner ${NGINX_DIR}/sbin/nginx ${NGINX_DIR}/modules/*.so ${LUAJIT_LIB}/*.so /tmp/envsubst \
-            | awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
-            | sort -u \
-            | xargs -r apk info --installed \
-            | sort -u \
-    )" && \
-    apk add --no-cache --virtual .$NGINX_BUILD_DEPS $runDeps && \
-    apk del .gettext && \
-    mv /tmp/envsubst /usr/local/bin/
+COPY ["./web-nginx-pgsql/docker-entrypoint.sh", "/usr/bin/"]
+COPY ["./web-nginx-pgsql/conf/etc/zabbix/web/", "/www/zabbix/conf/"]
+COPY ["./web-nginx-pgsql/assets/fonts/DejaVuSans.ttf", "/www/zabbix/assets/fonts/DejaVuSans.ttf"]
+COPY ["./web-nginx-pgsql/conf/nginx/php.conf", "/data/nginx/conf/php.conf"]
+COPY ["./web-nginx-pgsql/conf/nginx/vhost/default.conf", "/data/nginx/conf/vhost/default.conf"]
+COPY ["./web-nginx-pgsql/conf/supervisor", "/etc/supervisor"]
 
 # ***** 检查依赖并授权 *****
 RUN set -eux && \
     # 创建用户和用户组
-    addgroup -g 32548 -S nginx && \
-    adduser -S -D -H -u 32548 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx && \
+    addgroup --system --quiet nginx && \
+    adduser --quiet --system --disabled-login --ingroup nginx --home /data/nginx --no-create-home nginx && \
     chmod a+x /usr/bin/docker-entrypoint.sh && \
     chown --quiet -R nginx:nginx /www/zabbix && \
     chmod -R 775 /www/zabbix/ && \
@@ -257,7 +255,7 @@ RUN set -eux && \
     php-fpm -v && \
     nginx -t && \
     php-fpm -t && \
-    rm -rf /var/cache/apk/*
+    rm -rf /var/lib/apt/lists/*
 
 # ***** 入口 *****
 ENTRYPOINT ["docker-entrypoint.sh"]

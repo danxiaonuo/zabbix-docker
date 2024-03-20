@@ -15,7 +15,6 @@ fi
 # Default Zabbix server port number
 : ${ZBX_SERVER_PORT:="16168"}
 
-
 # Default directories
 # Configuration files directory
 ZABBIX_ETC_DIR="/usr/local/zabbix/etc"
@@ -115,8 +114,10 @@ check_db_connect() {
     unset PGSSLKEY
 }
 
+
 prepare_zbx_web_config() {
     echo "** Preparing Zabbix frontend configuration file"
+
 
     : ${ZBX_DENY_GUI_ACCESS:="false"}
     export ZBX_DENY_GUI_ACCESS=${ZBX_DENY_GUI_ACCESS,,}
@@ -128,7 +129,6 @@ prepare_zbx_web_config() {
     export ZBX_POSTMAXSIZE=${ZBX_POSTMAXSIZE:-"16M"}
     export ZBX_UPLOADMAXFILESIZE=${ZBX_UPLOADMAXFILESIZE:-"2M"}
     export ZBX_MAXINPUTTIME=${ZBX_MAXINPUTTIME:-"300"}
-    export PHP_TZ=${PHP_TZ}
 
     export DB_SERVER_TYPE="POSTGRESQL"
     export DB_SERVER_HOST=${DB_SERVER_HOST}
@@ -149,9 +149,12 @@ prepare_zbx_web_config() {
     : ${ZBX_DB_VERIFY_HOST:="false"}
     export ZBX_DB_VERIFY_HOST=${ZBX_DB_VERIFY_HOST,,}
 
+    export ZBX_VAULT=${ZBX_VAULT}
     export ZBX_VAULTURL=${ZBX_VAULTURL}
     export ZBX_VAULTDBPATH=${ZBX_VAULTDBPATH}
     export VAULT_TOKEN=${VAULT_TOKEN}
+    export ZBX_VAULTCERTFILE=${ZBX_VAULTCERTFILE}
+    export ZBX_VAULTKEYFILE=${ZBX_VAULTKEYFILE}
 
     : ${DB_DOUBLE_IEEE754:="true"}
     export DB_DOUBLE_IEEE754=${DB_DOUBLE_IEEE754,,}

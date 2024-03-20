@@ -21,9 +21,9 @@ tmp_file = "/usr/local/zabbix/scripts/base/.tcp_connect_status.txt"
 # 获取tcp状态
 tcp_conn_status_cmd = "ss -tan|awk 'NR>1{++S[$1]}END{for (a in S) print a,S[a]}'"
 # 获取本机IP
-zbx_ip = "zabbix_get -s 127.0.0.1 -k agent.hostname"
+zbx_ip = "/usr/local/zabbix/bin/zabbix_get -s 127.0.0.1 -k agent.hostname"
 # zabbix发送数据命令
-zbx_sender_bin = "zabbix_sender"
+zbx_sender_bin = "/usr/local/zabbix/bin/zabbix_sender"
 # zabbix配置文件
 zbx_conf_path = '/usr/local/zabbix/etc/zabbix_agent2.conf '
 
@@ -50,8 +50,8 @@ def execute_cmd(cmd):
     """
     cmd_res = {'status': 1, 'stdout': '', 'stderr': ''}
     try:
-        # res = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        res = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,encoding="utf-8")
+        res = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # res = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,encoding="utf-8")
         res_stdout, res_stderr = res.communicate()
         cmd_res['status'] = res.returncode
         cmd_res['stdout'] = res_stdout

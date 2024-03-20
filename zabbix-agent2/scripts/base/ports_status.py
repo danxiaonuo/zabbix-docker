@@ -1,5 +1,5 @@
-#!/usr/bin/env python3
-#coding:utf-8
+#!/usr/bin/python
+#coding=utf-8
 
 import time
 import os
@@ -10,7 +10,7 @@ import re
 import socket
 import threading
 import argparse
-import requests
+import httplib
 import fcntl
 
 pidfile = 0
@@ -32,8 +32,8 @@ def execute_cmd(cmd):
     """
     cmd_res = {'status': 1, 'stdout': '', 'stderr': ''}
     try:
-        # res = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        res = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,encoding="utf-8")
+        res = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # res = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,encoding="utf-8")
         res_stdout, res_stderr = res.communicate()
         cmd_res['status'] = res.returncode
         cmd_res['stdout'] = res_stdout
@@ -44,11 +44,11 @@ def execute_cmd(cmd):
         return cmd_res
 
 # 获取本机IP
-zbx_ip = "zabbix_get -s 127.0.0.1 -k agent.hostname"
+zbx_ip = "/usr/local/zabbix/bin/zabbix_get -s 127.0.0.1 -k agent.hostname"
 # 发送本机IP
 senderhostname = execute_cmd(zbx_ip)['stdout'].strip()
 # 排除列表
-drop_list = ['systemd','dnsmasq','cupsd','smtpd','master','^.*:95','ssh.*','agentWorker']
+drop_list = ['systemd','dnsmasq','cupsd','smtpd','master','^.*:95','ssh.*']
 drop_str = "|".join(drop_list)
 # 获取端口列表
 port_cmd = (""" for port in $(ps -aux | grep -i 'ss -atunlp' | grep -v grep >/dev/null 2>&1 || ss -atunlp | grep -v grep | grep LISTEN | egrep -vw '%s' | sed "s#::#FF#g" | egrep -v '(ffff)' | grep users | sort -u | uniq | awk '{print $5,$NF}' | awk -F "[ :]+" '{print $2,$NF}' | awk '{if(length($2)>1) print $0}' | awk -F '[=,()" ]+' '{print $1}' | sort -u | uniq);do curl -s --max-time 1 --insecure http://127.0.0.1:$port -o /dev/null && echo $port;done """ % (drop_str))
@@ -62,9 +62,9 @@ zbx_find_key = 'port.find'
 # zabbix配置文件
 zbx_cfg = '/usr/local/zabbix/etc/zabbix_agent2.conf'
 # zabbix_get
-zbx_get = 'zabbix_get'
+zbx_get = '/usr/local/zabbix/bin/zabbix_get'
 # zabbix_sender
-zbx_sender = 'zabbix_sender'
+zbx_sender = '/usr/local/zabbix/bin/zabbix_sender'
 # 临时文件
 zbx_tmp_port_file='/usr/local/zabbix/scripts/base/.zabbix_port_find'
 zbx_tmp_port_status_file='/usr/local/zabbix/scripts/base/.zabbix_port_status'
@@ -99,13 +99,19 @@ def getDisplayLimits(processId):
 
 # 获取端口状态
 def getDisplayStatus(processId):
+    status=''
     host='127.0.0.1'
     port='%s' % str(processId)
-    headers={"Content-Type":"application/json"}
+    header={"Content-Type":"application/json"}
     payload = ''
-    url = "http://" + host + ":" + port + "/"
-    response = requests.request('GET', url, headers=headers, data=payload, timeout=10, verify=False)
-    code = str(response.status_code)
+    url="/"
+    data={}
+    data = json.dumps(data)
+    conn=httplib.HTTPConnection(host, port, timeout=10)
+    conn.request('GET', url, payload, header)
+    response = conn.getresponse()
+    res=response.read().decode("utf-8")
+    code = str(response.status)
     if code.find("20") >= 0 or code.find("30") >= 0 or code.find("40") >= 0 or code.find("50") >= 0 or res.find("/") >= 0:
        code = {"status":1}
     else:
@@ -250,5 +256,5 @@ if __name__ == '__main__':
            else:
                 cmd_line_opts(arg=['-h'])
   except Exception as msg:
-        # print(msg)
-        print(0)
+         # print(msg)
+         print(0)
