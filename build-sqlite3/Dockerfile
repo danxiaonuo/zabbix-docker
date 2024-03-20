@@ -5,7 +5,7 @@
 # zabbix版本号
 ARG MAJOR_VERSION=7.0
 ARG ZBX_VERSION=${MAJOR_VERSION}
-ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-base:ubuntu-${ZBX_VERSION}
+ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-base:${ZBX_VERSION}
 
 # 指定创建的基础镜像
 FROM ${BUILD_BASE_IMAGE} as builder

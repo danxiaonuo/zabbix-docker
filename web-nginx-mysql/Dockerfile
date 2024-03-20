@@ -6,7 +6,7 @@
 # zabbix版本号
 ARG MAJOR_VERSION=7.0
 ARG ZBX_VERSION=${MAJOR_VERSION}
-ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-mysql:ubuntu-${ZBX_VERSION}
+ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-mysql:${ZBX_VERSION}
 ARG BUILD_NGINX_IMAGE=danxiaonuo/nginx:latest
 ARG BUILD_PHP_IMAGE=danxiaonuo/php:latest
 
