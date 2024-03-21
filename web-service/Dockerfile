@@ -73,6 +73,7 @@ ARG PKG_DEPS="\
     python3 \
     python3-dev \
     python3-pip \
+    gnupg \
     language-pack-zh-hans \
     fonts-droid-fallback \
     fonts-wqy-zenhei \
@@ -85,8 +86,7 @@ ENV PKG_DEPS=$PKG_DEPS
 ARG INSTALL_PKGS="\
     ca-certificates \
     chromium \
-    chromium-sandbox \
-    gnupg"
+    chromium-sandbox"
 ENV INSTALL_PKGS=$INSTALL_PKGS
 
 # ***** 安装依赖 *****
@@ -100,7 +100,13 @@ RUN --mount=type=cache,target=/var/lib/apt/,sharing=locked \
    # 更新系统软件
    DEBIAN_FRONTEND=noninteractive apt-get update -qqy && apt-get upgrade -qqy && \
    # 安装依赖包
-   DEBIAN_FRONTEND=noninteractive apt-get install -qqy --no-install-recommends $PKG_DEPS $INSTALL_PKGS && \
+   DEBIAN_FRONTEND=noninteractive apt-get install -qqy --no-install-recommends $PKG_DEPS && \
+   apt-key --keyring /etc/apt/trusted.gpg.d/debian-archive-bullseye-automatic.gpg adv --keyserver keyserver.ubuntu.com --recv-keys 0E98404D386FA1D9 && \
+   apt-key --keyring /etc/apt/trusted.gpg.d/debian-archive-bullseye-security-automatic.gpg adv --keyserver keyserver.ubuntu.com --recv-keys A48449044AAD5C5D && \
+   echo "deb http://deb.debian.org/debian bullseye main" > /etc/apt/sources.list.d/debian.list && \
+   echo "deb http://deb.debian.org/debian bullseye-updates main" >> /etc/apt/sources.list.d/debian.list && \
+   DEBIAN_FRONTEND=noninteractive apt-get update -qqy && apt-get upgrade -qqy && \
+   DEBIAN_FRONTEND=noninteractive apt-get install -qqy --no-install-recommends $INSTALL_PKGS && \
    DEBIAN_FRONTEND=noninteractive apt-get -qqy --no-install-recommends autoremove --purge && \
    DEBIAN_FRONTEND=noninteractive apt-get -qqy --no-install-recommends autoclean && \
    rm -rf /var/lib/apt/lists/* && \

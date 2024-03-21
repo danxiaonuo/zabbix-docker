@@ -162,15 +162,11 @@ RUN set -eux && \
 
 # ***** 升级 setuptools 版本 *****
 RUN set -eux && \
-    pip3 config set global.index-url http://mirrors.aliyun.com/pypi/simple/ && \
-    pip3 config set install.trusted-host mirrors.aliyun.com && \
-    python3 -m ensurepip && \
-    rm -r /usr/lib/python*/ensurepip && \
-    pip3 install --upgrade pip setuptools wheel pycryptodome lxml cython beautifulsoup4 redis pymysql && \
-    if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip ; fi && \
-    if [[ ! -e /usr/bin/python ]]; then ln -sf /usr/bin/python3 /usr/bin/python; fi && \
     wget --no-check-certificate https://bootstrap.pypa.io/pip/2.7/get-pip.py -O /tmp/get-pip.py && \
     python2 /tmp/get-pip.py && \
+    pip3 config set global.index-url http://mirrors.aliyun.com/pypi/simple/ && \
+    pip3 config set install.trusted-host mirrors.aliyun.com && \
+    pip3 install --upgrade pip setuptools wheel pycryptodome lxml cython beautifulsoup4 redis pymysql && \
     rm -r /root/.cache && rm -rf /tmp/*
 
 # ***** 创建zabbix用户和相关目录 *****
