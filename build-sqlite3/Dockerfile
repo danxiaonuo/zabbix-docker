@@ -3,8 +3,8 @@
 ##########################################
 #
 # zabbix版本号
-ARG MAJOR_VERSION=7.0
-ARG ZBX_VERSION=${MAJOR_VERSION}
+ARG MAJOR_VERSION=6.0
+ARG ZBX_VERSION=${MAJOR_VERSION}.27
 ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-base:${ZBX_VERSION}
 
 # 指定创建的基础镜像
@@ -23,17 +23,17 @@ ENV LANG=$LANG
 ARG MAJOR_VERSION
 ARG ZBX_VERSION
 ARG ZBX_SOURCES=https://git.zabbix.com/scm/zbx/zabbix.git
-ARG GIT_BRANCH=master
-ENV MONGODB_PLUGIN_SOURCES=https://git.zabbix.com/scm/ap/mongodb.git MONGODB_PLUGIN_VERSION=master \
-    POSTGRESQL_PLUGIN_SOURCES=https://git.zabbix.com/scm/ap/postgresql.git POSTGRESQL_PLUGIN_VERSION=master
+ENV MONGODB_PLUGIN_SOURCES=https://git.zabbix.com/scm/ap/mongodb.git MONGODB_PLUGIN_VERSION=${ZBX_VERSION} \
+    POSTGRESQL_PLUGIN_SOURCES=https://git.zabbix.com/scm/ap/postgresql.git POSTGRESQL_PLUGIN_VERSION=${ZBX_VERSION}
 
 # 安装编译
 RUN --mount=type=cache,target=/root/.cache/go-build/ \
     --mount=type=cache,target=/opt/golang/ \
     set -eux && \
     cd /tmp/ && \
-    git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${GIT_BRANCH} --depth 1 --single-branch /tmp/zabbix-${ZBX_VERSION} && \
+    git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${ZBX_VERSION} --depth 1 --single-branch /tmp/zabbix-${ZBX_VERSION} && \
     cd /tmp/zabbix-${ZBX_VERSION} && \
+    sed -i s#1000#100000#g include/proxy.h && \
     sed -i 's#UINT64_C(2)#UINT64_C(64)#g' src/zabbix_server/server.c && \
     sed -i 's#100}#1000}#g' src/zabbix_server/server.c && \
     sed -i 's#UINT64_C(2)#UINT64_C(64)#g' src/zabbix_proxy/proxy.c && \

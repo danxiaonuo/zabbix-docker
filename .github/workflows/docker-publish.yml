@@ -38,8 +38,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0
-    
+          - DOCKER_TAG: 6.0.27
+
     # 运行步骤
     steps:
 
@@ -73,7 +73,7 @@ jobs:
           file: ./build-base/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-build-base:7.0
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-build-base:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -84,7 +84,7 @@ jobs:
           repository_name: 'zabbix-build-base'
           user_name: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
-          image_version: 7.0
+          image_version: ${{ matrix.DOCKER_TAG }}
           docker_file: 'build-base/.'
 
 
@@ -105,7 +105,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0
+          - DOCKER_TAG: 6.0.27
 
     # 运行步骤
     steps:
@@ -140,7 +140,7 @@ jobs:
           file: ./build-mysql/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-build-mysql:7.0
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-build-mysql:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -151,7 +151,7 @@ jobs:
           repository_name: 'zabbix-build-mysql'
           user_name: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
-          image_version: 7.0
+          image_version: ${{ matrix.DOCKER_TAG }}
           docker_file: 'build-mysql/.'
 
 
@@ -172,7 +172,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0
+          - DOCKER_TAG: 6.0.27
 
     # 运行步骤
     steps:
@@ -207,7 +207,7 @@ jobs:
           file: ./build-pgsql/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-build-pgsql:7.0
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-build-pgsql:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -218,7 +218,7 @@ jobs:
           repository_name: 'zabbix-build-pgsql'
           user_name: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
-          image_version: 7.0
+          image_version: ${{ matrix.DOCKER_TAG }}
           docker_file: 'build-pgsql/.'
 
 
@@ -239,7 +239,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0
+          - DOCKER_TAG: 6.0.27
 
     # 运行步骤
     steps:
@@ -274,7 +274,7 @@ jobs:
           file: ./build-sqlite3/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-build-sqlite3:7.0
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-build-sqlite3:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -285,7 +285,7 @@ jobs:
           repository_name: 'zabbix-build-sqlite3'
           user_name: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
-          image_version: 7.0
+          image_version: ${{ matrix.DOCKER_TAG }}
           docker_file: 'build-sqlite3/.'
 
 
@@ -306,7 +306,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0
+          - DOCKER_TAG: 6.0.27
 
     # 运行步骤
     steps:
@@ -341,7 +341,7 @@ jobs:
           file: ./zabbix-server-mysql/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-server-mysql:7.0
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-server-mysql:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -352,7 +352,7 @@ jobs:
           repository_name: 'zabbix-server-mysql'
           user_name: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
-          image_version: 7.0
+          image_version: ${{ matrix.DOCKER_TAG }}
           docker_file: 'zabbix-server-mysql/.'
 
 
@@ -373,7 +373,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0
+          - DOCKER_TAG: 6.0.27
 
     # 运行步骤
     steps:
@@ -408,7 +408,7 @@ jobs:
           file: ./zabbix-server-pgsql/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-server-pgsql:7.0
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-server-pgsql:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -419,7 +419,7 @@ jobs:
           repository_name: 'zabbix-server-pgsql'
           user_name: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
-          image_version: 7.0
+          image_version: ${{ matrix.DOCKER_TAG }}
           docker_file: 'zabbix-server-pgsql/.'
 
 
@@ -440,7 +440,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0
+          - DOCKER_TAG: 6.0.27
 
     # 运行步骤
     steps:
@@ -475,7 +475,7 @@ jobs:
           file: ./zabbix-proxy-mysql/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-proxy-mysql:7.0
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-proxy-mysql:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -486,7 +486,7 @@ jobs:
           repository_name: 'zabbix-proxy-mysql'
           user_name: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
-          image_version: 7.0
+          image_version: ${{ matrix.DOCKER_TAG }}
           docker_file: 'zabbix-proxy-mysql/.'
 
 
@@ -507,7 +507,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0
+          - DOCKER_TAG: 6.0.27
 
     # 运行步骤
     steps:
@@ -542,7 +542,7 @@ jobs:
           file: ./zabbix-proxy-sqlite3/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-proxy-sqlite3:7.0
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-proxy-sqlite3:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -553,7 +553,7 @@ jobs:
           repository_name: 'zabbix-proxy-sqlite3'
           user_name: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
-          image_version: 7.0
+          image_version: ${{ matrix.DOCKER_TAG }}
           docker_file: 'zabbix-proxy-sqlite3/.'
 
 
@@ -574,7 +574,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0
+          - DOCKER_TAG: 6.0.27
 
     # 运行步骤
     steps:
@@ -609,7 +609,7 @@ jobs:
           file: ./zabbix-agent2/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-agent2:7.0
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-agent2:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -620,7 +620,7 @@ jobs:
           repository_name: 'zabbix-agent2'
           user_name: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
-          image_version: 7.0
+          image_version: ${{ matrix.DOCKER_TAG }}
           docker_file: 'zabbix-agent2/.'
 
       - name: 删除旧的GitHub-workflow
@@ -640,7 +640,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0
+          - DOCKER_TAG: 6.0.27
 
     # 运行步骤
     steps:
@@ -675,7 +675,7 @@ jobs:
           file: ./web-service/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-web-service:7.0
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-web-service:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -686,7 +686,7 @@ jobs:
           repository_name: 'zabbix-web-service'
           user_name: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
-          image_version: 7.0
+          image_version: ${{ matrix.DOCKER_TAG }}
           docker_file: 'web-service/.'
 
       - name: 删除旧的GitHub-workflow
@@ -706,7 +706,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0
+          - DOCKER_TAG: 6.0.27
 
     # 运行步骤
     steps:
@@ -741,7 +741,7 @@ jobs:
           file: ./web-nginx-mysql/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-web-nginx-mysql:7.0
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-web-nginx-mysql:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -752,7 +752,7 @@ jobs:
           repository_name: 'zabbix-web-nginx-mysql'
           user_name: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
-          image_version: 7.0
+          image_version: ${{ matrix.DOCKER_TAG }}
           docker_file: 'web-nginx-mysql/.'
 
       - name: 删除旧的GitHub-workflow
@@ -772,7 +772,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0
+          - DOCKER_TAG: 6.0.27
 
     # 运行步骤
     steps:
@@ -807,7 +807,7 @@ jobs:
           file: ./web-nginx-pgsql/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-web-nginx-pgsql:7.0
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-web-nginx-pgsql:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -818,7 +818,7 @@ jobs:
           repository_name: 'zabbix-web-nginx-pgsql'
           user_name: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
-          image_version: 7.0
+          image_version: ${{ matrix.DOCKER_TAG }}
           docker_file: 'web-nginx-pgsql/.'
 
       - name: 删除旧的GitHub-workflow
@@ -838,7 +838,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0
+          - DOCKER_TAG: 6.0.27
 
     # 运行步骤
     steps:
@@ -873,7 +873,7 @@ jobs:
           file: ./snmptraps/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-snmptraps:7.0
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-snmptraps:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -884,7 +884,7 @@ jobs:
           repository_name: 'zabbix-snmptraps'
           user_name: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
-          image_version: 7.0
+          image_version: ${{ matrix.DOCKER_TAG }}
           docker_file: 'snmptraps/.'
 
 
@@ -905,7 +905,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0
+          - DOCKER_TAG: 6.0.27
 
     # 运行步骤
     steps:
@@ -940,7 +940,7 @@ jobs:
           file: ./java-gateway/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-java-gateway:7.0
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-java-gateway:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -951,7 +951,7 @@ jobs:
           repository_name: 'zabbix-java-gateway'
           user_name: ${{ secrets.ALIYUN_USERNAME }}
           password: ${{ secrets.ALIYUN_PASSWORD }}
-          image_version: 7.0
+          image_version: ${{ matrix.DOCKER_TAG }}
           docker_file: 'java-gateway/.'
 
 

@@ -3,8 +3,8 @@
 ##########################################
 #
 # zabbix版本号
-ARG MAJOR_VERSION=7.0
-ARG ZBX_VERSION=${MAJOR_VERSION}
+ARG MAJOR_VERSION=6.0
+ARG ZBX_VERSION=${MAJOR_VERSION}.27
 ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-pgsql:${ZBX_VERSION}
 
 # 指定创建的基础镜像
