@@ -219,9 +219,7 @@ COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_get/zabbix_get", "/u
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_sender/zabbix_sender", "/usr/bin/zabbix_sender"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/conf/zabbix_server.conf", "/usr/local/zabbix/etc/zabbix_server.conf"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/database/postgresql/create_server.sql.gz", "/usr/local/zabbix/share/doc/zabbix-server-postgresql/create.sql.gz"]
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/database/postgresql/timescaledb/schema.sql", "/usr/local/zabbix/share/doc/zabbix-server-postgresql/timescaledb.sql"]
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/database/postgresql/timescaledb/option-patches/with-compression/*.sql", "/usr/local/zabbix/share/doc/zabbix-server-postgresql/option-patches/with-compression/"]
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/database/postgresql/timescaledb/option-patches/without-compression/*.sql", "/usr/local/zabbix/share/doc/zabbix-server-postgresql/option-patches/without-compression/"]
+COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/database/postgresql/timescaledb.sql", "/usr/local/zabbix/share/doc/zabbix-server-postgresql/timescaledb.sql"]
 COPY ["./zabbix-server-pgsql/docker-entrypoint.sh", "/usr/bin/"]
 
 # ***** 创建zabbix目录授权 *****
