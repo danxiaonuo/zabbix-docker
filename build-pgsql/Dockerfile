@@ -4,7 +4,7 @@
 #
 # zabbix版本号
 ARG MAJOR_VERSION=6.0
-ARG ZBX_VERSION=${MAJOR_VERSION}.27
+ARG ZBX_VERSION=${MAJOR_VERSION}.28
 ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-base:${ZBX_VERSION}
 
 # 指定创建的基础镜像
