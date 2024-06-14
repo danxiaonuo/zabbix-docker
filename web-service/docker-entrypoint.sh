@@ -109,9 +109,14 @@ prepare_zbx_web_service_config() {
     update_config_var $ZBX_CONFIG "IgnoreURLCertErrors" "${ZBX_IGNOREURLCERTERRORS}"
 }
 
+prepare_permissions() {
+   sudo chown -R zabbix:zabbix /usr/local/zabbix && sudo chmod -R 775 /usr/local/zabbix
+}
+
 prepare_web_service() {
     echo "** Preparing Zabbix web service"
     prepare_zbx_web_service_config
+    prepare_permissions
 }
 
 #################################################

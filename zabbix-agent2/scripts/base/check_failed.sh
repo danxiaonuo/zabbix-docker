@@ -4,13 +4,13 @@
 processName="check_failed.sh"
 processNum=$(ps -aux | grep -i "${processName}" | grep -v grep | wc -l)
 
-if [ ${processNum} >= 5 ]; then
+if [ ${processNum} -ge 5 ]; then
    exit 1
 fi
 
 ProgramPath="/usr/local/zabbix"
 CONFIGFILE=${ProgramPath}/etc/zabbix_agent2.conf
-zbx_sender='/usr/local/zabbix/bin/zabbix_sender'
+zbx_sender='/usr/bin/zabbix_sender'
 mon=$(date +%B)
 h=$(date +%d)
 ms=$(date +%H:%M)

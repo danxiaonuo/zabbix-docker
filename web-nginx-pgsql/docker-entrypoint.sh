@@ -21,6 +21,7 @@ ZABBIX_ETC_DIR="/usr/local/zabbix/etc"
 # Web interface www-root directory
 ZABBIX_WWW_ROOT="/www/zabbix"
 
+
 # usage: file_env VAR [DEFAULT]
 # as example: file_env 'MYSQL_PASSWORD' 'zabbix'
 #    (will allow for "$MYSQL_PASSWORD_FILE" to fill in the value of "$MYSQL_PASSWORD" from a file)
@@ -114,10 +115,15 @@ check_db_connect() {
     unset PGSSLKEY
 }
 
-
 prepare_zbx_web_config() {
     echo "** Preparing Zabbix frontend configuration file"
 
+    if [ "$(id -u)" == '0' ]; then
+        echo "user = zabbix" >> "$PHP_CONFIG_FILE"
+        echo "group = zabbix" >> "$PHP_CONFIG_FILE"
+        echo "listen.owner = nginx" >> "$PHP_CONFIG_FILE"
+        echo "listen.group = nginx" >> "$PHP_CONFIG_FILE"
+    fi
 
     : ${ZBX_DENY_GUI_ACCESS:="false"}
     export ZBX_DENY_GUI_ACCESS=${ZBX_DENY_GUI_ACCESS,,}
@@ -166,6 +172,9 @@ prepare_zbx_web_config() {
     export ZBX_SSO_SP_KEY=${ZBX_SSO_SP_KEY}
     export ZBX_SSO_SP_CERT=${ZBX_SSO_SP_CERT}
     export ZBX_SSO_IDP_CERT=${ZBX_SSO_IDP_CERT}
+
+    : ${ZBX_ALLOW_HTTP_AUTH:="true"}
+    export ZBX_ALLOW_HTTP_AUTH=${ZBX_ALLOW_HTTP_AUTH}
 
     if [ -n "${ZBX_SESSION_NAME}" ]; then
         cp "$ZABBIX_WWW_ROOT/include/defines.inc.php" "/tmp/defines.inc.php_tmp"

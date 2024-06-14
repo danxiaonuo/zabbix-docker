@@ -217,7 +217,7 @@ update_zbx_config() {
 
     update_config_var $ZBX_CONFIG "AlertScriptsPath" "${ZABBIX_USER_HOME_DIR}/alertscripts"
     update_config_var $ZBX_CONFIG "ExternalScripts" "${ZABBIX_USER_HOME_DIR}/externalscripts"
-	  update_config_var $ZBX_CONFIG "Include" "$ZABBIX_ETC_DIR/zabbix_proxy.conf.d/*.conf"
+	  update_config_var $ZBX_CONFIG "Include" "${ZABBIX_ETC_DIR}/zabbix_proxy.conf.d/*.conf"
 
     update_config_var $ZBX_CONFIG "FpingLocation" "/usr/bin/fping"
     update_config_var $ZBX_CONFIG "Fping6Location" "/usr/bin/fping6"
@@ -255,12 +255,20 @@ update_zbx_config() {
     else
         update_config_var $ZBX_CONFIG "AllowRoot" "1"
     fi
+
+    update_config_var $ZBX_CONFIG "WebDriverURL" "${ZBX_WEBDRIVERURL}"
+    update_config_var $ZBX_CONFIG "StartBrowserPollers" "${ZBX_STARTBROWSERPOLLERS}"
+}
+
+prepare_permissions() {
+   sudo chown -R zabbix:zabbix /usr/local/zabbix && sudo chmod -R 775 /usr/local/zabbix
 }
 
 prepare_proxy() {
     echo "Preparing Zabbix proxy"
 
     update_zbx_config
+    prepare_permissions
 }
 
 #################################################

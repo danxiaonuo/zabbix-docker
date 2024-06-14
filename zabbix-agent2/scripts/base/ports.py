@@ -31,8 +31,8 @@ def execute_cmd(cmd):
     """
     cmd_res = {'status': 1, 'stdout': '', 'stderr': ''}
     try:
-        res = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        # res = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,encoding="utf-8")
+        # res = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        res = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,encoding="utf-8")
         res_stdout, res_stderr = res.communicate()
         cmd_res['status'] = res.returncode
         cmd_res['stdout'] = res_stdout
@@ -43,7 +43,7 @@ def execute_cmd(cmd):
         return cmd_res
 
 # 获取本机IP
-zbx_ip = "/usr/local/zabbix/bin/zabbix_get -s 127.0.0.1 -k agent.hostname"
+zbx_ip = "/usr/bin/zabbix_get -s 127.0.0.1 -k agent.hostname"
 # 发送本机IP
 senderhostname = execute_cmd(zbx_ip)['stdout'].strip()
 # 排除列表
@@ -61,9 +61,9 @@ zbx_pid_key = 'pid_status'
 # zabbix配置文件
 zbx_cfg = '/usr/local/zabbix/etc/zabbix_agent2.conf'
 # zabbix_get
-zbx_get = '/usr/local/zabbix/bin/zabbix_get'
+zbx_get = '/usr/bin/zabbix_get'
 # zabbix_sender
-zbx_sender = '/usr/local/zabbix/bin/zabbix_sender'
+zbx_sender = '/usr/bin/zabbix_sender'
 # 临时文件
 zbx_tmp_port_file='/usr/local/zabbix/scripts/base/.zabbix_port_discovery'
 zbx_tmp_pid_file='/usr/local/zabbix/scripts/base/.zabbix_pid_discovery'

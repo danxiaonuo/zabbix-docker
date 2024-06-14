@@ -3,8 +3,8 @@
 ##########################################
 #
 # zabbix版本号
-ARG MAJOR_VERSION=6.0
-ARG ZBX_VERSION=${MAJOR_VERSION}.28
+ARG MAJOR_VERSION=7.0
+ARG ZBX_VERSION=${MAJOR_VERSION}.0
 ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-pgsql:${ZBX_VERSION}
 
 # 指定创建的基础镜像
@@ -27,7 +27,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV DEBIAN_FRONTEND=$DEBIAN_FRONTEND
 
 # GO环境变量
-ARG GO_VERSION=1.22.1
+ARG GO_VERSION=1.22.4
 ENV GO_VERSION=$GO_VERSION
 ARG GOROOT=/opt/go
 ENV GOROOT=$GOROOT
@@ -118,7 +118,7 @@ RUN --mount=type=cache,target=/var/lib/apt/,sharing=locked \
    # 更新系统软件
    DEBIAN_FRONTEND=noninteractive apt-get update -qqy && apt-get upgrade -qqy && \
    # 安装依赖包
-   DEBIAN_FRONTEND=noninteractive apt-get install -qqy --no-install-recommends $PKG_DEPS $INSTALL_PKGS && \
+   DEBIAN_FRONTEND=noninteractive apt-get install -qqy --no-install-recommends $PKG_DEPS $INSTALL_PKGS --option=Dpkg::Options::=--force-confdef && \
    DEBIAN_FRONTEND=noninteractive apt-get -qqy --no-install-recommends autoremove --purge && \
    DEBIAN_FRONTEND=noninteractive apt-get -qqy --no-install-recommends autoclean && \
    rm -rf /var/lib/apt/lists/* && \
@@ -169,6 +169,7 @@ RUN set -eux && \
     mkdir -p /usr/local/zabbix/enc && \
     mkdir -p /usr/local/zabbix/export && \
     mkdir -p /usr/local/zabbix/scripts && \
+    mkdir -p /usr/local/zabbix/tools && \
     mkdir -p /usr/local/zabbix/modules && \
     mkdir -p /usr/local/zabbix/buffer
 
@@ -182,17 +183,12 @@ EXPOSE 10050/TCP 31999/TCP
 WORKDIR /usr/local/zabbix
 
 # 拷贝文件
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/go/bin/zabbix_agent2", "/usr/sbin/zabbix_agent2"]
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_get/zabbix_get", "/usr/bin/zabbix_get"]
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_sender/zabbix_sender", "/usr/bin/zabbix_sender"]
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/go/conf/zabbix_agent2.conf", "/usr/local/zabbix/etc/zabbix_agent2.conf"]
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/go/conf/zabbix_agent2.d/plugins.d", "/usr/local/zabbix/etc/zabbix_agent2.d/plugins.d"]
-# COPY --from=builder ["/tmp/mongodb_plugin/mongodb.conf", "/usr/local/zabbix/etc/zabbix_agent2.d/plugins.d/mongodb.conf"]
-# COPY --from=builder ["/tmp/postgresql_plugin/postgresql.conf", "/usr/local/zabbix/etc/zabbix_agent2.d/plugins.d/postgresql.conf"]
-COPY --from=builder ["/tmp/mongodb_plugin/zabbix-agent2-plugin-mongodb", "/usr/sbin/zabbix-agent2-plugin/zabbix-agent2-plugin-mongodb"]
-COPY --from=builder ["/tmp/postgresql_plugin/zabbix-agent2-plugin-postgresql", "/usr/sbin/zabbix-agent2-plugin/zabbix-agent2-plugin-postgresql"]
+COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}-output/agent2/sbin/", "/usr/sbin/"]
+COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}-output/general/bin/*", "/usr/bin/"]
+COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}-output/agent2/conf/", "/usr/local/zabbix/etc/"]
 COPY ["./zabbix-agent2/docker-entrypoint.sh", "/usr/bin/"]
 COPY ["./zabbix-agent2/scripts/", "/usr/local/zabbix/scripts/"]
+COPY ["./zabbix-agent2/tools/", "/usr/local/zabbix/tools/"]
 COPY ["./zabbix-agent2/zabbix_agentd.conf.d/", "/usr/local/zabbix/etc/zabbix_agentd.conf.d/"]
 COPY ["./zabbix-agent2/zabbix_agent2.d/", "/usr/local/zabbix/etc/zabbix_agent2.d/"]
 

@@ -346,14 +346,13 @@ create_db_schema_postgresql() {
             psql_query "CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;" "${DB_SERVER_DBNAME}"
         fi
 
-        exec_sql_file "/usr/local/zabbix/share/doc/zabbix-server-postgresql/create.sql.gz"
+        exec_sql_file "${ZABBIX_USER_HOME_DIR}/share/doc/zabbix-server-postgresql/create.sql.gz"
 
         if [ "${ENABLE_TIMESCALEDB,,}" == "true" ]; then
-            exec_sql_file "/usr/local/zabbix/share/doc/zabbix-server-postgresql/timescaledb.sql"
+            exec_sql_file "${ZABBIX_USER_HOME_DIR}/share/doc/zabbix-server-postgresql/timescaledb.sql"
         fi
 
-        apply_db_scripts "/usr/local/zabbix/dbscripts/*.sql"
-        apply_db_scripts "/usr/local/zabbix/dbscripts/*.sql"
+        apply_db_scripts "${ZABBIX_USER_HOME_DIR}/dbscripts/*.sql"
     fi
 }
 
@@ -396,6 +395,7 @@ update_zbx_config() {
         update_config_var $ZBX_CONFIG "VaultDBPath" "${ZBX_VAULTDBPATH}"
         update_config_var $ZBX_CONFIG "VaultTLSCertFile" "${ZBX_VAULTTLSCERTFILE}"
         update_config_var $ZBX_CONFIG "VaultTLSKeyFile" "${ZBX_VAULTTLSKEYFILE}"
+        update_config_var $ZBX_CONFIG "VaultPrefix" "${ZBX_VAULTPREFIX}"
         update_config_var $ZBX_CONFIG "VaultURL" "${ZBX_VAULTURL}"
         update_config_var $ZBX_CONFIG "DBUser"
         update_config_var $ZBX_CONFIG "DBPassword"
@@ -404,6 +404,7 @@ update_zbx_config() {
         update_config_var $ZBX_CONFIG "VaultDBPath"
         update_config_var $ZBX_CONFIG "VaultTLSCertFile"
         update_config_var $ZBX_CONFIG "VaultTLSKeyFile"
+        update_config_var $ZBX_CONFIG "VaultPrefix"
         update_config_var $ZBX_CONFIG "VaultURL"
         update_config_var $ZBX_CONFIG "DBUser" "${DB_SERVER_ZBX_USER}"
         update_config_var $ZBX_CONFIG "DBPassword" "${DB_SERVER_ZBX_PASS}"
@@ -411,6 +412,7 @@ update_zbx_config() {
 
     update_config_var $ZBX_CONFIG "AllowUnsupportedDBVersions" "${ZBX_ALLOWUNSUPPORTEDDBVERSIONS}"
     update_config_var $ZBX_CONFIG "MaxConcurrentChecksPerPoller" "${ZBX_MAXCONCURRENTCHECKSPERPOLLER}"
+    update_config_var $ZBX_CONFIG "EnableGlobalScripts" "${ZBX_ENABLEGLOBALSCRIPTS}"
 
     update_config_var $ZBX_CONFIG "StartReportWriters" "${ZBX_STARTREPORTWRITERS}"
     : ${ZBX_WEBSERVICEURL:="http://zabbix-web-service:10053/report"}
@@ -501,7 +503,7 @@ update_zbx_config() {
 
     update_config_var $ZBX_CONFIG "AlertScriptsPath" "$ZABBIX_USER_HOME_DIR/alertscripts"
     update_config_var $ZBX_CONFIG "ExternalScripts" "$ZABBIX_USER_HOME_DIR/externalscripts"
-	  update_config_var $ZBX_CONFIG "Include" "$ZABBIX_ETC_DIR/zabbix_server.conf.d/*.conf"
+    update_config_var $ZBX_CONFIG "Include" "$ZABBIX_ETC_DIR/zabbix_server.conf.d/*.conf"
 
     if [ -n "${ZBX_EXPORTFILESIZE}" ]; then
         update_config_var $ZBX_CONFIG "ExportDir" "$ZABBIX_USER_HOME_DIR/export/"
@@ -541,6 +543,9 @@ update_zbx_config() {
     update_config_var $ZBX_CONFIG "TLSPSKFile" "${ZBX_TLSPSKFILE}"
 
     update_config_var $ZBX_CONFIG "ServiceManagerSyncFrequency" "${ZBX_SERVICEMANAGERSYNCFREQUENCY}"
+    update_config_var $ZBX_CONFIG "AllowSoftwareUpdateCheck" "${ZBX_ALLOWSOFTWAREUPDATECHECK}"
+
+    update_config_var $ZBX_CONFIG "SMSDevices" "${ZBX_SMSDEVICES}"
 
     if [ "${ZBX_AUTOHANODENAME}" == 'fqdn' ] && [ ! -n "${ZBX_HANODENAME}" ]; then
         update_config_var $ZBX_CONFIG "HANodeName" "$(hostname -f)"
@@ -550,7 +555,7 @@ update_zbx_config() {
         update_config_var $ZBX_CONFIG "HANodeName" "${ZBX_HANODENAME}"
     fi
 
-    : ${ZBX_NODEADDRESSPORT:="16168"}
+    : ${ZBX_NODEADDRESSPORT:="10051"}
     if [ "${ZBX_AUTONODEADDRESS}" == 'fqdn' ] && [ ! -n "${ZBX_NODEADDRESS}" ]; then
         update_config_var $ZBX_CONFIG "NodeAddress" "$(hostname -f):${ZBX_NODEADDRESSPORT}"
     elif [ "${ZBX_AUTONODEADDRESS}" == 'hostname' ] && [ ! -n "${ZBX_NODEADDRESS}" ]; then
@@ -564,6 +569,9 @@ update_zbx_config() {
     else
         update_config_var $ZBX_CONFIG "AllowRoot" "1"
     fi
+
+    update_config_var $ZBX_CONFIG "WebDriverURL" "${ZBX_WEBDRIVERURL}"
+    update_config_var $ZBX_CONFIG "StartBrowserPollers" "${ZBX_STARTBROWSERPOLLERS}"
 }
 
 prepare_db() {
@@ -584,7 +592,7 @@ prepare_server() {
 
     prepare_db
     update_zbx_config
-	  prepare_permissions
+    prepare_permissions
 }
 
 #################################################

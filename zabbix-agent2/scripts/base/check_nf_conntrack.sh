@@ -3,13 +3,13 @@
 processName="check_nf_conntrack.sh"
 processNum=$(ps -aux | grep -i "${processName}" | grep -v grep | wc -l)
 
-if [ ${processNum} >= 5 ]; then
+if [ ${processNum} -ge 5 ]; then
    exit 1
 fi
 
 ProgramPath="/usr/local/zabbix"
 CONFIGFILE=${ProgramPath}/etc/zabbix_agent2.conf
-zbx_sender='/usr/local/zabbix/bin/zabbix_sender'
+zbx_sender='/usr/bin/zabbix_sender'
 x=0.7
 nf_conntrack_max=$(cat /proc/sys/net/nf_conntrack_max)
 nf_conntrack_number=$(cat /proc/sys/net/netfilter/nf_conntrack_count)

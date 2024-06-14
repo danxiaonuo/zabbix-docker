@@ -19,8 +19,8 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV DEBIAN_FRONTEND=$DEBIAN_FRONTEND
 
 # zabbix版本号
-ARG MAJOR_VERSION=6.0
-ARG ZBX_VERSION=${MAJOR_VERSION}.28
+ARG MAJOR_VERSION=7.0
+ARG ZBX_VERSION=${MAJOR_VERSION}.0
 ARG ZBX_SOURCES=https://git.zabbix.com/scm/zbx/zabbix.git
 
 ENV TERM=xterm \
@@ -94,7 +94,7 @@ RUN --mount=type=cache,target=/var/lib/apt/,sharing=locked \
    # 更新系统软件
    DEBIAN_FRONTEND=noninteractive apt-get update -qqy && apt-get upgrade -qqy && \
    # 安装依赖包
-   DEBIAN_FRONTEND=noninteractive apt-get install -qqy --no-install-recommends $PKG_DEPS $INSTALL_PKGS && \
+   DEBIAN_FRONTEND=noninteractive apt-get install -qqy --no-install-recommends $PKG_DEPS $INSTALL_PKGS --option=Dpkg::Options::=--force-confdef && \
    DEBIAN_FRONTEND=noninteractive apt-get -qqy --no-install-recommends autoremove --purge && \
    DEBIAN_FRONTEND=noninteractive apt-get -qqy --no-install-recommends autoclean && \
    rm -rf /var/lib/apt/lists/* && \
@@ -158,4 +158,4 @@ RUN set -eux && \
 USER 1997
 
 # ***** 执行命令 *****
-CMD ["/usr/sbin/snmptrapd", "-n", "-C", "-c", "/etc/snmp/snmptrapd.conf", "-Lo", "-A"]
+CMD ["/usr/sbin/snmptrapd", "-n", "-t", "-X", "-C", "-c", "/etc/snmp/snmptrapd.conf", "-Lo", "-A", "--doNotFork=yes", "--agentuser=zabbix", "--agentgroup=zabbix"]

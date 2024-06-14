@@ -3,8 +3,8 @@
 ##########################################
 #
 # zabbix版本号
-ARG MAJOR_VERSION=6.0
-ARG ZBX_VERSION=${MAJOR_VERSION}.28
+ARG MAJOR_VERSION=7.0
+ARG ZBX_VERSION=${MAJOR_VERSION}.0
 ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-pgsql:${ZBX_VERSION}
 
 # 指定创建的基础镜像
@@ -27,7 +27,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV DEBIAN_FRONTEND=$DEBIAN_FRONTEND
 
 # GO环境变量
-ARG GO_VERSION=1.22.1
+ARG GO_VERSION=1.22.4
 ENV GO_VERSION=$GO_VERSION
 ARG GOROOT=/opt/go
 ENV GOROOT=$GOROOT
@@ -135,7 +135,7 @@ RUN --mount=type=cache,target=/var/lib/apt/,sharing=locked \
    # 更新系统软件
    DEBIAN_FRONTEND=noninteractive apt-get update -qqy && apt-get upgrade -qqy && \
    # 安装依赖包
-   DEBIAN_FRONTEND=noninteractive apt-get install -qqy --no-install-recommends $PKG_DEPS $INSTALL_PKGS && \
+   DEBIAN_FRONTEND=noninteractive apt-get install -qqy --no-install-recommends $PKG_DEPS $INSTALL_PKGS --option=Dpkg::Options::=--force-confdef && \
    DEBIAN_FRONTEND=noninteractive apt-get -qqy --no-install-recommends autoremove --purge && \
    DEBIAN_FRONTEND=noninteractive apt-get -qqy --no-install-recommends autoclean && \
    rm -rf /var/lib/apt/lists/* && \
@@ -166,7 +166,7 @@ RUN set -eux && \
     python2 /tmp/get-pip.py && \
     pip3 config set global.index-url http://mirrors.aliyun.com/pypi/simple/ && \
     pip3 config set install.trusted-host mirrors.aliyun.com && \
-    pip3 install --upgrade pip setuptools wheel pycryptodome lxml cython beautifulsoup4 redis pymysql && \
+    pip3 install --upgrade pip setuptools wheel pycryptodome lxml cython beautifulsoup4 redis pymysql psycopg2-binary psycopg2 && \
     rm -r /root/.cache && rm -rf /tmp/*
 
 # ***** 创建zabbix用户和相关目录 *****
@@ -214,12 +214,10 @@ WORKDIR /usr/local/zabbix
 VOLUME ["/usr/local/zabbix/snmptraps", "/usr/local/zabbix/export"]
 
 # 拷贝文件
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_server/zabbix_server", "/usr/sbin/zabbix_server"]
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_get/zabbix_get", "/usr/bin/zabbix_get"]
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_sender/zabbix_sender", "/usr/bin/zabbix_sender"]
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/conf/zabbix_server.conf", "/usr/local/zabbix/etc/zabbix_server.conf"]
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/database/postgresql/create_server.sql.gz", "/usr/local/zabbix/share/doc/zabbix-server-postgresql/create.sql.gz"]
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/database/postgresql/timescaledb.sql", "/usr/local/zabbix/share/doc/zabbix-server-postgresql/timescaledb.sql"]
+COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}-output/server/sbin/zabbix_server", "/usr/sbin/zabbix_server"]
+COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}-output/general/bin/*", "/usr/bin/"]
+COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}-output/server/conf/", "/usr/local/zabbix/etc/"]
+COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}-output/server/database/postgresql/", "/usr/local/zabbix/share/doc/zabbix-server-postgresql/"]
 COPY ["./zabbix-server-pgsql/docker-entrypoint.sh", "/usr/bin/"]
 
 # ***** 创建zabbix目录授权 *****

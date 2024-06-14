@@ -33,7 +33,7 @@ $DB['VAULT_DB_PATH']            = getenv('ZBX_VAULTDBPATH');
 $DB['VAULT_TOKEN']              = getenv('VAULT_TOKEN');
 
 if (file_exists('/www/certs/vault.crt')) {
-    $DB['VAULT_CERT_FILE'] = file_exists('/www/certs/vault.crt');
+    $DB['VAULT_CERT_FILE'] = '/www/certs/vault.crt';
 }
 elseif (file_exists(getenv('ZBX_VAULTCERTFILE'))) {
     $DB['VAULT_CERT_FILE'] = getenv('ZBX_VAULTCERTFILE');
@@ -103,3 +103,5 @@ else {
 
 $sso_settings = str_replace("'","\"",getenv('ZBX_SSO_SETTINGS'));
 $SSO['SETTINGS'] = (json_decode($sso_settings)) ? json_decode($sso_settings, true) : array();
+
+$ALLOW_HTTP_AUTH = getenv('ZBX_ALLOW_HTTP_AUTH') == 'true' ? true: false;

@@ -323,7 +323,7 @@ create_db_schema_mysql() {
     if [ -z "${ZBX_DB_VERSION}" ]; then
         echo "** Creating '${DB_SERVER_DBNAME}' schema in MySQL"
 
-        exec_sql_file "/usr/local/zabbix/share/doc/zabbix-proxy-mysql/create.sql.gz"
+        exec_sql_file "${ZABBIX_USER_HOME_DIR}/share/doc/zabbix-proxy-mysql/create.sql.gz"
     fi
 }
 
@@ -382,6 +382,7 @@ update_zbx_config() {
         update_config_var $ZBX_CONFIG "VaultDBPath" "${ZBX_VAULTDBPATH}"
         update_config_var $ZBX_CONFIG "VaultTLSCertFile" "${ZBX_VAULTTLSCERTFILE}"
         update_config_var $ZBX_CONFIG "VaultTLSKeyFile" "${ZBX_VAULTTLSKEYFILE}"
+        update_config_var $ZBX_CONFIG "VaultPrefix" "${ZBX_VAULTPREFIX}"
         update_config_var $ZBX_CONFIG "VaultURL" "${ZBX_VAULTURL}"
         update_config_var $ZBX_CONFIG "DBUser"
         update_config_var $ZBX_CONFIG "DBPassword"
@@ -390,6 +391,7 @@ update_zbx_config() {
         update_config_var $ZBX_CONFIG "VaultDBPath"
         update_config_var $ZBX_CONFIG "VaultTLSCertFile"
         update_config_var $ZBX_CONFIG "VaultTLSKeyFile"
+        update_config_var $ZBX_CONFIG "VaultPrefix"
         update_config_var $ZBX_CONFIG "VaultURL"
         update_config_var $ZBX_CONFIG "DBUser" "${DB_SERVER_ZBX_USER}"
         update_config_var $ZBX_CONFIG "DBPassword" "${DB_SERVER_ZBX_PASS}"
@@ -504,6 +506,9 @@ update_zbx_config() {
     else
         update_config_var $ZBX_CONFIG "AllowRoot" "1"
     fi
+
+    update_config_var $ZBX_CONFIG "WebDriverURL" "${ZBX_WEBDRIVERURL}"
+    update_config_var $ZBX_CONFIG "StartBrowserPollers" "${ZBX_STARTBROWSERPOLLERS}"
 }
 
 prepare_db() {
@@ -516,11 +521,16 @@ prepare_db() {
     create_db_schema_mysql
 }
 
+prepare_permissions() {
+   sudo chown -R zabbix:zabbix /usr/local/zabbix && sudo chmod -R 775 /usr/local/zabbix
+}
+
 prepare_proxy() {
     echo "** Preparing Zabbix proxy"
 
     prepare_db
     update_zbx_config
+    prepare_permissions
 }
 
 #################################################

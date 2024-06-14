@@ -4,8 +4,8 @@
 #
 #
 # zabbix版本号
-ARG MAJOR_VERSION=6.0
-ARG ZBX_VERSION=${MAJOR_VERSION}.28
+ARG MAJOR_VERSION=7.0
+ARG ZBX_VERSION=${MAJOR_VERSION}.0
 ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-mysql:${ZBX_VERSION}
 ARG BUILD_NGINX_IMAGE=danxiaonuo/nginx:latest
 ARG BUILD_PHP_IMAGE=danxiaonuo/php:latest
@@ -48,7 +48,7 @@ ENV PATH=$PATH
 
 # luajit2
 # https://github.com/openresty/luajit2
-ARG LUAJIT_VERSION=2.1-20231117
+ARG LUAJIT_VERSION=2.1-20240314
 ENV LUAJIT_VERSION=$LUAJIT_VERSION
 ARG LUAJIT_LIB=/usr/local/lib
 ENV LUAJIT_LIB=$LUAJIT_LIB
@@ -175,7 +175,7 @@ RUN --mount=type=cache,target=/var/lib/apt/,sharing=locked \
    # 更新系统软件
    DEBIAN_FRONTEND=noninteractive apt-get update -qqy && apt-get upgrade -qqy && \
    # 安装依赖包
-   DEBIAN_FRONTEND=noninteractive apt-get install -qqy --no-install-recommends $PKG_DEPS $NGINX_BUILD_DEPS $PHP_BUILD_DEPS && \
+   DEBIAN_FRONTEND=noninteractive apt-get install -qqy --no-install-recommends $PKG_DEPS $NGINX_BUILD_DEPS $PHP_BUILD_DEPS --option=Dpkg::Options::=--force-confdef && \
    DEBIAN_FRONTEND=noninteractive apt-get -qqy --no-install-recommends autoremove --purge && \
    DEBIAN_FRONTEND=noninteractive apt-get -qqy --no-install-recommends autoclean && \
    rm -rf /var/lib/apt/lists/* && \
