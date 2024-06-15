@@ -88,6 +88,7 @@ ARG PKG_DEPS="\
     python3 \
     python3-dev \
     python3-pip \
+    libpq-dev \
     postgresql-client \
     snmp-mibs-downloader \
     language-pack-zh-hans \
