@@ -149,7 +149,7 @@ RUN set -eux && \
     python2 /tmp/get-pip.py && \
     pip3 config set global.index-url http://mirrors.aliyun.com/pypi/simple/ && \
     pip3 config set install.trusted-host mirrors.aliyun.com && \
-    pip3 install --upgrade pip setuptools wheel pycryptodome lxml cython beautifulsoup4 requests && \
+    pip3 install --upgrade pip setuptools wheel pycryptodome lxml cython beautifulsoup4 requests distro && \
     rm -r /root/.cache && rm -rf /tmp/*
 
 # ***** 创建zabbix用户和相关目录 *****
