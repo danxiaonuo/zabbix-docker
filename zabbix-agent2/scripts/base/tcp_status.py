@@ -21,7 +21,7 @@ tmp_file = "/usr/local/zabbix/scripts/base/.tcp_connect_status.txt"
 # 获取tcp状态
 tcp_conn_status_cmd = "ss -tan|awk 'NR>1{++S[$1]}END{for (a in S) print a,S[a]}'"
 # 获取本机IP
-zbx_ip = "/usr/local/zabbix/bin/zabbix_get -s 127.0.0.1 -k agent.hostname"
+zbx_ip = "/usr/bin/zabbix_get -s 127.0.0.1 -k agent.hostname -s 127.0.0.1 -k agent.hostname"
 # zabbix发送数据命令
 zbx_sender_bin = "/usr/bin/zabbix_sender"
 # zabbix配置文件
