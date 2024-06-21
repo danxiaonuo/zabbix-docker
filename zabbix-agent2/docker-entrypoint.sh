@@ -119,14 +119,6 @@ prepare_zbx_agent_config() {
     : ${ZBX_PASSIVESERVERS:=""}
     : ${ZBX_ACTIVESERVERS:=""}
 
-    # [ -n "$ZBX_PASSIVESERVERS" ] && ZBX_PASSIVESERVERS=","$ZBX_PASSIVESERVERS
-
-    # ZBX_PASSIVESERVERS=$ZBX_SERVER_HOST$ZBX_PASSIVESERVERS
-
-    # [ -n "$ZBX_ACTIVESERVERS" ] && ZBX_ACTIVESERVERS=","$ZBX_ACTIVESERVERS
-
-    # ZBX_ACTIVESERVERS=$ZBX_SERVER_HOST":"$ZBX_SERVER_PORT$ZBX_ACTIVESERVERS
-
     update_config_var $ZBX_AGENT_CONFIG "PidFile"
     update_config_var $ZBX_AGENT_CONFIG "LogType" "console"
     update_config_var $ZBX_AGENT_CONFIG "LogFile"
@@ -134,15 +126,7 @@ prepare_zbx_agent_config() {
     update_config_var $ZBX_AGENT_CONFIG "DebugLevel" "${ZBX_DEBUGLEVEL}"
     update_config_var $ZBX_AGENT_CONFIG "SourceIP"
     update_config_var $ZBX_AGENT_CONFIG "Plugins.SystemRun.LogRemoteCommands" "${ZBX_LOGREMOTECOMMANDS}"
-
-    : ${ZBX_PASSIVE_ALLOW:="true"}
-    if [ "${ZBX_PASSIVE_ALLOW,,}" == "true" ]; then
-        echo "** Using '$ZBX_PASSIVESERVERS' servers for passive checks"
-        update_config_var $ZBX_AGENT_CONFIG "Server" "${ZBX_PASSIVESERVERS}"
-    else
-        update_config_var $ZBX_AGENT_CONFIG "Server"
-    fi
-
+    update_config_var $ZBX_AGENT_CONFIG "Server" "${ZBX_SERVER_HOST}"
     update_config_var $ZBX_AGENT_CONFIG "ListenPort" "${ZBX_LISTENPORT}"
     update_config_var $ZBX_AGENT_CONFIG "ListenIP" "${ZBX_LISTENIP}"
 
@@ -203,7 +187,7 @@ prepare_zbx_agent_config() {
 prepare_zbx_agent_plugin_config() {
     echo "** Preparing Zabbix agent plugin configuration files"
 
-    sed -i "/Include=.*/i\Include=${ZABBIX_ETC_DIR}/zabbix_agent2.d/plugins.d/*.conf" ${ZBX_AGENT_CONFIG}
+    sed -i "/AllowKey=.*/i\Include=${ZABBIX_ETC_DIR}/zabbix_agent2.d/plugins.d/*.conf" ${ZBX_AGENT_CONFIG}
     # update_config_var "${ZABBIX_ETC_DIR}/zabbix_agent2.d/plugins.d/mongodb.conf" "Plugins.MongoDB.System.Path" "/usr/sbin/zabbix-agent2-plugin/mongodb"
     # update_config_var "${ZABBIX_ETC_DIR}/zabbix_agent2.d/plugins.d/postgresql.conf" "Plugins.PostgreSQL.System.Path" "/usr/sbin/zabbix-agent2-plugin/postgresql"
     update_config_var "${ZABBIX_ETC_DIR}/zabbix_agent2.d/plugins.d/mssql.conf" "Plugins.MSSQL.System.Path" "/usr/sbin/zabbix-agent2-plugin/mssql"
