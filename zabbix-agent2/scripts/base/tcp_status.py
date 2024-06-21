@@ -25,7 +25,7 @@ zbx_ip = "/usr/local/zabbix/bin/zabbix_get -s 127.0.0.1 -k agent.hostname"
 # zabbix发送数据命令
 zbx_sender_bin = "/usr/bin/zabbix_sender"
 # zabbix配置文件
-zbx_conf_path = '/usr/local/zabbix/etc/zabbix_agent2.conf '
+zbx_conf_path = '/usr/local/zabbix/etc/zabbix_agent2.conf'
 
 # tcp 连接状态码
 tcp_conn_status_dic = {
