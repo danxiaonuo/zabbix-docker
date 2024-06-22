@@ -84,11 +84,11 @@ def send_tcp_status():
     # 发送数据给zabbix
     sender_data_ret = execute_cmd('{0} -c {1} -i {2}'.format(zbx_sender_bin, zbx_conf_path, tmp_file))
     # 当命令执行成功，并且找到"failed: 0"
-    if sender_data_ret['status'] == 0:
-       os.remove(tmp_file)  # 删除临时文件
-    else:
-         sender_data_ret['stdout']
-         # print(sender_data_ret['stdout'])
+    #if sender_data_ret['status'] == 0:
+    #   os.remove(tmp_file)  # 删除临时文件
+    #else:
+    #     sender_data_ret['stdout']
+    #      print(sender_data_ret['stdout'])
     return sender_data_ret
 
  
