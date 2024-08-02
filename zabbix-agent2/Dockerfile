@@ -4,7 +4,7 @@
 #
 # zabbix版本号
 ARG MAJOR_VERSION=7.0
-ARG ZBX_VERSION=${MAJOR_VERSION}.1
+ARG ZBX_VERSION=${MAJOR_VERSION}.2
 ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-pgsql:${ZBX_VERSION}
 
 # 指定创建的基础镜像
@@ -194,6 +194,7 @@ COPY ["./zabbix-agent2/zabbix_agent2.d/", "/usr/local/zabbix/etc/zabbix_agent2.d
 
 # ***** 创建zabbix目录授权 *****
 RUN set -eux && \
+    sed -i 's/^Defaults.*.requiretty/#Defaults    requiretty/' /etc/sudoers && \
     sed -i '$a\zabbix  ALL=(ALL)  NOPASSWD:ALL' /etc/sudoers && \
     cp -rf /root/.oh-my-zsh /usr/local/zabbix/.oh-my-zsh && \
     cp -rf /root/.zshrc /usr/local/zabbix/.zshrc && \
