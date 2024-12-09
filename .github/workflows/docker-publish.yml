@@ -38,36 +38,36 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.2
+          - DOCKER_TAG: 7.0.6
 
     # 运行步骤
     steps:
 
       # 检出master分支
       - name: 检出各个模块代码
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: 安装 QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: all
 
       - name: 安装 docker buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           version: latest
 
       - name: 登录 DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./build-base/Dockerfile
@@ -105,36 +105,36 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.2
+          - DOCKER_TAG: 7.0.6
 
     # 运行步骤
     steps:
 
       # 检出master分支
       - name: 检出各个模块代码
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: 安装 QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: all
 
       - name: 安装 docker buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           version: latest
 
       - name: 登录 DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./build-mysql/Dockerfile
@@ -172,36 +172,36 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.2
+          - DOCKER_TAG: 7.0.6
 
     # 运行步骤
     steps:
 
       # 检出master分支
       - name: 检出各个模块代码
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: 安装 QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: all
 
       - name: 安装 docker buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           version: latest
 
       - name: 登录 DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./build-pgsql/Dockerfile
@@ -239,36 +239,36 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.2
+          - DOCKER_TAG: 7.0.6
 
     # 运行步骤
     steps:
 
       # 检出master分支
       - name: 检出各个模块代码
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: 安装 QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: all
 
       - name: 安装 docker buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           version: latest
 
       - name: 登录 DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./build-sqlite3/Dockerfile
@@ -306,36 +306,36 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.2
+          - DOCKER_TAG: 7.0.6
 
     # 运行步骤
     steps:
 
       # 检出master分支
       - name: 检出各个模块代码
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: 安装 QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: all
 
       - name: 安装 docker buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           version: latest
 
       - name: 登录 DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./zabbix-server-mysql/Dockerfile
@@ -373,36 +373,36 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.2
+          - DOCKER_TAG: 7.0.6
 
     # 运行步骤
     steps:
 
       # 检出master分支
       - name: 检出各个模块代码
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: 安装 QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: all
 
       - name: 安装 docker buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           version: latest
 
       - name: 登录 DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./zabbix-server-pgsql/Dockerfile
@@ -440,36 +440,36 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.2
+          - DOCKER_TAG: 7.0.6
 
     # 运行步骤
     steps:
 
       # 检出master分支
       - name: 检出各个模块代码
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: 安装 QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: all
 
       - name: 安装 docker buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           version: latest
 
       - name: 登录 DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./zabbix-proxy-mysql/Dockerfile
@@ -507,36 +507,36 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.2
+          - DOCKER_TAG: 7.0.6
 
     # 运行步骤
     steps:
 
       # 检出master分支
       - name: 检出各个模块代码
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: 安装 QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: all
 
       - name: 安装 docker buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           version: latest
 
       - name: 登录 DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./zabbix-proxy-sqlite3/Dockerfile
@@ -574,36 +574,36 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.2
+          - DOCKER_TAG: 7.0.6
 
     # 运行步骤
     steps:
 
       # 检出master分支
       - name: 检出各个模块代码
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: 安装 QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: all
 
       - name: 安装 docker buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           version: latest
 
       - name: 登录 DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./zabbix-agent2/Dockerfile
@@ -640,36 +640,36 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.2
+          - DOCKER_TAG: 7.0.6
 
     # 运行步骤
     steps:
 
       # 检出master分支
       - name: 检出各个模块代码
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: 安装 QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: all
 
       - name: 安装 docker buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           version: latest
 
       - name: 登录 DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./web-service/Dockerfile
@@ -706,36 +706,36 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.2
+          - DOCKER_TAG: 7.0.6
 
     # 运行步骤
     steps:
 
       # 检出master分支
       - name: 检出各个模块代码
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: 安装 QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: all
 
       - name: 安装 docker buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           version: latest
 
       - name: 登录 DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./web-nginx-mysql/Dockerfile
@@ -772,36 +772,36 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.2
+          - DOCKER_TAG: 7.0.6
 
     # 运行步骤
     steps:
 
       # 检出master分支
       - name: 检出各个模块代码
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: 安装 QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: all
 
       - name: 安装 docker buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           version: latest
 
       - name: 登录 DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./web-nginx-pgsql/Dockerfile
@@ -838,36 +838,36 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.2
+          - DOCKER_TAG: 7.0.6
 
     # 运行步骤
     steps:
 
       # 检出master分支
       - name: 检出各个模块代码
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: 安装 QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: all
 
       - name: 安装 docker buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           version: latest
 
       - name: 登录 DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./snmptraps/Dockerfile
@@ -905,36 +905,36 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.2
+          - DOCKER_TAG: 7.0.6
 
     # 运行步骤
     steps:
 
       # 检出master分支
       - name: 检出各个模块代码
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: 安装 QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: all
 
       - name: 安装 docker buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           version: latest
 
       - name: 登录 DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./java-gateway/Dockerfile
