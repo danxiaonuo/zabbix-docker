@@ -16,10 +16,8 @@ fi
 : ${ZBX_SERVER_PORT:="16168"}
 
 # Default directories
-# User 'zabbix' home directory
-ZABBIX_USER_HOME_DIR="/usr/local/zabbix"
-# Configuration files directory
-ZABBIX_ETC_DIR="/usr/local/zabbix/etc"
+# Internal directory for TLS related files, used when TLS*File specified as plain text values
+ZABBIX_INTERNAL_ENC_DIR="${ZABBIX_USER_HOME_DIR}/enc_internal"
 
 escape_spec_char() {
     local var_value=$1
@@ -57,16 +55,20 @@ update_config_var() {
         echo -n "** Updating '$config_path' parameter \"$var_name\": '$var_value'..."
     fi
 
-    # Remove configuration parameter definition in case of unset parameter value
+    # Remove configuration parameter definition in case of unset or empty parameter value
     if [ -z "$var_value" ]; then
         sed -i -e "/^$var_name=/d" "$config_path"
         echo "removed"
         return
     fi
 
-    # Remove value from configuration parameter in case of double quoted parameter value
-    if [ "$var_value" == '""' ]; then
-        sed -i -e "/^$var_name=/s/=.*/=/" "$config_path"
+    # Remove value from configuration parameter in case of set to double quoted parameter value
+    if [[ "$var_value" == '""' ]]; then
+        if [ "$(grep -E "^$var_name=" $config_path)" ]; then
+            sed -i -e "/^$var_name=/s/=.*/=/" "$config_path"
+        else
+            sed -i -e "/^[#;] $var_name=/s/.*/&\n$var_name=/" "$config_path"
+        fi
         echo "undefined"
         return
     fi
@@ -80,7 +82,9 @@ update_config_var() {
     var_value=$(escape_spec_char "$var_value")
     var_name=$(escape_spec_char "$var_name")
 
-    if [ "$(grep -E "^$var_name=" $config_path)" ] && [ "$is_multiple" != "true" ]; then
+    if [ "$(grep -E "^$var_name=$var_value$" $config_path)" ]; then
+        echo "exists"
+    elif [ "$(grep -E "^$var_name=" $config_path)" ] && [ "$is_multiple" != "true" ]; then
         sed -i -e "/^$var_name=/s/=.*/=$var_value/" "$config_path"
         echo "updated"
     elif [ "$(grep -Ec "^# $var_name=" $config_path)" -gt 1 ]; then
@@ -112,12 +116,24 @@ update_config_multiple_var() {
     done
 }
 
+file_process_from_env() {
+    local config_path=$1
+    local var_name=$2
+    local file_name=$3
+    local var_value=$4
+
+    if [ ! -z "$var_value" ]; then
+        echo -n "$var_value" > "${ZABBIX_INTERNAL_ENC_DIR}/$var_name"
+        file_name="${ZABBIX_INTERNAL_ENC_DIR}/${var_name}"
+    fi
+    update_config_var $config_path "$var_name" "$file_name"
+}
+
 prepare_zbx_agent_config() {
     echo "** Preparing Zabbix agent configuration file"
-    ZBX_AGENT_CONFIG=$ZABBIX_ETC_DIR/zabbix_agent2.conf
+    ZBX_AGENT_CONFIG=${ZABBIX_CONF_DIR}/zabbix_agent2.conf
 
-    : ${ZBX_PASSIVESERVERS:=""}
-    : ${ZBX_ACTIVESERVERS:=""}
+    : ${ZBX_ACTIVESERVERS=""}
 
     update_config_var $ZBX_AGENT_CONFIG "PidFile"
     update_config_var $ZBX_AGENT_CONFIG "LogType" "console"
@@ -193,9 +209,16 @@ prepare_zbx_agent_plugin_config() {
     update_config_var "${ZABBIX_ETC_DIR}/zabbix_agent2.d/plugins.d/mssql.conf" "Plugins.MSSQL.System.Path" "/usr/sbin/zabbix-agent2-plugin/mssql"
     update_config_var "${ZABBIX_ETC_DIR}/zabbix_agent2.d/plugins.d/ember.conf" "Plugins.EmberPlus.System.Path" "/usr/sbin/zabbix-agent2-plugin/ember-plus"
 }
+clear_zbx_env() {
+    [[ "${ZBX_CLEAR_ENV}" == "false" ]] && return
+
+    for env_var in $(env | grep -E "^ZBX_"); do
+        unset "${env_var%%=*}"
+    done
+}
 
 prepare_permissions() {
-   sudo chown -R zabbix:zabbix /usr/local/zabbix && sudo chmod -R 775 /usr/local/zabbix
+   sudo chown -R zabbix:zabbix ${ZABBIX_USER_HOME_DIR} && sudo chmod -R 775 ${ZABBIX_USER_HOME_DIR}
 }
 
 
@@ -203,6 +226,7 @@ prepare_agent() {
     echo "** Preparing Zabbix agent"
     prepare_zbx_agent_config
     prepare_zbx_agent_plugin_config
+    clear_zbx_env
 	  prepare_permissions
 }
 

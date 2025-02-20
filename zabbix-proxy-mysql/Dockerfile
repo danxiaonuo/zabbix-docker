@@ -4,7 +4,7 @@
 #
 # zabbix版本号
 ARG MAJOR_VERSION=7.0
-ARG ZBX_VERSION=${MAJOR_VERSION}.6
+ARG ZBX_VERSION=${MAJOR_VERSION}.9
 ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-mysql:${ZBX_VERSION}
 
 # 指定创建的基础镜像
@@ -27,7 +27,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV DEBIAN_FRONTEND=$DEBIAN_FRONTEND
 
 # GO环境变量
-ARG GO_VERSION=1.23.4
+ARG GO_VERSION=1.24.0
 ENV GO_VERSION=$GO_VERSION
 ARG GOROOT=/opt/go
 ENV GOROOT=$GOROOT
@@ -41,8 +41,11 @@ ARG ZBX_SOURCES=https://git.zabbix.com/scm/zbx/zabbix.git
 
 ENV TERM=xterm \
     ZBX_VERSION=${ZBX_VERSION} ZBX_SOURCES=${ZBX_SOURCES} \
-    MIBDIRS=/var/lib/mibs/ietf:/var/lib/mibs/iana:/usr/share/snmp/mibs:/var/lib/zabbix/mibs MIBS=+ALL \
-    NMAP_PRIVILEGED=""
+    MIBDIRS=/var/lib/mibs/ietf:/var/lib/mibs/iana:/usr/share/snmp/mibs:/usr/local/zabbix/mibs MIBS=+ALL \
+    NMAP_PRIVILEGED="" \
+    ZABBIX_USER_HOME_DIR="/usr/local/zabbix" \
+    ZABBIX_CONF_DIR="/usr/local/zabbix/etc"
+    ZBX_FPINGLOCATION="/usr/bin/fping"
 
 # 安装依赖包
 ARG PKG_DEPS="\
@@ -122,7 +125,8 @@ ARG INSTALL_PKGS="\
 ENV INSTALL_PKGS=$INSTALL_PKGS
 
 # ***** 安装依赖 *****
-RUN --mount=type=cache,target=/var/lib/apt/,sharing=locked \
+RUN --mount=type=cache,target=/var/cache/apt/,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/,sharing=locked \
    set -eux && \
    # 更新源地址
    sed -i s@http://*.*ubuntu.com@https://mirrors.aliyun.com@g /etc/apt/sources.list && \
@@ -157,12 +161,15 @@ RUN set -eux && \
     mkdir -pv $GOPATH/bin && \
     ln -sfd /opt/go/bin/* /usr/bin/
 
-# ***** 升级 setuptools 版本 *****
+# ***** 升级 python3 版本 *****
 RUN set -eux && \
-    wget --no-check-certificate https://bootstrap.pypa.io/pip/2.7/get-pip.py -O /tmp/get-pip.py && \
-    python2 /tmp/get-pip.py && \
+    # update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1 && \
     pip3 config set global.index-url http://mirrors.aliyun.com/pypi/simple/ && \
     pip3 config set install.trusted-host mirrors.aliyun.com && \
+    wget --no-check-certificate https://bootstrap.pypa.io/pip/2.7/get-pip.py -O /tmp/get-pip.py && \
+    python2 /tmp/get-pip.py && rm -rf /tmp/get-pip.py && \
+    wget --no-check-certificate https://bootstrap.pypa.io/get-pip.py -O /tmp/get-pip.py && \
+    python3 /tmp/get-pip.py && rm -rf /tmp/get-pip.py && \
     pip3 install --upgrade pip setuptools wheel pycryptodome lxml cython beautifulsoup4 requests && \
     rm -r /root/.cache && rm -rf /tmp/*
 
@@ -175,27 +182,28 @@ RUN set -eux && \
             --uid 1997 \
             --ingroup zabbix \
             --shell /sbin/nologin \
-            --home /usr/local/zabbix/ \
+            --home ${ZABBIX_USER_HOME_DIR} \
                             zabbix && \
     adduser zabbix root && \
     adduser zabbix dialout && \
     chgrp zabbix /usr/bin/nmap && \
     setcap cap_net_raw+eip /usr/bin/nmap && \
-    mkdir -p /usr/local/zabbix/etc/zabbix_proxy.conf.d && \
-    mkdir -p /usr/local/zabbix/alertscripts && \
-    mkdir -p /usr/local/zabbix/enc && \
-    mkdir -p /usr/local/zabbix/export && \
-    mkdir -p /usr/local/zabbix/scripts && \
-    mkdir -p /usr/local/zabbix/externalscripts && \
-    mkdir -p /usr/local/zabbix/mibs && \
-    mkdir -p /usr/local/zabbix/modules && \
-    mkdir -p /usr/local/zabbix/snmptraps && \
-    mkdir -p /usr/local/zabbix/ssh_keys && \
-    mkdir -p /usr/local/zabbix/ssl && \
-    mkdir -p /usr/local/zabbix/ssl/certs && \
-    mkdir -p /usr/local/zabbix/ssl/keys && \
-    mkdir -p /usr/local/zabbix/ssl/ssl_ca && \
-    mkdir -p /usr/local/zabbix/share/doc/zabbix-proxy-mysql-mysql
+    mkdir -p ${ZABBIX_CONF_DIR}/zabbix_proxy.conf.d && \
+    mkdir -p ${ZABBIX_USER_HOME_DIR}/alertscripts && \
+    mkdir -p ${ZABBIX_USER_HOME_DIR}/enc && \
+    mkdir -p ${ZABBIX_USER_HOME_DIR}/enc_internal && \
+    mkdir -p ${ZABBIX_USER_HOME_DIR}/export && \
+    mkdir -p ${ZABBIX_USER_HOME_DIR}/scripts && \
+    mkdir -p ${ZABBIX_USER_HOME_DIR}/externalscripts && \
+    mkdir -p ${ZABBIX_USER_HOME_DIR}/mibs && \
+    mkdir -p ${ZABBIX_USER_HOME_DIR}/modules && \
+    mkdir -p ${ZABBIX_USER_HOME_DIR}/snmptraps && \
+    mkdir -p ${ZABBIX_USER_HOME_DIR}/ssh_keys && \
+    mkdir -p ${ZABBIX_USER_HOME_DIR}/ssl && \
+    mkdir -p ${ZABBIX_USER_HOME_DIR}/ssl/certs && \
+    mkdir -p ${ZABBIX_USER_HOME_DIR}/ssl/keys && \
+    mkdir -p ${ZABBIX_USER_HOME_DIR}/ssl/ssl_ca && \
+    mkdir -p ${ZABBIX_USER_HOME_DIR}/share/doc/zabbix-proxy-mysql-mysql
 
 # ***** 容器信号处理 *****
 STOPSIGNAL SIGQUIT
@@ -204,30 +212,31 @@ STOPSIGNAL SIGQUIT
 EXPOSE 16165/TCP
 
 # ***** 工作目录 *****
-WORKDIR /usr/local/zabbix
+WORKDIR ${ZABBIX_USER_HOME_DIR}
 
 # ***** 挂载目录 *****
-VOLUME ["/usr/local/zabbix/snmptraps", "/usr/local/zabbix/export"]
+VOLUME ["${ZABBIX_USER_HOME_DIR}/snmptraps", "${ZABBIX_USER_HOME_DIR}/export"]
 
 # 拷贝文件
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}-output/proxy/sbin/zabbix_proxy", "/usr/sbin/zabbix_proxy"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}-output/general/bin/*", "/usr/bin/"]
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}-output/proxy/conf/", "/usr/local/zabbix/etc/"]
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}-output/proxy/database/mysql/", "/usr/local/zabbix/share/doc/zabbix-proxy-mysql/"]
+COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}-output/proxy/conf/", "${ZABBIX_CONF_DIR}/"]
+COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}-output/proxy/database/mysql/", "${ZABBIX_USER_HOME_DIR}/share/doc/zabbix-proxy-mysql/"]
 COPY ["./zabbix-proxy-mysql/docker-entrypoint.sh", "/usr/bin/"]
 
 # ***** 创建zabbix目录授权 *****
 RUN set -eux && \
     sed -i 's/^Defaults.*.requiretty/#Defaults    requiretty/' /etc/sudoers && \
     sed -i '$a\zabbix  ALL=(ALL)  NOPASSWD:ALL' /etc/sudoers && \
-    cp -rf /root/.oh-my-zsh /usr/local/zabbix/.oh-my-zsh && \
-    cp -rf /root/.zshrc /usr/local/zabbix/.zshrc && \
-    sed -i '5s#/root/.oh-my-zsh#/usr/local/zabbix/.oh-my-zsh#' /usr/local/zabbix/.zshrc && \
+    cp -rf /root/.oh-my-zsh ${ZABBIX_USER_HOME_DIR}/.oh-my-zsh && \
+    cp -rf /root/.zshrc ${ZABBIX_USER_HOME_DIR}/.zshrc && \
+    sed -i '5s#/root/.oh-my-zsh#${ZABBIX_USER_HOME_DIR}/.oh-my-zsh#' ${ZABBIX_USER_HOME_DIR}/.zshrc && \
     chmod a+x /usr/bin/docker-entrypoint.sh /usr/sbin/zabbix_proxy /usr/bin/zabbix_get /usr/bin/zabbix_sender && \
-    chown --quiet -R zabbix:root /usr/local/zabbix/ && \
-    chgrp -R 0 /usr/local/zabbix/ && \
-    chmod -R g=u /usr/local/zabbix/ && \
-    rm -rf /var/lib/apt/lists/*
+    chown --quiet -R zabbix:root ${ZABBIX_USER_HOME_DIR} && \
+    chgrp -R 0 ${ZABBIX_USER_HOME_DIR} && \
+    chmod -R g=u ${ZABBIX_USER_HOME_DIR} && \
+    rm -rf /var/lib/apt/lists/* && \
+    /usr/sbin/zabbix_proxy -V
 
 # ***** 入口 *****
 ENTRYPOINT ["/usr/bin/docker-entrypoint.sh"]

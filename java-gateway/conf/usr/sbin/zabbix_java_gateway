@@ -2,7 +2,7 @@
 JAVA=${JAVA:-"/usr/bin/java"}
 
 JAVA_OPTIONS="-server $JAVA_OPTIONS"
-JAVA_OPTIONS="$JAVA_OPTIONS -Dlogback.configurationFile=/usr/local/zabbix/etc/zabbix_java_gateway_logback.xml"
+JAVA_OPTIONS="$JAVA_OPTIONS -Dlogback.configurationFile=$ZABBIX_CONF_DIR/zabbix_java_gateway_logback.xml"
 
 cd /usr/sbin/zabbix_java
 

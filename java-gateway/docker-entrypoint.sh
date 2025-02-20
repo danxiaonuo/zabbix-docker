@@ -9,14 +9,10 @@ if [ "${DEBUG_MODE,,}" == "true" ]; then
     set -o xtrace
 fi
 
-# Default directories
-# Configuration files directory
-ZABBIX_ETC_DIR="/usr/local/zabbix/etc"
-
 prepare_java_gateway_config() {
     echo "** Preparing Zabbix Java Gateway log configuration file"
 
-    ZBX_GATEWAY_CONFIG=$ZABBIX_ETC_DIR/zabbix_java_gateway_logback.xml
+    ZBX_GATEWAY_CONFIG=$ZABBIX_CONF_DIR/zabbix_java_gateway_logback.xml
 
     : ${ZBX_DEBUGLEVEL:="info"}
 

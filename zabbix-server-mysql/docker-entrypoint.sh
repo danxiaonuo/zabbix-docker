@@ -10,10 +10,8 @@ if [ "${DEBUG_MODE,,}" == "true" ]; then
 fi
 
 # Default directories
-# User 'zabbix' home directory
-ZABBIX_USER_HOME_DIR="/usr/local/zabbix"
-# Configuration files directory
-ZABBIX_ETC_DIR="/usr/local/zabbix/etc"
+# Internal directory for TLS related files, used when TLS*File specified as plain text values
+ZABBIX_INTERNAL_ENC_DIR="${ZABBIX_USER_HOME_DIR}/enc_internal"
 
 : ${DB_CHARACTER_SET:="utf8mb4"}
 : ${DB_CHARACTER_COLLATE:="utf8mb4_bin"}
@@ -85,16 +83,20 @@ update_config_var() {
         echo -n "** Updating '$config_path' parameter \"$var_name\": '$var_value'..."
     fi
 
-    # Remove configuration parameter definition in case of unset parameter value
+    # Remove configuration parameter definition in case of unset or empty parameter value
     if [ -z "$var_value" ]; then
         sed -i -e "/^$var_name=/d" "$config_path"
         echo "removed"
         return
     fi
 
-    # Remove value from configuration parameter in case of double quoted parameter value
-    if [ "$var_value" == '""' ]; then
-        sed -i -e "/^$var_name=/s/=.*/=/" "$config_path"
+    # Remove value from configuration parameter in case of set to double quoted parameter value
+    if [[ "$var_value" == '""' ]]; then
+        if [ "$(grep -E "^$var_name=" $config_path)" ]; then
+            sed -i -e "/^$var_name=/s/=.*/=/" "$config_path"
+        else
+            sed -i -e "/^[#;] $var_name=/s/.*/&\n$var_name=/" "$config_path"
+        fi
         echo "undefined"
         return
     fi
@@ -108,7 +110,9 @@ update_config_var() {
     var_value=$(escape_spec_char "$var_value")
     var_name=$(escape_spec_char "$var_name")
 
-    if [ "$(grep -E "^$var_name=" $config_path)" ] && [ "$is_multiple" != "true" ]; then
+    if [ "$(grep -E "^$var_name=$var_value$" $config_path)" ]; then
+        echo "exists"
+    elif [ "$(grep -E "^$var_name=" $config_path)" ] && [ "$is_multiple" != "true" ]; then
         sed -i -e "/^$var_name=/s/=.*/=$var_value/" "$config_path"
         echo "updated"
     elif [ "$(grep -Ec "^# $var_name=" $config_path)" -gt 1 ]; then
@@ -135,6 +139,19 @@ update_config_multiple_var() {
     for value in "${OPT_LIST[@]}"; do
         update_config_var $config_path $var_name $value true
     done
+}
+
+file_process_from_env() {
+    local config_path=$1
+    local var_name=$2
+    local file_name=$3
+    local var_value=$4
+
+    if [ ! -z "$var_value" ]; then
+        echo -n "$var_value" > "${ZABBIX_INTERNAL_ENC_DIR}/$var_name"
+        file_name="${ZABBIX_INTERNAL_ENC_DIR}/${var_name}"
+    fi
+    update_config_var $config_path "$var_name" "$file_name"
 }
 
 # Check prerequisites for MySQL database
@@ -340,7 +357,7 @@ create_db_schema_mysql() {
 update_zbx_config() {
     echo "** Preparing Zabbix server configuration file"
 
-    ZBX_CONFIG=$ZABBIX_ETC_DIR/zabbix_server.conf
+    ZBX_CONFIG=$ZABBIX_CONF_DIR/zabbix_server.conf
 
     update_config_var $ZBX_CONFIG "ListenIP" "${ZBX_LISTENIP}"
     update_config_var $ZBX_CONFIG "ListenPort" "${ZBX_LISTENPORT}"
@@ -374,22 +391,29 @@ update_zbx_config() {
     update_config_var $ZBX_CONFIG "DBName" "${DB_SERVER_DBNAME}"
     update_config_var $ZBX_CONFIG "DBSchema" "${DB_SERVER_SCHEMA}"
 
-    if [ -n "${ZBX_VAULTDBPATH}" ] && [ -n "${ZBX_VAULTURL}" ]; then
+    if [ -n "${ZBX_VAULT}" ] && [ -n "${ZBX_VAULTURL}" ]; then
         update_config_var $ZBX_CONFIG "Vault" "${ZBX_VAULT}"
-        update_config_var $ZBX_CONFIG "VaultDBPath" "${ZBX_VAULTDBPATH}"
         update_config_var $ZBX_CONFIG "VaultTLSCertFile" "${ZBX_VAULTTLSCERTFILE}"
         update_config_var $ZBX_CONFIG "VaultTLSKeyFile" "${ZBX_VAULTTLSKEYFILE}"
         update_config_var $ZBX_CONFIG "VaultPrefix" "${ZBX_VAULTPREFIX}"
         update_config_var $ZBX_CONFIG "VaultURL" "${ZBX_VAULTURL}"
-        update_config_var $ZBX_CONFIG "DBUser"
-        update_config_var $ZBX_CONFIG "DBPassword"
+        update_config_var $ZBX_CONFIG "VaultDBPath" "${ZBX_VAULTDBPATH}"
+
+        if [ -n "${ZBX_VAULTDBPATH}" ]; then
+            update_config_var $ZBX_CONFIG "DBUser"
+            update_config_var $ZBX_CONFIG "DBPassword"
+        else
+            update_config_var $ZBX_CONFIG "DBUser" "${DB_SERVER_ZBX_USER}"
+            update_config_var $ZBX_CONFIG "DBPassword" "${DB_SERVER_ZBX_PASS}"
+        fi
     else
         update_config_var $ZBX_CONFIG "Vault"
-        update_config_var $ZBX_CONFIG "VaultDBPath"
         update_config_var $ZBX_CONFIG "VaultTLSCertFile"
         update_config_var $ZBX_CONFIG "VaultTLSKeyFile"
         update_config_var $ZBX_CONFIG "VaultPrefix"
         update_config_var $ZBX_CONFIG "VaultURL"
+        update_config_var $ZBX_CONFIG "VaultDBPath"
+
         update_config_var $ZBX_CONFIG "DBUser" "${DB_SERVER_ZBX_USER}"
         update_config_var $ZBX_CONFIG "DBPassword" "${DB_SERVER_ZBX_PASS}"
     fi
@@ -409,7 +433,7 @@ update_zbx_config() {
     update_config_var $ZBX_CONFIG "StatsAllowedIP" "${ZBX_STATSALLOWEDIP}"
 
     update_config_var $ZBX_CONFIG "StartPollers" "${ZBX_STARTPOLLERS}"
-    update_config_var $ZBX_CONFIG "StartIPMIPollers" "${ZBX_IPMIPOLLERS}"
+    update_config_var $ZBX_CONFIG "StartIPMIPollers" "${ZBX_STARTIPMIPOLLERS}"
     update_config_var $ZBX_CONFIG "StartPollersUnreachable" "${ZBX_STARTPOLLERSUNREACHABLE}"
     update_config_var $ZBX_CONFIG "StartTrappers" "${ZBX_STARTTRAPPERS}"
     update_config_var $ZBX_CONFIG "StartPingers" "${ZBX_STARTPINGERS}"
@@ -481,9 +505,9 @@ update_zbx_config() {
     update_config_var $ZBX_CONFIG "UnavailableDelay" "${ZBX_UNAVAILABLEDELAY}"
     update_config_var $ZBX_CONFIG "UnreachableDelay" "${ZBX_UNREACHABLEDELAY}"
 
-    update_config_var $ZBX_CONFIG "AlertScriptsPath" "$ZABBIX_USER_HOME_DIR/alertscripts"
-    update_config_var $ZBX_CONFIG "ExternalScripts" "$ZABBIX_USER_HOME_DIR/externalscripts"
-    update_config_var $ZBX_CONFIG "Include" "$ZABBIX_ETC_DIR/zabbix_server.conf.d/*.conf"
+    update_config_var $ZBX_CONFIG "AlertScriptsPath" "${ZABBIX_USER_HOME_DIR}/alertscripts"
+    update_config_var $ZBX_CONFIG "ExternalScripts" "${ZABBIX_USER_HOME_DIR}/externalscripts"
+    update_config_var $ZBX_CONFIG "Include" "${ZABBIX_CONF_DIR}/zabbix_proxy.conf.d/*.conf"
 
     if [ -n "${ZBX_EXPORTFILESIZE}" ]; then
         update_config_var $ZBX_CONFIG "ExportDir" "$ZABBIX_USER_HOME_DIR/export/"
@@ -507,20 +531,17 @@ update_zbx_config() {
     update_config_var $ZBX_CONFIG "LoadModulePath" "$ZABBIX_USER_HOME_DIR/modules/"
     update_config_multiple_var $ZBX_CONFIG "LoadModule" "${ZBX_LOADMODULE}"
 
-    update_config_var $ZBX_CONFIG "TLSCAFile" "${ZBX_TLSCAFILE}"
-    update_config_var $ZBX_CONFIG "TLSCRLFile" "${ZBX_TLSCRLFILE}"
+    file_process_from_env $ZBX_CONFIG "TLSCAFile" "${ZBX_TLSCAFILE}" "${ZBX_TLSCA}"
+    file_process_from_env $ZBX_CONFIG "TLSCRLFile" "${ZBX_TLSCRLFILE}" "${ZBX_TLSCRL}"
 
-    update_config_var $ZBX_CONFIG "TLSCertFile" "${ZBX_TLSCERTFILE}"
+    file_process_from_env $ZBX_CONFIG "TLSCertFile" "${ZBX_TLSCERTFILE}" "${ZBX_TLSCERT}"
     update_config_var $ZBX_CONFIG "TLSCipherAll" "${ZBX_TLSCIPHERALL}"
     update_config_var $ZBX_CONFIG "TLSCipherAll13" "${ZBX_TLSCIPHERALL13}"
     update_config_var $ZBX_CONFIG "TLSCipherCert" "${ZBX_TLSCIPHERCERT}"
     update_config_var $ZBX_CONFIG "TLSCipherCert13" "${ZBX_TLSCIPHERCERT13}"
     update_config_var $ZBX_CONFIG "TLSCipherPSK" "${ZBX_TLSCIPHERPSK}"
     update_config_var $ZBX_CONFIG "TLSCipherPSK13" "${ZBX_TLSCIPHERPSK13}"
-    update_config_var $ZBX_CONFIG "TLSKeyFile" "${ZBX_TLSKEYFILE}"
-
-    update_config_var $ZBX_CONFIG "TLSPSKIdentity" "${ZBX_TLSPSKIDENTITY}"
-    update_config_var $ZBX_CONFIG "TLSPSKFile" "${ZBX_TLSPSKFILE}"
+    file_process_from_env $ZBX_CONFIG "TLSKeyFile" "${ZBX_TLSKEYFILE}" "${ZBX_TLSKEY}"
 
     update_config_var $ZBX_CONFIG "ServiceManagerSyncFrequency" "${ZBX_SERVICEMANAGERSYNCFREQUENCY}"
     update_config_var $ZBX_CONFIG "AllowSoftwareUpdateCheck" "${ZBX_ALLOWSOFTWAREUPDATECHECK}"
@@ -552,6 +573,16 @@ update_zbx_config() {
 
     update_config_var $ZBX_CONFIG "WebDriverURL" "${ZBX_WEBDRIVERURL}"
     update_config_var $ZBX_CONFIG "StartBrowserPollers" "${ZBX_STARTBROWSERPOLLERS}"
+
+    command -v openssl >/dev/null 2>&1 && openssl rehash -v "$ZABBIX_USER_HOME_DIR/ssl/ssl_ca/" 1>/dev/null
+}
+
+clear_zbx_env() {
+    [[ "${ZBX_CLEAR_ENV}" == "false" ]] && return
+
+    for env_var in $(env | grep -E "^(ZBX|DB|MYSQL)_"); do
+        unset "${env_var%%=*}"
+    done
 }
 
 prepare_db() {
@@ -565,7 +596,7 @@ prepare_db() {
 }
 
 prepare_permissions() {
-   sudo chown -R zabbix:zabbix /usr/local/zabbix && sudo chmod -R 775 /usr/local/zabbix
+   sudo chown -R zabbix:zabbix ${ZABBIX_USER_HOME_DIR} && sudo chmod -R 775 ${ZABBIX_USER_HOME_DIR}
 }
 
 prepare_server() {
@@ -573,6 +604,7 @@ prepare_server() {
 
     prepare_db
     update_zbx_config
+    clear_zbx_env
 	  prepare_permissions
 }
 

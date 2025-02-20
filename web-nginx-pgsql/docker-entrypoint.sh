@@ -15,12 +15,6 @@ fi
 # Default Zabbix server port number
 : ${ZBX_SERVER_PORT:="16168"}
 
-# Default directories
-# Configuration files directory
-ZABBIX_ETC_DIR="/usr/local/zabbix/etc"
-# Web interface www-root directory
-ZABBIX_WWW_ROOT="/www/zabbix"
-
 
 # usage: file_env VAR [DEFAULT]
 # as example: file_env 'MYSQL_PASSWORD' 'zabbix'
@@ -58,7 +52,7 @@ check_variables() {
     file_env POSTGRES_USER
     file_env POSTGRES_PASSWORD
 
-    : ${DB_SERVER_HOST:="postgres-server"}
+    : ${DB_SERVER_HOST="postgres-server"}
     : ${DB_SERVER_PORT:="5432"}
 
     DB_SERVER_ZBX_USER=${POSTGRES_USER:-"zabbix"}
@@ -69,11 +63,23 @@ check_variables() {
     DB_SERVER_DBNAME=${POSTGRES_DB:-"zabbix"}
 
     : ${POSTGRES_USE_IMPLICIT_SEARCH_PATH:="false"}
+
+    if [ -n "${DB_SERVER_HOST}" ]; then
+        psql_connect_args="--host ${DB_SERVER_HOST} --port ${DB_SERVER_PORT}"
+    else
+        psql_connect_args="--port ${DB_SERVER_PORT}"
+    fi
 }
 
 check_db_connect() {
     echo "********************"
-    echo "* DB_SERVER_HOST: ${DB_SERVER_HOST}"
+    if [ -n "${DB_SERVER_HOST}" ]; then
+        echo "* DB_SERVER_HOST: ${DB_SERVER_HOST}"
+        echo "* DB_SERVER_PORT: ${DB_SERVER_PORT}"
+    else
+        echo "* DB_SERVER_HOST: Using DB socket"
+        echo "* DB_SERVER_PORT: ${DB_SERVER_PORT}"
+    fi
     echo "* DB_SERVER_PORT: ${DB_SERVER_PORT}"
     echo "* DB_SERVER_DBNAME: ${DB_SERVER_DBNAME}"
     echo "* DB_SERVER_SCHEMA: ${DB_SERVER_SCHEMA}"
@@ -102,7 +108,7 @@ check_db_connect() {
         export PGSSLKEY=${ZBX_DBTLSKEYFILE}
     fi
 
-    while [ ! "$(psql --host ${DB_SERVER_HOST} --port ${DB_SERVER_PORT} --username ${DB_SERVER_ZBX_USER} --dbname ${DB_SERVER_DBNAME} --list --quiet 2>/dev/null)" ]; do
+    while [ ! "$(psql $psql_connect_args --username ${DB_SERVER_ZBX_USER} --dbname ${DB_SERVER_DBNAME} --list --quiet 2>/dev/null)" ]; do
         echo "**** PostgreSQL server is not available. Waiting $WAIT_TIMEOUT seconds..."
         sleep $WAIT_TIMEOUT
     done
@@ -115,15 +121,8 @@ check_db_connect() {
     unset PGSSLKEY
 }
 
-prepare_zbx_web_config() {
-    echo "** Preparing Zabbix frontend configuration file"
-
-    if [ "$(id -u)" == '0' ]; then
-        echo "user = zabbix" >> "$PHP_CONFIG_FILE"
-        echo "group = zabbix" >> "$PHP_CONFIG_FILE"
-        echo "listen.owner = nginx" >> "$PHP_CONFIG_FILE"
-        echo "listen.group = nginx" >> "$PHP_CONFIG_FILE"
-    fi
+prepare_zbx_php_config() {
+    echo "** Preparing PHP configuration"
 
     : ${ZBX_DENY_GUI_ACCESS:="false"}
     export ZBX_DENY_GUI_ACCESS=${ZBX_DENY_GUI_ACCESS,,}
@@ -135,6 +134,7 @@ prepare_zbx_web_config() {
     export ZBX_POSTMAXSIZE=${ZBX_POSTMAXSIZE:-"16M"}
     export ZBX_UPLOADMAXFILESIZE=${ZBX_UPLOADMAXFILESIZE:-"2M"}
     export ZBX_MAXINPUTTIME=${ZBX_MAXINPUTTIME:-"300"}
+    export PHP_TZ=${PHP_TZ}
 
     export DB_SERVER_TYPE="POSTGRESQL"
     export DB_SERVER_HOST=${DB_SERVER_HOST}
@@ -184,13 +184,22 @@ prepare_zbx_web_config() {
 
 }
 
+prepare_zbx_config() {
+    if [ -n "${ZBX_SESSION_NAME}" ]; then
+        cp "$ZABBIX_WWW_ROOT/include/defines.inc.php" "/tmp/defines.inc.php_tmp"
+        sed "/ZBX_SESSION_NAME/s/'[^']*'/'${ZBX_SESSION_NAME}'/2" "/tmp/defines.inc.php_tmp" > "$ZABBIX_WWW_ROOT/include/defines.inc.php"
+        rm -f "/tmp/defines.inc.php_tmp"
+    fi
+}
+
 #################################################
 
 echo "** Deploying Zabbix web-interface (Nginx) with PostgreSQL database"
 
 check_variables
 check_db_connect
-prepare_zbx_web_config
+prepare_zbx_php_config
+prepare_zbx_config
 
 echo "########################################################"
 

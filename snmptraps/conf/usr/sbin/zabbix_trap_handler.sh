@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ZABBIX_TRAPS_FILE="/usr/local/zabbix/snmptraps/snmptraps.log"
+ZABBIX_TRAPS_FILE="${ZABBIX_USER_HOME_DIR}/snmptraps/snmptraps.log"
 
 ZBX_SNMP_TRAP_DATE_FORMAT=${ZBX_SNMP_TRAP_DATE_FORMAT:-"+%Y-%m-%dT%T%z"}
 
@@ -43,5 +43,20 @@ done
 ! [ -z $trap_address ] && sender_addr=$trap_address
 
 [[ "$ZBX_SNMP_TRAP_USE_DNS" == "true" ]] && ! [[ ${host} =~ \[(.*?)\].*\-\> ]] && sender_addr=$host
+
+# Header in Zabbix format shouldn't exist anywhere in vars, it is injection
+# Must exit with 0
+date_regex=$(echo "$ZBX_SNMP_TRAP_DATE_FORMAT" | sed -e 's/^+//g' \
+        -e 's/%Y/[0-9]\{4\}/g' \
+        -e 's/%m/[0-9]\{2\}/g' \
+        -e 's/%d/[0-9]\{2\}/g' \
+        -e 's/%T/[0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}/g' \
+        -e 's/%z/[\+\-][0-9]\{4\}/g' \
+        -e 's/%H/[0-9]\{2\}/g' \
+        -e 's/%M/[0-9]\{2\}/g' \
+        -e 's/%S/[0-9]\{2\}/g')
+
+zbx_trap_regex="$date_regex ZBXTRAP"
+echo "$vars" | grep -qE "$zbx_trap_regex" && exit 0
 
 echo -e "$date ZBXTRAP $sender_addr$ZBX_SNMP_TRAP_FORMAT$sender$ZBX_SNMP_TRAP_FORMAT$vars" >> $ZABBIX_TRAPS_FILE

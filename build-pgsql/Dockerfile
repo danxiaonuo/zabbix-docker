@@ -4,7 +4,7 @@
 #
 # zabbix版本号
 ARG MAJOR_VERSION=7.0
-ARG ZBX_VERSION=${MAJOR_VERSION}.6
+ARG ZBX_VERSION=${MAJOR_VERSION}.9
 ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-base:${ZBX_VERSION}
 
 # 指定创建的基础镜像
@@ -25,17 +25,22 @@ ARG ZBX_VERSION
 ARG ZBX_SOURCES=https://git.zabbix.com/scm/zbx/zabbix.git
 ARG GIT_BRANCH
 
+ARG ZBX_PLUGINS_VERSION=${GIT_BRANCH:-$ZBX_VERSION}
+ARG CFLAGS
+
 ENV ZBX_SOURCES_DIR=/tmp/zabbix-${ZBX_VERSION} ZBX_OUTPUT_DIR=/tmp/zabbix-${ZBX_VERSION}-output \
     DB_TYPE=postgresql \
-    MONGODB_PLUGIN_SOURCES=https://git.zabbix.com/scm/ap/mongodb.git MONGODB_PLUGIN_VERSION=${GIT_BRANCH:-$ZBX_VERSION} \
-    POSTGRESQL_PLUGIN_SOURCES=https://git.zabbix.com/scm/ap/postgresql.git POSTGRESQL_PLUGIN_VERSION=${GIT_BRANCH:-$ZBX_VERSION} \
-    MSSQL_PLUGIN_SOURCES=https://git.zabbix.com/scm/ap/mssql.git MSSQL_PLUGIN_VERSION=${GIT_BRANCH:-$ZBX_VERSION} \
-    EMBER_PLUS_PLUGIN_SOURCES=https://git.zabbix.com/scm/ap/ember-plus.git EMBER_PLUS_PLUGIN_VERSION=${GIT_BRANCH:-$ZBX_VERSION}
+    CFLAGS=${CFLAGS:-"-fPIC -pie -Wl,-z,relro,-z,now,-z,defs -D_FORTIFY_SOURCE=2 -fexceptions -O2 -pipe"} \
+    MONGODB_PLUGIN_SOURCES=https://git.zabbix.com/scm/ap/mongodb.git MONGODB_PLUGIN_VERSION=${ZBX_PLUGINS_VERSION} \
+    POSTGRESQL_PLUGIN_SOURCES=https://git.zabbix.com/scm/ap/postgresql.git POSTGRESQL_PLUGIN_VERSION=${ZBX_PLUGINS_VERSION} \
+    MSSQL_PLUGIN_SOURCES=https://git.zabbix.com/scm/ap/mssql.git MSSQL_PLUGIN_VERSION=${ZBX_PLUGINS_VERSION} \
+    EMBER_PLUS_PLUGIN_SOURCES=https://git.zabbix.com/scm/ap/ember-plus.git EMBER_PLUS_PLUGIN_VERSION=${ZBX_PLUGINS_VERSION}
 
 # 安装编译
 RUN --mount=type=cache,target=/root/.cache/go-build/ \
     --mount=type=cache,target=/opt/golang/ \
-    --mount=type=bind,source=./build-pgsql/conf/chromedp_no_sandbox.patch,target=/tmp/chromedp_no_sandbox.patch \
+    --mount=from=sources,target=/tmp/src \
+    --mount=type=bind,source=./build-pgsql/patches/,target=/tmp/patches \
     set -eux && \
     cd /tmp/ && \
     mkdir -p ${ZBX_OUTPUT_DIR}/agent/sbin/ && \
@@ -57,21 +62,27 @@ RUN --mount=type=cache,target=/root/.cache/go-build/ \
     mkdir -p ${ZBX_OUTPUT_DIR}/general/sbin/ && \
     mkdir -p ${ZBX_OUTPUT_DIR}/general/bin/ && \
     mkdir -p ${ZBX_OUTPUT_DIR}/general/conf/ && \
-    git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${GIT_BRANCH:-$ZBX_VERSION} --depth 1 --single-branch ${ZBX_SOURCES_DIR} && \
+    if [ -f "/tmp/src/bootstrap.sh" ]; then \
+        cp -R /tmp/src ${ZBX_SOURCES_DIR}; \
+    else \
+        git -c advice.detachedHead=false clone ${ZBX_SOURCES} --branch ${GIT_BRANCH:-$ZBX_VERSION} --depth 1 --single-branch ${ZBX_SOURCES_DIR}; \
+    fi && \
     cd ${ZBX_SOURCES_DIR} && \
-    patch -p1 < /tmp/chromedp_no_sandbox.patch && \
+    for patch_filename in /tmp/patches/*.patch; do \
+        if [ -f "$patch_filename" ]; then \
+            patch -p1 < $patch_filename; \
+        fi \
+    done && \
     zabbix_revision=`git rev-parse --short HEAD` && \
     sed -i "s/{ZABBIX_REVISION}/$zabbix_revision/g" include/version.h && \
     sed -i "s/{ZABBIX_REVISION}/$zabbix_revision/g" src/go/pkg/version/version.go && \
     sed -i "s/{ZABBIX_REVISION}/$zabbix_revision/g" src/zabbix_java/src/com/zabbix/gateway/GeneralInformation.java && \
     ./bootstrap.sh && \
-    export CFLAGS="-fPIC -pie -Wl,-z,relro,-z,now,-z,defs" && \
-    export CFLAGS="$CFLAGS -D_FORTIFY_SOURCE=2 -fexceptions -O2 -pipe" && \
     ./configure \
             --prefix=/usr/local/zabbix \
+            --enable-ipv6 \
             --enable-agent \
             --enable-agent2 \
-            --enable-ipv6 \
             --enable-proxy \
             --enable-server \
             --enable-webservice \
@@ -80,17 +91,16 @@ RUN --mount=type=cache,target=/root/.cache/go-build/ \
             --with-libmodbus \
             --with-libpcre2 \
             --with-libxml2 \
+            --with-${DB_TYPE} \
             --with-net-snmp \
             --with-openipmi \
             --with-openssl \
-            --with-${DB_TYPE} \
             --with-ssh \
             --with-unixodbc \
-            --enable-java \
             --silent && \
-    make -j"$(nproc)" -s dbschema && \
+    make -s dbschema && \
     make -j"$(nproc)" -s && \
-    make -j"$(nproc)" -s gettext && \
+    make -s gettext && \
     cat database/${DB_TYPE}/schema.sql > database/${DB_TYPE}/create.sql && \
     gzip -c database/${DB_TYPE}/create.sql > ${ZBX_OUTPUT_DIR}/proxy/database/${DB_TYPE}/create.sql.gz && \
     cat database/${DB_TYPE}/images.sql >> database/${DB_TYPE}/create.sql && \

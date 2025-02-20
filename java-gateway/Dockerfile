@@ -4,7 +4,7 @@
 #
 # zabbix版本号
 ARG MAJOR_VERSION=7.0
-ARG ZBX_VERSION=${MAJOR_VERSION}.6
+ARG ZBX_VERSION=${MAJOR_VERSION}.9
 ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-pgsql:${ZBX_VERSION}
 
 # 指定创建的基础镜像
@@ -33,7 +33,9 @@ ARG ZBX_SOURCES=https://git.zabbix.com/scm/zbx/zabbix.git
 
 # 环境
 ENV TERM=xterm \
-    ZBX_VERSION=${ZBX_VERSION} ZBX_SOURCES=${ZBX_SOURCES}
+    ZBX_VERSION=${ZBX_VERSION} ZBX_SOURCES=${ZBX_SOURCES} \
+    ZABBIX_USER_HOME_DIR="/usr/local/zabbix" \
+    ZABBIX_CONF_DIR="/usr/local/zabbix/etc"
 
 # 安装依赖包
 ARG PKG_DEPS="\
@@ -87,7 +89,8 @@ ARG INSTALL_PKGS="openjdk-19-jdk-headless"
 ENV INSTALL_PKGS=$INSTALL_PKGS
 
 # ***** 安装依赖 *****
-RUN --mount=type=cache,target=/var/lib/apt/,sharing=locked \
+RUN --mount=type=cache,target=/var/cache/apt/,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/,sharing=locked \
    set -eux && \
    # 更新源地址
    sed -i s@http://*.*ubuntu.com@https://mirrors.aliyun.com@g /etc/apt/sources.list && \
@@ -121,11 +124,11 @@ RUN set -eux && \
             --uid 1997 \
             --ingroup zabbix \
             --shell /sbin/nologin \
-            --home /usr/local/zabbix/ \
+            --home ${ZABBIX_USER_HOME_DIR} \
                             zabbix && \
     adduser zabbix root && \
     adduser zabbix dialout && \
-    mkdir -p /usr/local/zabbix/etc
+    mkdir -p ${ZABBIX_CONF_DIR}
 
 # ***** 容器信号处理 *****
 STOPSIGNAL SIGQUIT
@@ -134,27 +137,26 @@ STOPSIGNAL SIGQUIT
 EXPOSE 10053/TCP
 
 # ***** 工作目录 *****
-WORKDIR /usr/local/zabbix
+WORKDIR ${ZABBIX_USER_HOME_DIR}
 
 # 拷贝文件
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_java/bin", "/usr/sbin/zabbix_java/bin"]
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/src/zabbix_java/lib", "/usr/sbin/zabbix_java/lib"]
+COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}-output/java_gateway/sbin/", "/usr/sbin/zabbix_java/"]
 COPY ["./java-gateway/docker-entrypoint.sh", "/usr/bin/"]
 COPY ["./java-gateway/conf/usr/sbin/zabbix_java_gateway", "/usr/sbin/"]
 
 # ***** 创建zabbix目录授权 *****
 RUN set -eux && \
-    cp -rf /root/.oh-my-zsh /usr/local/zabbix/.oh-my-zsh && \
-    cp -rf /root/.zshrc /usr/local/zabbix/.zshrc && \
-    sed -i '5s#/root/.oh-my-zsh#/usr/local/zabbix/.oh-my-zsh#' /usr/local/zabbix/.zshrc && \
+    cp -rf /root/.oh-my-zsh ${ZABBIX_USER_HOME_DIR}/.oh-my-zsh && \
+    cp -rf /root/.zshrc ${ZABBIX_USER_HOME_DIR}/.zshrc && \
+    sed -i '5s#/root/.oh-my-zsh#${ZABBIX_USER_HOME_DIR}/.oh-my-zsh#' ${ZABBIX_USER_HOME_DIR}/.zshrc && \
     mkdir -p /usr/sbin/zabbix_java/ && \
     mkdir -p /usr/sbin/zabbix_java/ext_lib/ && \
     rm -rf /usr/sbin/zabbix_java/lib/logback.xml && \
-    mv /usr/sbin/zabbix_java/lib/logback-console.xml /usr/local/zabbix/etc/zabbix_java_gateway_logback.xml && \
+    mv /usr/sbin/zabbix_java/lib/logback-console.xml ${ZABBIX_CONF_DIR}/zabbix_java_gateway_logback.xml && \
     chmod a+x /usr/bin/docker-entrypoint.sh /usr/sbin/zabbix_java_gateway && \
-    chown --quiet -R zabbix:root /usr/local/zabbix/ /usr/sbin/zabbix_java/ && \
-    chgrp -R 0 /usr/local/zabbix/ /usr/sbin/zabbix_java/ && \
-    chmod -R g=u /usr/local/zabbix/ /usr/sbin/zabbix_java/ && \
+    chown --quiet -R zabbix:root ${ZABBIX_USER_HOME_DIR} /usr/sbin/zabbix_java/ && \
+    chgrp -R 0 ${ZABBIX_USER_HOME_DIR} /usr/sbin/zabbix_java/ && \
+    chmod -R g=u ${ZABBIX_USER_HOME_DIR} /usr/sbin/zabbix_java/ && \
     rm -rf /var/lib/apt/lists/*
 
 # ***** 入口 *****

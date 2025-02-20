@@ -5,7 +5,7 @@
 #
 # zabbix版本号
 ARG MAJOR_VERSION=7.0
-ARG ZBX_VERSION=${MAJOR_VERSION}.6
+ARG ZBX_VERSION=${MAJOR_VERSION}.9
 ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-pgsql:${ZBX_VERSION}
 ARG BUILD_NGINX_IMAGE=danxiaonuo/nginx:latest
 ARG BUILD_PHP_IMAGE=danxiaonuo/php:latest
@@ -37,7 +37,8 @@ ARG ZBX_VERSION
 ARG ZBX_SOURCES=https://git.zabbix.com/scm/zbx/zabbix.git
 
 ENV TERM=xterm \
-    ZBX_VERSION=${ZBX_VERSION} ZBX_SOURCES=${ZBX_SOURCES}
+    ZBX_VERSION=${ZBX_VERSION} ZBX_SOURCES=${ZBX_SOURCES} \
+    ZABBIX_WWW_ROOT="/www/zabbix"
 
 # NGINX工作目录
 ARG NGINX_DIR=/data/nginx
@@ -165,7 +166,8 @@ ARG PHP_BUILD_DEPS="\
 ENV PHP_BUILD_DEPS=$PHP_BUILD_DEPS
 
 # ***** 安装依赖 *****
-RUN --mount=type=cache,target=/var/lib/apt/,sharing=locked \
+RUN --mount=type=cache,target=/var/cache/apt/,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/,sharing=locked \
    set -eux && \
    # 更新源地址
    sed -i s@http://*.*ubuntu.com@https://mirrors.aliyun.com@g /etc/apt/sources.list && \
@@ -197,54 +199,54 @@ STOPSIGNAL SIGQUIT
 EXPOSE 80/TCP 443/TCP
 
 # ***** 工作目录 *****
-WORKDIR /www/zabbix
+WORKDIR ${ZABBIX_WWW_ROOT}
 
 # ***** 挂载目录 *****
-VOLUME ["/www/zabbix"]
+VOLUME ["${ZABBIX_WWW_ROOT}"]
 
 # 拷贝文件
-COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/ui/", "/www/zabbix/"]
+COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}/ui/", "${ZABBIX_WWW_ROOT}"]
 COPY --from=nginx /usr/local/lib /usr/local/lib
 COPY --from=nginx /usr/local/share/lua /usr/local/share/lua
-COPY --from=nginx /data/nginx /data/nginx
-COPY --from=php /data/php /data/php
+COPY --from=nginx ${NGINX_DIR} ${NGINX_DIR}
+COPY --from=php ${PHP_DIR} ${PHP_DIR}
 
 # ***** 删除配置文件 *****
 RUN set -eux && \
-    cd /www/zabbix/ && \
+    cd ${ZABBIX_WWW_ROOT} && \
     rm -f conf/zabbix.conf.php conf/maintenance.inc.php conf/zabbix.conf.php.example assets/fonts/DejaVuSans.ttf && \
     rm -rf tests && \
     rm -f locale/add_new_language.sh locale/update_po.sh locale/make_mo.sh && \
-    find /www/zabbix/locale -name '*.po' | xargs rm -f && \
-    find /www/zabbix/locale -name '*.sh' | xargs rm -f && \
+    find ${ZABBIX_WWW_ROOT}/locale -name '*.po' | xargs rm -f && \
+    find ${ZABBIX_WWW_ROOT}/locale -name '*.sh' | xargs rm -f && \
     mkdir -p /www/certs && chmod -R 775 /www/certs && \
     mkdir -p /var/lib/locales/supported.d/ && rm -f /var/lib/locales/supported.d/local && \
-    cat /www/zabbix/include/locales.inc.php | grep display | grep true | awk '{$1=$1};1' | \
+    cat ${ZABBIX_WWW_ROOT}/include/locales.inc.php | grep display | grep true | awk '{$1=$1};1' | \
         cut -d"'" -f 2 | sort | \
         xargs -I '{}' bash -c 'echo "{}.UTF-8 UTF-8" >> /var/lib/locales/supported.d/local' && \
     dpkg-reconfigure locales
 
 # 拷贝文件
 COPY ["./web-nginx-pgsql/docker-entrypoint.sh", "/usr/bin/"]
-COPY ["./web-nginx-pgsql/conf/etc/zabbix/web/", "/www/zabbix/conf/"]
-COPY ["./web-nginx-pgsql/assets/fonts/DejaVuSans.ttf", "/www/zabbix/assets/fonts/DejaVuSans.ttf"]
-COPY ["./web-nginx-pgsql/conf/nginx/php.conf", "/data/nginx/conf/php.conf"]
-COPY ["./web-nginx-pgsql/conf/nginx/vhost/default.conf", "/data/nginx/conf/vhost/default.conf"]
+COPY ["./web-nginx-pgsql/conf/etc/zabbix/web/", "${ZABBIX_WWW_ROOT}/conf/"]
+COPY ["./web-nginx-pgsql/assets/fonts/DejaVuSans.ttf", "${ZABBIX_WWW_ROOT}/assets/fonts/DejaVuSans.ttf"]
+COPY ["./web-nginx-pgsql/conf/nginx/php.conf", "${NGINX_DIR}/conf/php.conf"]
+COPY ["./web-nginx-pgsql/conf/nginx/vhost/default.conf", "${NGINX_DIR}/conf/vhost/default.conf"]
 COPY ["./web-nginx-pgsql/conf/supervisor", "/etc/supervisor"]
 
 # ***** 检查依赖并授权 *****
 RUN set -eux && \
     # 创建用户和用户组
     addgroup --system --quiet nginx && \
-    adduser --quiet --system --disabled-login --ingroup nginx --home /data/nginx --no-create-home nginx && \
+    adduser --quiet --system --disabled-login --ingroup nginx --home ${NGINX_DIR} --no-create-home nginx && \
     chmod a+x /usr/bin/docker-entrypoint.sh && \
-    chown --quiet -R nginx:nginx /www/zabbix && \
-    chmod -R 775 /www/zabbix/ && \
-    cp -rf /root/.oh-my-zsh /www/zabbix/.oh-my-zsh && \
-    cp -rf /root/.zshrc /www/zabbix/.zshrc && \
-    sed -i '5s#/root/.oh-my-zsh#/www/zabbix/.oh-my-zsh#' /www/zabbix/.zshrc && \
-    ln -sf /dev/stdout /data/nginx/logs/access.log && \
-    ln -sf /dev/stderr /data/nginx/logs/error.log && \
+    chown --quiet -R nginx:nginx ${ZABBIX_WWW_ROOT} && \
+    chmod -R 775 ${ZABBIX_WWW_ROOT} && \
+    cp -rf /root/.oh-my-zsh ${ZABBIX_WWW_ROOT}/.oh-my-zsh && \
+    cp -rf /root/.zshrc ${ZABBIX_WWW_ROOT}/.zshrc && \
+    sed -i '5s#/root/.oh-my-zsh#${ZABBIX_WWW_ROOT}/.oh-my-zsh#' ${ZABBIX_WWW_ROOT}/.zshrc && \
+    ln -sf /dev/stdout ${NGINX_DIR}/logs/access.log && \
+    ln -sf /dev/stderr ${NGINX_DIR}/logs/error.log && \
     # smoke test
     # ##############################################################################
     ln -sf ${NGINX_DIR}/sbin/* /usr/sbin/ && \

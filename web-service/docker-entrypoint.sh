@@ -10,10 +10,8 @@ if [ "${DEBUG_MODE,,}" == "true" ]; then
 fi
 
 # Default directories
-# User 'zabbix' home directory
-ZABBIX_USER_HOME_DIR="/usr/local/zabbix"
-# Configuration files directory
-ZABBIX_ETC_DIR="/usr/local/zabbix/etc"
+# Internal directory for TLS related files, used when TLS*File specified as plain text values
+ZABBIX_INTERNAL_ENC_DIR="${ZABBIX_USER_HOME_DIR}/enc_internal"
 
 escape_spec_char() {
     local var_value=$1
@@ -84,9 +82,22 @@ update_config_var() {
 
 }
 
+file_process_from_env() {
+    local config_path=$1
+    local var_name=$2
+    local file_name=$3
+    local var_value=$4
+
+    if [ ! -z "$var_value" ]; then
+        echo -n "$var_value" > "${ZABBIX_INTERNAL_ENC_DIR}/$var_name"
+        file_name="${ZABBIX_INTERNAL_ENC_DIR}/${var_name}"
+    fi
+    update_config_var $config_path "$var_name" "$file_name"
+}
+
 prepare_zbx_web_service_config() {
     echo "** Preparing Zabbix web service configuration file"
-    ZBX_CONFIG=$ZABBIX_ETC_DIR/zabbix_web_service.conf
+    ZBX_CONFIG=$ZABBIX_CONF_DIR/zabbix_web_service.conf
 
     update_config_var $ZBX_CONFIG "LogType" "console"
     update_config_var $ZBX_CONFIG "LogFile"
@@ -101,22 +112,26 @@ prepare_zbx_web_service_config() {
     update_config_var $ZBX_CONFIG "Timeout" "${ZBX_TIMEOUT}"
 
     update_config_var $ZBX_CONFIG "TLSAccept" "${ZBX_TLSACCEPT}"
-    update_config_var $ZBX_CONFIG "TLSCAFile" "${ZBX_TLSCAFILE}"
+    file_process_from_env $ZBX_CONFIG "TLSCAFile" "${ZBX_TLSCAFILE}" "${ZBX_TLSCA}"
 
-    update_config_var $ZBX_CONFIG "TLSCertFile" "${ZBX_TLSCERTFILE}"
-    update_config_var $ZBX_CONFIG "TLSKeyFile" "${ZBX_TLSKEYFILE}"
+    file_process_from_env $ZBX_CONFIG "TLSCertFile" "${ZBX_TLSCERTFILE}" "${ZBX_TLSCERT}"
+    file_process_from_env $ZBX_CONFIG "TLSKeyFile" "${ZBX_TLSKEYFILE}" "${ZBX_TLSKEY}"
 
     update_config_var $ZBX_CONFIG "IgnoreURLCertErrors" "${ZBX_IGNOREURLCERTERRORS}"
 }
 
-prepare_permissions() {
-   sudo chown -R zabbix:zabbix /usr/local/zabbix && sudo chmod -R 775 /usr/local/zabbix
+clear_zbx_env() {
+    [[ "${ZBX_CLEAR_ENV}" == "false" ]] && return
+
+    for env_var in $(env | grep -E "^ZBX_"); do
+        unset "${env_var%%=*}"
+    done
 }
 
 prepare_web_service() {
     echo "** Preparing Zabbix web service"
     prepare_zbx_web_service_config
-    prepare_permissions
+    clear_zbx_env
 }
 
 #################################################

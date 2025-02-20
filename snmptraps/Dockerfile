@@ -20,14 +20,17 @@ ENV DEBIAN_FRONTEND=$DEBIAN_FRONTEND
 
 # zabbix版本号
 ARG MAJOR_VERSION=7.0
-ARG ZBX_VERSION=${MAJOR_VERSION}.6
+ARG ZBX_VERSION=${MAJOR_VERSION}.9
 ARG ZBX_SOURCES=https://git.zabbix.com/scm/zbx/zabbix.git
 
 ENV TERM=xterm \
     ZBX_VERSION=${ZBX_VERSION} ZBX_SOURCES=${ZBX_SOURCES} \
-    MIBDIRS=/var/lib/mibs/ietf:/var/lib/mibs/iana:/usr/share/snmp/mibs:/var/lib/zabbix/mibs MIBS=+ALL \
+    MIBDIRS=/var/lib/mibs/ietf:/var/lib/mibs/iana:/usr/share/snmp/mibs:/usr/local/zabbix/mibs MIBS=+ALL \
     ZBX_SNMP_TRAP_DATE_FORMAT=+%Y-%m-%dT%T%z ZBX_SNMP_TRAP_FORMAT="\n" \
-    ZBX_SNMP_TRAP_USE_DNS=false
+    ZBX_SNMP_TRAP_USE_DNS=false \
+    ZABBIX_USER_HOME_DIR="/usr/local/zabbix"
+
+ENV SNMP_PERSISTENT_DIR="${ZABBIX_USER_HOME_DIR}/snmptrapd_config"
  
 # 安装依赖包
 ARG PKG_DEPS="\
@@ -84,7 +87,8 @@ ARG INSTALL_PKGS="\
 ENV INSTALL_PKGS=$INSTALL_PKGS
 
 # ***** 安装依赖 *****
-RUN --mount=type=cache,target=/var/lib/apt/,sharing=locked \
+RUN --mount=type=cache,target=/var/cache/apt/,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt/,sharing=locked \
    set -eux && \
    # 更新源地址
    sed -i s@http://*.*ubuntu.com@https://mirrors.aliyun.com@g /etc/apt/sources.list && \
@@ -118,13 +122,13 @@ RUN set -eux && \
             --uid 1997 \
             --ingroup zabbix \
             --shell /sbin/nologin \
-            --home /usr/local/zabbix/ \
+            --home ${ZABBIX_USER_HOME_DIR} \
                             zabbix && \
     adduser zabbix root && \
     adduser zabbix dialout && \
-    mkdir -p /usr/local/zabbix && \
-    mkdir -p /usr/local/zabbix/mibs && \
-    mkdir -p /usr/local/zabbix/snmptraps
+    mkdir -p ${ZABBIX_USER_HOME_DIR} && \
+    mkdir -p ${ZABBIX_USER_HOME_DIR}/mibs && \
+    mkdir -p ${ZABBIX_USER_HOME_DIR}/snmptraps
  
 # ***** 容器信号处理 *****
 STOPSIGNAL SIGQUIT
@@ -133,10 +137,10 @@ STOPSIGNAL SIGQUIT
 EXPOSE 1162/UDP
 
 # ***** 工作目录 *****
-WORKDIR /usr/local/zabbix/snmptraps
+WORKDIR ${ZABBIX_USER_HOME_DIR}/snmptraps
 
 # ***** 挂载目录 *****
-VOLUME ["/usr/local/zabbix/snmptraps"]
+VOLUME ["${ZABBIX_USER_HOME_DIR}/snmptraps"]
 
 # 拷贝文件
 COPY ["./snmptraps/conf/etc/logrotate.d/zabbix_snmptraps", "/etc/logrotate.d/"]
@@ -145,13 +149,13 @@ COPY ["./snmptraps/conf/usr/sbin/zabbix_trap_handler.sh", "/usr/sbin/"]
 
 # ***** 创建zabbix目录授权 *****
 RUN set -eux && \
-    cp -rf /root/.oh-my-zsh /usr/local/zabbix/.oh-my-zsh && \
-    cp -rf /root/.zshrc /usr/local/zabbix/.zshrc && \
-    sed -i '5s#/root/.oh-my-zsh#/usr/local/zabbix/.oh-my-zsh#' /usr/local/zabbix/.zshrc && \
+    cp -rf /root/.oh-my-zsh ${ZABBIX_USER_HOME_DIR}/.oh-my-zsh && \
+    cp -rf /root/.zshrc ${ZABBIX_USER_HOME_DIR}/.zshrc && \
+    sed -i '5s#/root/.oh-my-zsh#${ZABBIX_USER_HOME_DIR}/.oh-my-zsh#' ${ZABBIX_USER_HOME_DIR}/.zshrc && \
     chmod a+x /usr/sbin/snmptrapd && \
-    chown --quiet -R zabbix:root /etc/snmp/ /usr/local/zabbix/ /var/tmp/ /var/run/ && \
-    chgrp -R 0 /etc/snmp/ /usr/local/zabbix/ /var/tmp/ /var/run/ && \
-    chmod -R g=u /etc/snmp/ /usr/local/zabbix/ /var/tmp/ /var/run/ && \
+    chown --quiet -R zabbix:root /etc/snmp/ ${ZABBIX_USER_HOME_DIR} /var/tmp/ /var/run/ && \
+    chgrp -R 0 /etc/snmp/ ${ZABBIX_USER_HOME_DIR} /var/tmp/ /var/run/ && \
+    chmod -R g=u /etc/snmp/ ${ZABBIX_USER_HOME_DIR} /var/tmp/ /var/run/ && \
     rm -rf /var/lib/apt/lists/*
   
  # ***** 运行用户 *****
