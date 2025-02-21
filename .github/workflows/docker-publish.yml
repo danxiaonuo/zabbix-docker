@@ -137,6 +137,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          build-contexts: |
+            sources=./sources/
           file: ./build-mysql/Dockerfile
           platforms: linux/amd64
           push: true
@@ -204,6 +206,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          build-contexts: |
+            sources=./sources/
           file: ./build-pgsql/Dockerfile
           platforms: linux/amd64
           push: true
@@ -271,6 +275,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          build-contexts: |
+            sources=./sources/
           file: ./build-sqlite3/Dockerfile
           platforms: linux/amd64
           push: true
