@@ -154,7 +154,7 @@ COPY ["./snmptraps/conf/usr/sbin/zabbix_trap_handler.sh", "/usr/sbin/"]
 RUN set -eux && \
     cp -rf /root/.oh-my-zsh ${ZABBIX_USER_HOME_DIR}/.oh-my-zsh && \
     cp -rf /root/.zshrc ${ZABBIX_USER_HOME_DIR}/.zshrc && \
-    sed -i '5s#/root/.oh-my-zsh#${ZABBIX_USER_HOME_DIR}/.oh-my-zsh#' ${ZABBIX_USER_HOME_DIR}/.zshrc && \
+    sed -i '5s#/root/.oh-my-zsh#/usr/local/zabbix/.oh-my-zsh#' ${ZABBIX_USER_HOME_DIR}/.zshrc && \
     chmod a+x /usr/sbin/snmptrapd && \
     chown --quiet -R zabbix:root /etc/snmp/ ${ZABBIX_USER_HOME_DIR} /var/tmp/ /var/run/ && \
     chgrp -R 0 /etc/snmp/ ${ZABBIX_USER_HOME_DIR} /var/tmp/ /var/run/ && \
