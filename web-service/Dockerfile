@@ -162,7 +162,7 @@ COPY ["./web-service/docker-entrypoint.sh", "/usr/bin/"]
 RUN set -eux && \
     cp -rf /root/.oh-my-zsh ${ZABBIX_USER_HOME_DIR}/.oh-my-zsh && \
     cp -rf /root/.zshrc ${ZABBIX_USER_HOME_DIR}/.zshrc && \
-    sed -i '5s#/root/.oh-my-zsh#${ZABBIX_USER_HOME_DIR}/.oh-my-zsh#' ${ZABBIX_USER_HOME_DIR}/.zshrc && \
+    sed -i '5s#/root/.oh-my-zsh#/usr/local/zabbix/.oh-my-zsh#' ${ZABBIX_USER_HOME_DIR}/.zshrc && \
     chmod a+x /usr/bin/docker-entrypoint.sh /usr/sbin/zabbix_web_service && \
     chown --quiet -R zabbix:root ${ZABBIX_USER_HOME_DIR} && \
     chgrp -R 0 ${ZABBIX_USER_HOME_DIR} && \
