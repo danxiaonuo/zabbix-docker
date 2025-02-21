@@ -28,6 +28,7 @@ ARG CFLAGS
 
 LABEL org.opencontainers.image.authors="danxiaonuo" \
       org.opencontainers.image.vendor="danxiaonuo" \
+      org.opencontainers.image.source="${ZBX_SOURCES}" \
       org.opencontainers.image.version="${ZBX_VERSION}"
 
 ENV ZBX_SOURCES_DIR=/tmp/zabbix-${ZBX_VERSION} ZBX_OUTPUT_DIR=/tmp/zabbix-${ZBX_VERSION}-output \
