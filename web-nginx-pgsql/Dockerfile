@@ -2,7 +2,8 @@
 #         构建基础镜像                    #
 ##########################################
 #
-#
+# 指定创建的基础镜像
+ARG OS_BASE_IMAGE=ubuntu:jammy
 # zabbix版本号
 ARG MAJOR_VERSION=7.0
 ARG ZBX_VERSION=${MAJOR_VERSION}.9
@@ -11,15 +12,13 @@ ARG BUILD_NGINX_IMAGE=danxiaonuo/nginx:latest
 ARG BUILD_PHP_IMAGE=danxiaonuo/php:latest
 
 # 指定创建的基础镜像
-FROM ${BUILD_BASE_IMAGE} as builder
-FROM ${BUILD_NGINX_IMAGE} as nginx
-FROM ${BUILD_PHP_IMAGE} as php
+FROM ${BUILD_BASE_IMAGE} AS builder
+FROM ${BUILD_NGINX_IMAGE} AS nginx
+FROM ${BUILD_PHP_IMAGE} AS php
 
 # 指定创建的基础镜像
-FROM ubuntu:jammy
+FROM ${OS_BASE_IMAGE}
 
-# 作者描述信息
-MAINTAINER danxiaonuo
 # 时区设置
 ARG TZ=Asia/Shanghai
 ENV TZ=$TZ
@@ -71,6 +70,10 @@ ENV PHP_DIR=$PHP_DIR
 # 环境变量
 ARG PATH=/data/php/bin:$PATH
 ENV PATH=$PATH
+
+LABEL org.opencontainers.image.authors="danxiaonuo" \
+      org.opencontainers.image.vendor="danxiaonuo" \
+      org.opencontainers.image.version="${ZBX_VERSION}"
 
 ARG PKG_DEPS="\
     zsh \

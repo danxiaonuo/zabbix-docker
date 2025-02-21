@@ -3,11 +3,9 @@
 ##########################################
 #
 # 指定创建的基础镜像
-ARG BASE_IMAGE_TAG=jammy
-FROM ubuntu:${BASE_IMAGE_TAG}
+ARG OS_BASE_IMAGE=ubuntu:jammy
+FROM ${OS_BASE_IMAGE}
 
-# 作者描述信息
-MAINTAINER danxiaonuo
 # 时区设置
 ARG TZ=Asia/Shanghai
 ENV TZ=$TZ
@@ -34,6 +32,10 @@ ARG ZBX_VERSION=${MAJOR_VERSION}.9
 # 环境
 ENV TERM=xterm \
     ZBX_VERSION=${ZBX_VERSION}
+
+LABEL org.opencontainers.image.authors="danxiaonuo" \
+      org.opencontainers.image.vendor="danxiaonuo" \
+      org.opencontainers.image.version="${ZBX_VERSION}"
 
 # 安装依赖包
 ARG PKG_DEPS="\

@@ -8,10 +8,8 @@ ARG ZBX_VERSION=${MAJOR_VERSION}.9
 ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-base:${ZBX_VERSION}
 
 # 指定创建的基础镜像
-FROM ${BUILD_BASE_IMAGE} as builder
+FROM ${BUILD_BASE_IMAGE} AS builder
 
-# 作者描述信息
-MAINTAINER danxiaonuo
 # 时区设置
 ARG TZ=Asia/Shanghai
 ENV TZ=$TZ
@@ -27,6 +25,10 @@ ARG GIT_BRANCH
 
 ARG ZBX_PLUGINS_VERSION=${GIT_BRANCH:-$ZBX_VERSION}
 ARG CFLAGS
+
+LABEL org.opencontainers.image.authors="danxiaonuo" \
+      org.opencontainers.image.vendor="danxiaonuo" \
+      org.opencontainers.image.version="${ZBX_VERSION}"
 
 ENV ZBX_SOURCES_DIR=/tmp/zabbix-${ZBX_VERSION} ZBX_OUTPUT_DIR=/tmp/zabbix-${ZBX_VERSION}-output \
     DB_TYPE=postgresql \

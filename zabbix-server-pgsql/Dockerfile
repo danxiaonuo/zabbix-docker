@@ -2,19 +2,19 @@
 #         构建基础镜像                    #
 ##########################################
 #
+# 指定创建的基础镜像
+ARG OS_BASE_IMAGE=ubuntu:jammy
 # zabbix版本号
 ARG MAJOR_VERSION=7.0
 ARG ZBX_VERSION=${MAJOR_VERSION}.9
 ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-pgsql:${ZBX_VERSION}
 
 # 指定创建的基础镜像
-FROM ${BUILD_BASE_IMAGE} as builder
+FROM ${BUILD_BASE_IMAGE} AS builder
 
 # 指定创建的基础镜像
-FROM ubuntu:jammy
+FROM ${OS_BASE_IMAGE}
 
-# 作者描述信息
-MAINTAINER danxiaonuo
 # 时区设置
 ARG TZ=Asia/Shanghai
 ENV TZ=$TZ
@@ -46,6 +46,10 @@ ENV TERM=xterm \
     ZABBIX_USER_HOME_DIR="/usr/local/zabbix" \
     ZABBIX_CONF_DIR="/usr/local/zabbix/etc"
     ZBX_FPINGLOCATION="/usr/bin/fping"
+
+LABEL org.opencontainers.image.authors="danxiaonuo" \
+      org.opencontainers.image.vendor="danxiaonuo" \
+      org.opencontainers.image.version="${ZBX_VERSION}"
 
 # 安装依赖包
 ARG PKG_DEPS="\
