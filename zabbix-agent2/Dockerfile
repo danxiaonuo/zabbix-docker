@@ -213,7 +213,7 @@ RUN set -eux && \
     cp -rf /root/.oh-my-zsh ${ZABBIX_USER_HOME_DIR}/.oh-my-zsh && \
     cp -rf /root/.zshrc ${ZABBIX_USER_HOME_DIR}/.zshrc && \
     sed -i '5s#/root/.oh-my-zsh#/usr/local/zabbix/.oh-my-zsh#' ${ZABBIX_USER_HOME_DIR}/.zshrc && \
-    chmod a+x /usr/bin/docker-entrypoint.sh /usr/sbin/zabbix_agent2 /usr/bin/zabbix_get /usr/bin/zabbix_sender /usr/sbin/zabbix-* && \
+    chmod a+x /usr/bin/docker-entrypoint.sh /usr/sbin/zabbix_agent2 /usr/bin/zabbix_get /usr/bin/zabbix_sender /usr/sbin/zabbix-agent2-plugin/zabbix-agent2-* && \
     chown --quiet -R zabbix:root ${ZABBIX_USER_HOME_DIR} /usr/sbin/zabbix-agent2-plugin/ && \
     chgrp -R 0 ${ZABBIX_USER_HOME_DIR} /usr/sbin/zabbix-agent2-plugin/ && \
     chmod -R g=u ${ZABBIX_USER_HOME_DIR} /usr/sbin/zabbix-agent2-plugin/ && \
