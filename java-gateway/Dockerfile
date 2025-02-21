@@ -152,7 +152,7 @@ COPY ["./java-gateway/conf/usr/sbin/zabbix_java_gateway", "/usr/sbin/"]
 RUN set -eux && \
     cp -rf /root/.oh-my-zsh ${ZABBIX_USER_HOME_DIR}/.oh-my-zsh && \
     cp -rf /root/.zshrc ${ZABBIX_USER_HOME_DIR}/.zshrc && \
-    sed -i '5s#/root/.oh-my-zsh#${ZABBIX_USER_HOME_DIR}/.oh-my-zsh#' ${ZABBIX_USER_HOME_DIR}/.zshrc && \
+    sed -i '5s#/root/.oh-my-zsh#/usr/local/zabbix/.oh-my-zsh#' ${ZABBIX_USER_HOME_DIR}/.zshrc && \
     mkdir -p /usr/sbin/zabbix_java/ && \
     mkdir -p /usr/sbin/zabbix_java/ext_lib/ && \
     rm -rf /usr/sbin/zabbix_java/lib/logback.xml && \
