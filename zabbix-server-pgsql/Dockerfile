@@ -120,6 +120,7 @@ ARG INSTALL_PKGS="\
     libcurl4 \
     libevent-2.1 \
     libevent-pthreads-2.1 \
+    libevent-extra-2.1 \
     libopenipmi0 \
     libpcre2-8-0 \
     libpq5 \
