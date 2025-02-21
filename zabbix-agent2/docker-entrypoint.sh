@@ -219,6 +219,7 @@ clear_zbx_env() {
 
 prepare_permissions() {
    sudo chown -R zabbix:zabbix ${ZABBIX_USER_HOME_DIR} && sudo chmod -R 775 ${ZABBIX_USER_HOME_DIR}
+   sudo chown -R zabbix:zabbix /usr/sbin/zabbix-agent2-plugin && sudo chmod -R 775 /usr/sbin/zabbix-agent2-plugin
 }
 
 
