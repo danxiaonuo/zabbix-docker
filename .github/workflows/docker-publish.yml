@@ -28,10 +28,6 @@ on:
   watch:
     types: [started]
 
-# 环境变量
-env:
- DOCKERHUB_USERNAME: danxiaonuo
-
 # 任务集
 jobs:
   zabbix-build-base:
@@ -67,7 +63,7 @@ jobs:
       - name: 登录 DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
@@ -77,7 +73,7 @@ jobs:
           file: ./build-base/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/zabbix-build-base:${{ matrix.DOCKER_TAG }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-build-base:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -134,7 +130,7 @@ jobs:
       - name: 登录 DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
@@ -144,7 +140,7 @@ jobs:
           file: ./build-mysql/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/zabbix-build-mysql:${{ matrix.DOCKER_TAG }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-build-mysql:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -201,7 +197,7 @@ jobs:
       - name: 登录 DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
@@ -211,7 +207,7 @@ jobs:
           file: ./build-pgsql/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/zabbix-build-pgsql:${{ matrix.DOCKER_TAG }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-build-pgsql:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -268,7 +264,7 @@ jobs:
       - name: 登录 DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
@@ -278,7 +274,7 @@ jobs:
           file: ./build-sqlite3/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/zabbix-build-sqlite3:${{ matrix.DOCKER_TAG }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-build-sqlite3:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -335,7 +331,7 @@ jobs:
       - name: 登录 DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
@@ -345,7 +341,7 @@ jobs:
           file: ./zabbix-server-mysql/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/zabbix-server-mysql:${{ matrix.DOCKER_TAG }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-server-mysql:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -402,7 +398,7 @@ jobs:
       - name: 登录 DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
@@ -412,7 +408,7 @@ jobs:
           file: ./zabbix-server-pgsql/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/zabbix-server-pgsql:${{ matrix.DOCKER_TAG }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-server-pgsql:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -469,7 +465,7 @@ jobs:
       - name: 登录 DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
@@ -479,7 +475,7 @@ jobs:
           file: ./zabbix-proxy-mysql/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/zabbix-proxy-mysql:${{ matrix.DOCKER_TAG }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-proxy-mysql:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -536,7 +532,7 @@ jobs:
       - name: 登录 DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
@@ -546,7 +542,7 @@ jobs:
           file: ./zabbix-proxy-sqlite3/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/zabbix-proxy-sqlite3:${{ matrix.DOCKER_TAG }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-proxy-sqlite3:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -603,7 +599,7 @@ jobs:
       - name: 登录 DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
@@ -613,7 +609,7 @@ jobs:
           file: ./zabbix-agent2/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/zabbix-agent2:${{ matrix.DOCKER_TAG }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-agent2:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -669,7 +665,7 @@ jobs:
       - name: 登录 DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
@@ -679,7 +675,7 @@ jobs:
           file: ./web-service/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/zabbix-web-service:${{ matrix.DOCKER_TAG }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-web-service:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -735,7 +731,7 @@ jobs:
       - name: 登录 DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
@@ -745,7 +741,7 @@ jobs:
           file: ./web-nginx-mysql/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/zabbix-web-nginx-mysql:${{ matrix.DOCKER_TAG }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-web-nginx-mysql:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -801,7 +797,7 @@ jobs:
       - name: 登录 DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
@@ -811,7 +807,7 @@ jobs:
           file: ./web-nginx-pgsql/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/zabbix-web-nginx-pgsql:${{ matrix.DOCKER_TAG }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-web-nginx-pgsql:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -867,7 +863,7 @@ jobs:
       - name: 登录 DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
@@ -877,7 +873,7 @@ jobs:
           file: ./snmptraps/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/zabbix-snmptraps:${{ matrix.DOCKER_TAG }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-snmptraps:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
@@ -934,7 +930,7 @@ jobs:
       - name: 登录 DockerHub
         uses: docker/login-action@v3
         with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建镜像并发布
@@ -944,7 +940,7 @@ jobs:
           file: ./java-gateway/Dockerfile
           platforms: linux/amd64
           push: true
-          tags: ${{ env.DOCKERHUB_USERNAME }}/zabbix-java-gateway:${{ matrix.DOCKER_TAG }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/zabbix-java-gateway:${{ matrix.DOCKER_TAG }}
 
       - name: 上传至阿里云
         id: buildAndPushImage
