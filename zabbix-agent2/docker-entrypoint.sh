@@ -182,8 +182,8 @@ prepare_zbx_agent_config() {
     # Please use include to enable Alias feature
     # update_config_multiple_var $ZBX_AGENT_CONFIG "Alias" ${ZBX_ALIAS}
     update_config_var $ZBX_AGENT_CONFIG "Timeout" "${ZBX_TIMEOUT}"
-    # update_config_var $ZBX_AGENT_CONFIG "Include" "${ZABBIX_ETC_DIR}/zabbix_agent2.d/plugins.d/*.conf"
-    update_config_var $ZBX_AGENT_CONFIG "Include" "${ZABBIX_ETC_DIR}/zabbix_agentd.conf.d/*.conf"
+    # update_config_var $ZBX_AGENT_CONFIG "Include" "${ZABBIX_CONF_DIR}/zabbix_agent2.d/plugins.d/*.conf"
+    update_config_var $ZBX_AGENT_CONFIG "Include" "${ZABBIX_CONF_DIR}/zabbix_agentd.conf.d/*.conf"
     update_config_var $ZBX_AGENT_CONFIG "UnsafeUserParameters" "${ZBX_UNSAFEUSERPARAMETERS}"
     update_config_var $ZBX_AGENT_CONFIG "TLSConnect" "${ZBX_TLSCONNECT}"
     update_config_var $ZBX_AGENT_CONFIG "TLSAccept" "${ZBX_TLSACCEPT}"
@@ -203,11 +203,11 @@ prepare_zbx_agent_config() {
 prepare_zbx_agent_plugin_config() {
     echo "** Preparing Zabbix agent plugin configuration files"
 
-    sed -i "/AllowKey=.*/i\Include=${ZABBIX_ETC_DIR}/zabbix_agent2.d/plugins.d/*.conf" ${ZBX_AGENT_CONFIG}
-    # update_config_var "${ZABBIX_ETC_DIR}/zabbix_agent2.d/plugins.d/mongodb.conf" "Plugins.MongoDB.System.Path" "/usr/sbin/zabbix-agent2-plugin/mongodb"
-    # update_config_var "${ZABBIX_ETC_DIR}/zabbix_agent2.d/plugins.d/postgresql.conf" "Plugins.PostgreSQL.System.Path" "/usr/sbin/zabbix-agent2-plugin/postgresql"
-    update_config_var "${ZABBIX_ETC_DIR}/zabbix_agent2.d/plugins.d/mssql.conf" "Plugins.MSSQL.System.Path" "/usr/sbin/zabbix-agent2-plugin/mssql"
-    update_config_var "${ZABBIX_ETC_DIR}/zabbix_agent2.d/plugins.d/ember.conf" "Plugins.EmberPlus.System.Path" "/usr/sbin/zabbix-agent2-plugin/ember-plus"
+    sed -i "/AllowKey=.*/i\Include=${ZABBIX_CONF_DIR}/zabbix_agent2.d/plugins.d/*.conf" ${ZBX_AGENT_CONFIG}
+    # update_config_var "${ZABBIX_CONF_DIR}/zabbix_agent2.d/plugins.d/mongodb.conf" "Plugins.MongoDB.System.Path" "/usr/sbin/zabbix-agent2-plugin/mongodb"
+    # update_config_var "${ZABBIX_CONF_DIR}/zabbix_agent2.d/plugins.d/postgresql.conf" "Plugins.PostgreSQL.System.Path" "/usr/sbin/zabbix-agent2-plugin/postgresql"
+    update_config_var "${ZABBIX_CONF_DIR}/zabbix_agent2.d/plugins.d/mssql.conf" "Plugins.MSSQL.System.Path" "/usr/sbin/zabbix-agent2-plugin/mssql"
+    update_config_var "${ZABBIX_CONF_DIR}/zabbix_agent2.d/plugins.d/ember.conf" "Plugins.EmberPlus.System.Path" "/usr/sbin/zabbix-agent2-plugin/ember-plus"
 }
 clear_zbx_env() {
     [[ "${ZBX_CLEAR_ENV}" == "false" ]] && return
