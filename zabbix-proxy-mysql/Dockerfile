@@ -44,7 +44,7 @@ ENV TERM=xterm \
     MIBDIRS=/var/lib/mibs/ietf:/var/lib/mibs/iana:/usr/share/snmp/mibs:/usr/local/zabbix/mibs MIBS=+ALL \
     NMAP_PRIVILEGED="" \
     ZABBIX_USER_HOME_DIR="/usr/local/zabbix" \
-    ZABBIX_CONF_DIR="/usr/local/zabbix/etc"
+    ZABBIX_CONF_DIR="/usr/local/zabbix/etc" \
     ZBX_FPINGLOCATION="/usr/bin/fping"
 
 LABEL org.opencontainers.image.authors="danxiaonuo" \
