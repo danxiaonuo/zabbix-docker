@@ -42,8 +42,8 @@ ENV ZBX_SOURCES_DIR=/tmp/zabbix-${ZBX_VERSION} ZBX_OUTPUT_DIR=/tmp/zabbix-${ZBX_
 # 安装编译
 RUN --mount=type=cache,target=/root/.cache/go-build/ \
     --mount=type=cache,target=/opt/golang/ \
-    --mount=from=sources,target=/tmp/src \
-    --mount=type=bind,source=./build-pgsql/patches/,target=/tmp/patches \
+    --mount=type=bind,source=build-pgsql/src/,target=/tmp/src \
+    --mount=type=bind,source=build-pgsql/patches/,target=/tmp/patches \
     set -eux && \
     cd /tmp/ && \
     mkdir -p ${ZBX_OUTPUT_DIR}/agent/sbin/ && \

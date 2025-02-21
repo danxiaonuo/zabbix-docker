@@ -41,8 +41,8 @@ ENV ZBX_SOURCES_DIR=/tmp/zabbix-${ZBX_VERSION} ZBX_OUTPUT_DIR=/tmp/zabbix-${ZBX_
 
 RUN --mount=type=cache,target=/root/.cache/go-build/ \
     --mount=type=cache,target=/opt/golang/ \
-    --mount=from=sources,target=/tmp/src \
-    --mount=type=bind,source=./build-mysql/patches/,target=/tmp/patches \
+    --mount=type=bind,source=build-mysql/src/,target=/tmp/src \
+    --mount=type=bind,source=build-mysql/patches/,target=/tmp/patches \
     set -eux && \
     cd /tmp/ && \
     mkdir -p ${ZBX_OUTPUT_DIR}/agent/sbin/ && \
