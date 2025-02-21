@@ -605,7 +605,7 @@ prepare_server() {
     prepare_db
     update_zbx_config
     clear_zbx_env
-	  prepare_permissions
+    prepare_permissions
 }
 
 #################################################
