@@ -120,9 +120,9 @@ ARG PKG_DEPS="\
     fonts-arphic-ukai \
     fonts-arphic-uming \
     ca-certificates \
-	libldap-common \
-	mysql-client \
-	supervisor"
+    libldap-common \
+    mysql-client \
+    supervisor"
 ENV PKG_DEPS=$PKG_DEPS
 
 ARG NGINX_BUILD_DEPS="\
