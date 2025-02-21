@@ -227,7 +227,7 @@ prepare_agent() {
     prepare_zbx_agent_config
     prepare_zbx_agent_plugin_config
     clear_zbx_env
-	  prepare_permissions
+    prepare_permissions
 }
 
 #################################################
