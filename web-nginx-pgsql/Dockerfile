@@ -120,9 +120,9 @@ ARG PKG_DEPS="\
     fonts-arphic-ukai \
     fonts-arphic-uming \
     ca-certificates \
-	libldap-common \
-	postgresql-client \
-	supervisor"
+    libldap-common \
+    postgresql-client \
+    supervisor"
 ENV PKG_DEPS=$PKG_DEPS
 
 ARG NGINX_BUILD_DEPS="\
@@ -247,7 +247,7 @@ RUN set -eux && \
     chmod -R 775 ${ZABBIX_WWW_ROOT} && \
     cp -rf /root/.oh-my-zsh ${ZABBIX_WWW_ROOT}/.oh-my-zsh && \
     cp -rf /root/.zshrc ${ZABBIX_WWW_ROOT}/.zshrc && \
-    sed -i '5s#/root/.oh-my-zsh#${ZABBIX_WWW_ROOT}/.oh-my-zsh#' ${ZABBIX_WWW_ROOT}/.zshrc && \
+    sed -i '5s#/root/.oh-my-zsh#/www/zabbix/.oh-my-zsh#' ${ZABBIX_WWW_ROOT}/.zshrc && \
     ln -sf /dev/stdout ${NGINX_DIR}/logs/access.log && \
     ln -sf /dev/stderr ${NGINX_DIR}/logs/error.log && \
     # smoke test
