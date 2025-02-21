@@ -243,7 +243,7 @@ RUN set -eux && \
     sed -i '$a\zabbix  ALL=(ALL)  NOPASSWD:ALL' /etc/sudoers && \
     cp -rf /root/.oh-my-zsh ${ZABBIX_USER_HOME_DIR}/.oh-my-zsh && \
     cp -rf /root/.zshrc ${ZABBIX_USER_HOME_DIR}/.zshrc && \
-    sed -i '5s#/root/.oh-my-zsh#${ZABBIX_USER_HOME_DIR}/.oh-my-zsh#' ${ZABBIX_USER_HOME_DIR}/.zshrc && \
+    sed -i '5s#/root/.oh-my-zsh#/usr/local/zabbix/.oh-my-zsh#' ${ZABBIX_USER_HOME_DIR}/.zshrc && \
     chmod a+x /usr/bin/docker-entrypoint.sh /usr/sbin/zabbix_server /usr/bin/zabbix_get /usr/bin/zabbix_sender && \
     chown --quiet -R zabbix:root ${ZABBIX_USER_HOME_DIR} && \
     chgrp -R 0 ${ZABBIX_USER_HOME_DIR} && \
