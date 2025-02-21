@@ -165,4 +165,4 @@ RUN set -eux && \
 USER 1997
 
 # ***** 执行命令 *****
-CMD ["/usr/sbin/snmptrapd", "-n", "-t", "-X", "-C", "-c", "/etc/snmp/snmptrapd.conf", "-Lo", "-A", "--doNotFork=yes", "--agentuser=zabbix", "--agentgroup=zabbix"]
+CMD ["/usr/sbin/snmptrapd", "-n", "-t", "-X", "-C", "-c", "/etc/snmp/snmptrapd.conf", "-Lo", "-A", "--doNotFork=yes"]
