@@ -202,8 +202,10 @@ COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}-output/agent2/sbin/", "/usr/sbi
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}-output/general/bin/*", "/usr/bin/"]
 COPY --from=builder ["/tmp/zabbix-${ZBX_VERSION}-output/agent2/conf/", "${ZABBIX_CONF_DIR}/"]
 COPY ["./zabbix-agent2/docker-entrypoint.sh", "/usr/bin/"]
+COPY ["./zabbix-agent2/scripts/", "/usr/local/zabbix/scripts/"]
 COPY ["./zabbix-agent2/sbin/zabbix-agent2-plugin/", "/usr/sbin/zabbix-agent2-plugin/"]
 COPY ["./zabbix-agent2/tools/", "${ZABBIX_USER_HOME_DIR}/tools/"]
+COPY ["./zabbix-agent2/zabbix_agentd.conf.d/", "/usr/local/zabbix/etc/zabbix_agentd.conf.d/"]
 COPY ["./zabbix-agent2/zabbix_agent2.d/", "${ZABBIX_CONF_DIR}/zabbix_agent2.d/"]
 
 # ***** 创建zabbix目录授权 *****
