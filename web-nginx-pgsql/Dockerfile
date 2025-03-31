@@ -6,7 +6,7 @@
 ARG OS_BASE_IMAGE=ubuntu:jammy
 # zabbix版本号
 ARG MAJOR_VERSION=7.0
-ARG ZBX_VERSION=${MAJOR_VERSION}.10
+ARG ZBX_VERSION=${MAJOR_VERSION}.11
 ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-pgsql:${ZBX_VERSION}
 ARG BUILD_NGINX_IMAGE=danxiaonuo/nginx:latest
 ARG BUILD_PHP_IMAGE=danxiaonuo/php:latest

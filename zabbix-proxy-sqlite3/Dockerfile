@@ -6,7 +6,7 @@
 ARG OS_BASE_IMAGE=ubuntu:jammy
 # zabbix版本号
 ARG MAJOR_VERSION=7.0
-ARG ZBX_VERSION=${MAJOR_VERSION}.10
+ARG ZBX_VERSION=${MAJOR_VERSION}.11
 ARG BUILD_BASE_IMAGE=danxiaonuo/zabbix-build-sqlite3:${ZBX_VERSION}
 
 # 指定创建的基础镜像
