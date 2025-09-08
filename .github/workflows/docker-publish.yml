@@ -28,6 +28,11 @@ on:
   watch:
     types: [started]
 
+# 仓库权限
+permissions:
+  contents: write
+  actions: write
+
 # 任务集
 jobs:
   zabbix-build-base:
@@ -38,7 +43,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.17
+          - DOCKER_TAG: 7.0.18
 
     # 运行步骤
     steps:
@@ -105,7 +110,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.17
+          - DOCKER_TAG: 7.0.18
 
     # 运行步骤
     steps:
@@ -174,7 +179,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.17
+          - DOCKER_TAG: 7.0.18
 
     # 运行步骤
     steps:
@@ -243,7 +248,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.17
+          - DOCKER_TAG: 7.0.18
 
     # 运行步骤
     steps:
@@ -312,7 +317,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.17
+          - DOCKER_TAG: 7.0.18
 
     # 运行步骤
     steps:
@@ -379,7 +384,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.17
+          - DOCKER_TAG: 7.0.18
 
     # 运行步骤
     steps:
@@ -446,7 +451,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.17
+          - DOCKER_TAG: 7.0.18
 
     # 运行步骤
     steps:
@@ -513,7 +518,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.17
+          - DOCKER_TAG: 7.0.18
 
     # 运行步骤
     steps:
@@ -580,7 +585,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.17
+          - DOCKER_TAG: 7.0.18
 
     # 运行步骤
     steps:
@@ -646,7 +651,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.17
+          - DOCKER_TAG: 7.0.18
 
     # 运行步骤
     steps:
@@ -712,7 +717,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.17
+          - DOCKER_TAG: 7.0.18
 
     # 运行步骤
     steps:
@@ -778,7 +783,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.17
+          - DOCKER_TAG: 7.0.18
 
     # 运行步骤
     steps:
@@ -844,7 +849,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.17
+          - DOCKER_TAG: 7.0.18
 
     # 运行步骤
     steps:
@@ -911,7 +916,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.17
+          - DOCKER_TAG: 7.0.18
 
     # 运行步骤
     steps:
@@ -962,8 +967,8 @@ jobs:
 
 
       - name: 删除旧的GitHub-workflow
-        uses: Mattraks/delete-workflow-runs@v2
+        uses: Mattraks/delete-workflow-runs@main
         with:
           repository: ${{ github.repository }}
-          retain_days: 1
+          retain_days: 0
           keep_minimum_runs: 1    #保留多少个workflow不删除
