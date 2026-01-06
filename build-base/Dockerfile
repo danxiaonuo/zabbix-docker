@@ -110,7 +110,7 @@ ARG INSTALL_PKGS="\
     libssh-dev \
     libxml2-dev \
     make \
-    openjdk-19-jdk-headless \
+    openjdk-21-jdk-headless \
     patch \
     pkg-config \
     gettext \
