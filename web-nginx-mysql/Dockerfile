@@ -46,6 +46,24 @@ ENV NGINX_DIR=$NGINX_DIR
 ARG PATH=/data/nginx/sbin:$PATH
 ENV PATH=$PATH
 
+# luajit2
+# https://github.com/openresty/luajit2
+ARG LUAJIT_VERSION=2.1-20250826
+ENV LUAJIT_VERSION=$LUAJIT_VERSION
+ARG LUAJIT_LIB=/usr/local/lib
+ENV LUAJIT_LIB=$LUAJIT_LIB
+ARG LUAJIT_INC=/usr/local/include/luajit-2.1
+ENV LUAJIT_INC=$LUAJIT_INC
+ARG LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+
+# lua-resty-core
+# https://github.com/openresty/lua-resty-core
+ARG LUA_RESTY_CORE_VERSION=0.1.32
+ENV LUA_RESTY_CORE_VERSION=$LUA_RESTY_CORE_VERSION
+ARG LUA_LIB_DIR=/usr/local/share/lua/5.1
+ENV LUA_LIB_DIR=$LUA_LIB_DIR
+
 # PHP工作目录
 ARG PHP_DIR=/data/php
 ENV PHP_DIR=$PHP_DIR
