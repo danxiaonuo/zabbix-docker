@@ -43,7 +43,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.21
+          - DOCKER_TAG: 7.0.22
 
     # 运行步骤
     steps:
@@ -110,7 +110,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.21
+          - DOCKER_TAG: 7.0.22
 
     # 运行步骤
     steps:
@@ -179,7 +179,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.21
+          - DOCKER_TAG: 7.0.22
 
     # 运行步骤
     steps:
@@ -248,7 +248,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.21
+          - DOCKER_TAG: 7.0.22
 
     # 运行步骤
     steps:
@@ -317,7 +317,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.21
+          - DOCKER_TAG: 7.0.22
 
     # 运行步骤
     steps:
@@ -384,7 +384,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.21
+          - DOCKER_TAG: 7.0.22
 
     # 运行步骤
     steps:
@@ -451,7 +451,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.21
+          - DOCKER_TAG: 7.0.22
 
     # 运行步骤
     steps:
@@ -518,7 +518,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.21
+          - DOCKER_TAG: 7.0.22
 
     # 运行步骤
     steps:
@@ -585,7 +585,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.21
+          - DOCKER_TAG: 7.0.22
 
     # 运行步骤
     steps:
@@ -651,7 +651,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.21
+          - DOCKER_TAG: 7.0.22
 
     # 运行步骤
     steps:
@@ -717,7 +717,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.21
+          - DOCKER_TAG: 7.0.22
 
     # 运行步骤
     steps:
@@ -783,7 +783,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.21
+          - DOCKER_TAG: 7.0.22
 
     # 运行步骤
     steps:
@@ -849,7 +849,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.21
+          - DOCKER_TAG: 7.0.22
 
     # 运行步骤
     steps:
@@ -916,7 +916,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - DOCKER_TAG: 7.0.21
+          - DOCKER_TAG: 7.0.22
 
     # 运行步骤
     steps:
