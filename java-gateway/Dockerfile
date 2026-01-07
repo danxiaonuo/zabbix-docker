@@ -89,7 +89,7 @@ ARG PKG_DEPS="\
     ca-certificates"
 ENV PKG_DEPS=$PKG_DEPS
 
-ARG INSTALL_PKGS="openjdk-19-jdk-headless"
+ARG INSTALL_PKGS="openjdk-21-jdk-headless"
 ENV INSTALL_PKGS=$INSTALL_PKGS
 
 # ***** 安装依赖 *****
